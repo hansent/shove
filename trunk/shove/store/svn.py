@@ -49,23 +49,24 @@ class SvnStore(BaseStore):
         local, remote = kw.get('local'), kw.get('remote')
         user, password = kw.get('user'), kw.get('password') 
         if engine is not None:
-            local, query = engine.split('?')
+            host, query = engine.split('?')
+            local = host.split('/', 2)[2]
             if '@' in local:
-                auth, local = engine.split('/', 2)[2].split('@')
+                auth, local = local.split('@')
                 user, password = auth.split(':')
             remote = query.split('=')[1]
-        self._local, self._remote = local, remote
         self._client = pysvn.Client()
         if user is not None: self._client.set_username(user)
         if password is not None: self._client.set_password(password)
         try:
-            self._client.info(remote)
-        except svn.ClientError:
+            self._client.info2(remote)
+        except pysvn.ClientError:
             self._client.mkdir(remote)          
         try:
             self._client.info(local)
-        except svn.ClientError:              
+        except pysvn.ClientError:              
             self._client.checkout(remote, local)
+        self._local, self._remote = local, remote
 
     @synchronized
     def __getitem__(self, key):
@@ -88,8 +89,8 @@ class SvnStore(BaseStore):
         '''
         fname = self._key_to_file(key)
         pickle.dump(value, open(fname, 'wb'), 2)
-        self._client.add(fname)
-        self._client.checkin([fname], 'Adding %s' % fname)
+        if key not in self: self._client.add(fname)
+        self._client.checkin([fname], 'Adding %s' % fname)            
         
     @synchronized
     def __delitem__(self, key):
@@ -99,11 +100,11 @@ class SvnStore(BaseStore):
         '''
         fname = self._key_to_file(key)
         self._client.remove(fname)
-        client.checkin([fname], 'Removing %s' % fname)
+        self._client.checkin([fname], 'Removing %s' % fname)
 
     @synchronized
     def keys(self):
-        return list(str(i.name) for i in self._client.ls(self._local))
+        return list(str(i.name.split('/')[-1]) for i in self._client.ls(self._local))
 
     def _key_to_file(self, key):
         '''Gives the filesystem path for a key.'''
