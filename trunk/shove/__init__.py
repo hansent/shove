@@ -43,7 +43,7 @@ stores = dict(simple='shove.store.simple.SimpleStore',
     postgres='shove.store.db.DbStore',
     mysql='shove.store.db.DbStore',
     oracle='shove.store.db.DbStore',
-    svn='shove.store.db.DbStore',
+    svn='shove.store.svn.SvnStore',
     s3='shove.store.s3.S3Store')
 
 caches = dict(simple='shove.cache.simple.SimpleCache',
