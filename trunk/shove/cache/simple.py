@@ -39,14 +39,14 @@ class SimpleCache(BaseCache):
 
     '''Single-process in-memory cache backend.'''    
     
-    def __init__(self, *a, **kw):
-        super(SimpleCache, self).__init__(*a, **kw)
+    def __init__(self, engine, **kw):
+        super(SimpleCache, self).__init__(**kw)
         self._cache, self._expire_info = dict(), dict()
         max_entries = kw.get('max_entries', 300)
         try:
             self._max_entries = int(max_entries)
         except (ValueError, TypeError):
-            self._max_entries = 300    
+            self._max_entries = 300
 
     def __getitem__(self, key):
         '''Fetch a given key from the cache.'''

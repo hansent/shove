@@ -45,10 +45,10 @@ class DbCache(BaseCache):
 
     '''Database cache backend.'''
 
-    def __init__(self, *a, **kw):
-        super(DbCache, self).__init__(self, *a, **kw)
+    def __init__(self, engine, **kw):
+        super(DbCache, self).__init__(self, **kw)
         # Bind metadata
-        self._metadata = BoundMetaData(a[0])
+        self._metadata = BoundMetaData(engine)
         # Make cache
         self._cache = Table('cache', self._metadata,
             Column('id', Integer, primary_key=True, nullable=False, unique=True),

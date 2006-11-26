@@ -43,11 +43,11 @@ class FileCache(SimpleCache):
 
     '''File-based cache backend'''    
     
-    def __init__(self, *a, **kw):
-        super(FileCache, self).__init__(*a, **kw)
+    def __init__(self, engine, **kw):
+        super(FileCache, self).__init__(engine, **kw)
         # Create directory
         try:
-            self._dir = a[0]
+            self._dir = engine
         except IndexError:
             raise IOError('file.FileCache requires a valid directory path.')
         if not os.path.exists(self._dir): self._createdir()

@@ -45,8 +45,8 @@ class MemoryCache(SimpleCache):
 
     '''Thread-safe in-memory cache backend.'''    
 
-    def __init__(self, *a, **kw):
-        super(MemoryCache, self).__init__(*a, **kw)
+    def __init__(self, engine, **kw):
+        super(MemoryCache, self).__init__(engine, **kw)
         self._lock = threading.Condition()
 
     @synchronized

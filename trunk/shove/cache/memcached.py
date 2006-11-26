@@ -42,9 +42,9 @@ class MemCached(BaseCache):
 
     '''Memcached cache backend'''    
     
-    def __init__(self, *a, **kw):
-        super(MemCached, self).__init__(*a, **kw)
-        self._cache = memcache.Client(a[0].split(';'))
+    def __init__(self, engine, **kw):
+        super(MemCached, self).__init__(**kw)
+        self._cache = memcache.Client(engine.split(';'))
 
     def __getitem__(self, key, default=None):
         '''Fetch a given key from the cache.  If the key does not exist, return
