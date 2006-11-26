@@ -28,16 +28,16 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 # SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-'''Base Cache class'''
+'''Base Cache.'''
 
 from shove import Base
 
-__all__ = ['BaseCache']
+__all__ = ['BaseCache', 'db', 'file', 'memcached', 'memory', 'simple']
 
 
 class BaseCache(Base):
 
-    '''Base Cache class.'''    
+    '''Base Cache.'''    
     
     def __init__(self, **kw):
         super(BaseCache, self).__init__()
