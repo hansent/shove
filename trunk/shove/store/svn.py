@@ -28,8 +28,9 @@
 
 '''Subversion store.'''
 
-import pysvn
+import os
 import urllib
+import pysvn
 try:
     import cPickle as pickle
 except ImportError:
@@ -41,12 +42,30 @@ __all__ = ['SvnStore']
 
 class SvnStore(BaseStore):
 
-    '''Subversion-accessed store.'''    
+    '''Subversion store.'''    
     
-    def __init__(self, engine, **kw):
-        super(SvnStore, self).__init__(*a, **kw)
-        self._engine, self._client = engine, pysvn.Client()
-        if not os.path.exists(self._dir): self._createdir()
+    def __init__(self, engine=None, **kw):
+        super(SvnStore, self).__init__(**kw)
+        local, remote = kw.get('local'), kw.get('remote')
+        user, password = kw.get('user'), kw.get('password') 
+        if engine is not None:
+            local, query = engine.split('?')
+            if '@' in local:
+                auth, local = engine.split('/', 2)[2].split('@')
+                user, password = auth.split(':')
+            remote = query.split('=')[1]
+        self._local, self._remote = local, remote
+        self._client = pysvn.Client()
+        if user is not None: self._client.set_username(user)
+        if password is not None: self._client.set_password(password)
+        try:
+            self._client.info(remote)
+        except svn.ClientError:
+            self._client.mkdir(remote)          
+        try:
+            self._client.info(local)
+        except svn.ClientError:              
+            self._client.checkout(remote, local)
 
     @synchronized
     def __getitem__(self, key):
@@ -54,12 +73,11 @@ class SvnStore(BaseStore):
         default, which itself defaults to None.
 
         @param key Keyword of item in cache.
-        @param default Default value (default: None)
         '''
         try:
-            return pickle.load(open(self._key_to_file(key), 'rb'))
-        except: pass
-        return default
+            return pickle.loads(self._client.cat(self._key_to_file(key)))
+        except:
+            raise KeyError()
 
     @synchronized
     def __setitem__(self, key, value):
@@ -68,41 +86,25 @@ class SvnStore(BaseStore):
         @param key Keyword of item in cache.
         @param value Value to be inserted in cache.        
         '''
-        try:
-            f = open(self._key_to_file(key), 'wb')
-            pickle.dump(value, f, 2)
-        except (IOError, OSError): pass
-
+        fname = self._key_to_file(key)
+        pickle.dump(value, open(fname, 'wb'), 2)
+        self._client.add(fname)
+        self._client.checkin([fname], 'Adding %s' % fname)
+        
     @synchronized
     def __delitem__(self, key):
         '''Delete a key from the cache, failing silently.
 
         @param key Keyword of item in cache.
         '''
-        try:
-            os.remove(self._key_to_file(key))
-        except (IOError, OSError): pass        
-
-    @synchronized
-    def __contains__(self, key):
-        '''Tell if a given key is in the cache.'''
-        return os.path.exists(self._key_to_file(key))       
+        fname = self._key_to_file(key)
+        self._client.remove(fname)
+        client.checkin([fname], 'Removing %s' % fname)
 
     @synchronized
     def keys(self):
-        try:
-            return os.listdir(self._dir)
-        except (IOError, OSError): return list()            
-
-    @synchronized    
-    def _createdir(self):
-        '''Creates the cache directory.'''
-        try:
-            self._client.mkdir(self._dir)
-        except OSError:
-            raise EnvironmentError('Cache directory "%s" does not exist and ' \
-                'could not be created' % self._dir)
+        return list(str(i.name) for i in self._client.ls(self._local))
 
     def _key_to_file(self, key):
         '''Gives the filesystem path for a key.'''
-        return os.path.join(self._dir, urllib.quote_plus(key))
+        return os.path.join(self._local, urllib.quote_plus(key))

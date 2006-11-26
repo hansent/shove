@@ -9,6 +9,7 @@ except ImportError:
 class S3Store(BaseStore):    
 
     def __init__(self, engine=None, **kw):
+        super(S3Store, self).__init__(**kw)
         self._updated, self._keys = True, None
         ken, secret, bucket = kw.get('key'), kw.get('secret'), kw.get('bucket')
         if engine is not None:
