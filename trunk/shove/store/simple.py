@@ -58,4 +58,4 @@ class SimpleStore(BaseStore):
         del self._store[key]
 
     def keys(self):
-        return self._store.keys()
+        return self._store.keys() 
