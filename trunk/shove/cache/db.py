@@ -71,9 +71,7 @@ class DbCache(BaseCache):
         @param default Default value (default: None)
         '''
         row = self._cache.select().execute(cache_key=key).fetchone()
-        if row.expires < datetime.now().replace(microsecond=0):
-            del self[key]
-            return default
+        if row.expires < datetime.now().replace(microsecond=0): del self[key]
         return row.value
 
     def __setitem__(self, key, val):
@@ -115,7 +113,7 @@ class DbCache(BaseCache):
         row = self._cache.select().execute(cache_key=key).fetchone()
         if row is None: return default
         if row.expires < datetime.now().replace(microsecond=0):
-            self.delete(key)
+            del self[key]
             return default
         return row.value
 

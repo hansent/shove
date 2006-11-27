@@ -47,7 +47,7 @@ stores = dict(simple='shove.store.simple.SimpleStore',
     s3='shove.store.s3.S3Store',
     ftp='shove.store.ftp.FtpStore',
     zodb='shove.store.zodb.ZodbStore',
-    durus='shove.store.durus.DurusStore',
+    durusdb='shove.store.durusdb.DurusStore',
     atom='shove.store.atom.AtomStore')
 
 caches = dict(simple='shove.cache.simple.SimpleCache',
@@ -92,6 +92,9 @@ def getmod(module):
 class Base(object):
 
     '''Base class.'''    
+    
+    def __init__(self):
+        super(Base, self).__init__()
     
     def __getitem__(self, key):
         '''Fetch a given key from the cache.'''
@@ -147,6 +150,9 @@ class Base(object):
 class BaseStore(Base):
 
     '''Base Store.'''
+    
+    def __init__(self):
+        super(BaseStore, self).__init__()
 
     def keys(self):
         raise NotImplementedError()

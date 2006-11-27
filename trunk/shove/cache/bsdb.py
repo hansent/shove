@@ -1,4 +1,5 @@
 import bsddb
+import time
 try:
     from cStringIO import StringIO
 except ImportError:
@@ -7,20 +8,17 @@ try:
     import cPickle as pickle
 except ImportError:
     import pickle
-from shove import synchronized
 from shove.cache.memory import MemoryCache
 
 __all__ = ['BsddbCache']
 
 
-class BsddbCache(MemoryCache):
+class BsdbCache(MemoryCache):
 
-    def __init__(engine, **kw):
-        super(BsddbCache, self).__init__(engine, **kw)
-        db = engine.split('/', 2)
-        self._cache = bsddb.htopen(db)
+    def __init__(self, engine, **kw):
+        super(BsdbCache, self).__init__(engine, **kw)
+        self._cache = bsddb.hashopen(engine.split('/', 2))
         
-    @synchronized
     def __getitem__(self, key):
         '''Fetch a given key from the cache.  If the key does not exist, return
         default, which itself defaults to None.
@@ -28,21 +26,20 @@ class BsddbCache(MemoryCache):
         @param key Keyword of item in cache.
         @param default Default value (default: None)
         '''
-        local = StringIO(self._cache[key])
+        local = StringIO(super(BsdbCache, self).__getitem__(key))
         exp, now = pickle.load(local), time.time()
         # Remove item if time has expired.
         if exp < now: del self._cache[key]        
-        return pickle.load(f)
+        return pickle.load(local)
                 
-    @synchronized
     def __setitem__(self, key, value):
         '''Set a value in the cache.
 
         @param key Keyword of item in cache.
         @param value Value to be inserted in cache.        
         '''
-        if len(self._store) > self._max_entries: self._cull()
+        if len(self._cache) > self._max_entries: self._cull()
         local = StringIO()
         pickle.dump(time.time() + self.timeout, local, 2)
         pickle.dump(value, local, 2)
-        self._cache[key] = local.getvalue()
+        super(BsdbCache, self).__setitem__(key, local.getvalue())
