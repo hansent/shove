@@ -31,10 +31,7 @@
 '''Thread-safe in-memory cache backend.'''
 
 import copy
-try:
-    import threading
-except ImportError:
-    import dummy_threading as threading
+import threading
 from shove import synchronized
 from shove.store.simple import SimpleStore
 

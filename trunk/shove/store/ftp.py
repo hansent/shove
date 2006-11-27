@@ -13,7 +13,7 @@ from shove import BaseStore
 __all__ = ['FtpStore']
 
 
-def FtpStore(BaseStore):
+class FtpStore(BaseStore):
 
     def __init__(self, engine, **kw):
         super(FtpStore, self).__init__()
@@ -68,7 +68,7 @@ def FtpStore(BaseStore):
                 if ri[-1] not in ('.', '..'):
                     nlist.append((ri[0], ri[-1]))
             return nlist
-        if not self._updates or self._keys is not None:
+        if not self._updated or self._keys is not None:
             return self._keys
         else:
             rlist = list()
