@@ -44,7 +44,8 @@ stores = dict(simple='shove.store.simple.SimpleStore',
     mysql='shove.store.db.DbStore',
     oracle='shove.store.db.DbStore',
     svn='shove.store.svn.SvnStore',
-    s3='shove.store.s3.S3Store')
+    s3='shove.store.s3.S3Store',
+    ftp='shove.store.ftp.FtpStore')
 
 caches = dict(simple='shove.cache.simple.SimpleCache',
     memory='shove.cache.memory.MemoryCache',
@@ -221,6 +222,17 @@ class BaseStore(Base):
     def __len__(self):
         return len(self.keys())
 
+    def __del__(self):
+        # __init__ didn't succeed, so don't bother closing
+        if not hasattr(self, '_store'): return
+        self.close()    
+
+    def close(self):
+        try:
+            self._store.close()
+        except AttributeError: pass
+        self._store = None
+
 
 class Shove(BaseStore):
 
@@ -246,9 +258,8 @@ class Shove(BaseStore):
         except KeyError:
             return self._store[key]
 
-    def __setitem__(self, key, value):        
-        self._store[key] = value
-        self._cache[key] = value
+    def __setitem__(self, key, value):
+        self._store[key], self._cache[key] = value, value
 
     def __delitem__(self, key):
         del self._store[key]
@@ -256,16 +267,5 @@ class Shove(BaseStore):
             del self._cache[key]
         except KeyError: pass
 
-    def __del__(self):
-        # __init__ didn't succeed, so don't bother closing
-        if not hasattr(self, '_store'): return
-        self.close()
-
     def keys(self):
         return self._store.keys()
-
-    def close(self):
-        try:
-            self._store.close()
-        except AttributeError: pass
-        self._store = None

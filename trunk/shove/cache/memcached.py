@@ -90,7 +90,3 @@ class MemCached(BaseCache):
         @param keys Keywords of items in cache.        
         '''
         return self._cache.get_multi(keys)
-
-    def _cull(self):
-        '''Stub.'''
-        pass
