@@ -1,27 +1,20 @@
 from durus.file_storage import FileStorage
 from durus.connection import Connection
-from shove import BaseStore
+from shove.store import SyncStore
 
 __all__ = ['DurusStore']
 
 
-class DurusStore(BaseStore):
+class DurusStore(SyncStore):
 
     def __init__(self, engine, **kw):
         super(DurusStore, self).__init__(engine, **kw)
-        db = engine.split('/', 2)
-        self._db = FileStorage(db)
+        self._db = FileStorage(engine.split('/', 2))
         self._connection = Connection(self._db)
+        self.sync = self._connection.commit
         self._store = self._connection.get_root() 
 
-    def __setitem__(self, key, value):        
-        self._store[key] = value
-        self._connection.commit()
-
-    def __delitem__(self, key):
-        del self._store[key]
-        self._connection.commit()
-
     def close(self):
-        self._connection.commit()
+        self.sync()
         self._db.close()
+        super(DurusStore, self).close()
