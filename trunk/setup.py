@@ -36,20 +36,24 @@ except:
 
 setup(name='shove',
       version='0.1',
-      description='''Simple persistence backend.''',
+      description='''Simple object persistence with caching''',
       long_description='''Supports memory, filesystem, database, and memcached based backends.
 ''',
       author='L. C. Rees',
       author_email='lcrees@gmail.com',
       license='BSD',
-      packages = ['wsgistate'],
-      test_suite='wsgistate.tests',
+      packages = ['shove'],
+      test_suite='shove.tests',
       zip_safe = True,
-      keywords='persistence database SQLAlchemy',
+      keywords='persistence database shelve SQLAlchemy',
       classifiers=['Development Status :: 3 - Alpha',
                     'Environment :: Web Environment',
                     'License :: OSI Approved :: BSD License',
                     'Natural Language :: English',
                     'Operating System :: OS Independent',
                     'Programming Language :: Python'],
-      install_requires = ['SQLAlchemy'],)
+      install_requires = ['SQLAlchemy'],
+      entry_points = '''
+    [python.storage.stores]
+    db = turbowebstring.webstringsupport:TurboWebstring
+    ''',)
