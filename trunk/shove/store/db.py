@@ -54,7 +54,7 @@ class DbStore(BaseStore):
         # Create cache if it does not exist
         if not self._store.exists(): self._store.create()
 
-    def __getitem__(self, key, default=None):
+    def __getitem__(self, key):
         '''Fetch a given key from the cache.  If the key does not exist, return
         default, which itself defaults to None.
 

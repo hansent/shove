@@ -1,17 +1,18 @@
-from boto.connection import S3Connection
-from boto.key import Key
-from shove import BaseStore
 try:
     import cPickle as pickle
 except ImportError:
     import pickle
+from boto.connection import S3Connection
+from boto.key import Key
+from shove import BaseStore
+
 
 class S3Store(BaseStore):    
 
     def __init__(self, engine=None, **kw):
         super(S3Store, self).__init__(**kw)
         self._updated, self._keys = True, None
-        ken, secret, bucket = kw.get('key'), kw.get('secret'), kw.get('bucket')
+        key, secret, bucket = kw.get('key'), kw.get('secret'), kw.get('bucket')
         if engine is not None:
             keys, bucket = engine.split('/', 2)[2].split('@')
             key, secret = keys.split(':')        

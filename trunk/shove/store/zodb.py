@@ -5,7 +5,7 @@ from shove.store import SyncStore
 __all__ = ['ZodbStore']
 
 
-class ZodbStore(SimpleStore):
+class ZodbStore(SyncStore):
 
     def __init__(self, engine, **kw):
         super(ZodbStore, self).__init__(engine, **kw)

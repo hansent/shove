@@ -15,4 +15,4 @@ class SyncStore(SimpleStore):
 
     def __delitem__(self, key):
         super(SyncStore, self).__delitem__(key)
-        self.sync()    
+        self.sync()
