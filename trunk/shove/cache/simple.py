@@ -91,7 +91,7 @@ class SimpleCache(BaseCache):
             return default
         # Delete if item timed out and return default.
         elif exp < now:
-            self.delete(key)
+            del self._cache[key]
             return default
         else:
             return self._cache[key]
@@ -100,4 +100,4 @@ class SimpleCache(BaseCache):
         '''Remove items in cache that have timed out.'''
         now = time.time()
         for key, exp in self._expire_info.iteritems():
-            if exp < now: self.delete(key)
+            if exp < now: del self[key]

@@ -46,7 +46,7 @@ class MemCached(BaseCache):
         super(MemCached, self).__init__(**kw)
         self._cache = memcache.Client(engine.split(';'))
 
-    def __getitem__(self, key, default=None):
+    def __getitem__(self, key):
         '''Fetch a given key from the cache.  If the key does not exist, return
         default, which itself defaults to None.
 

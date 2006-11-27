@@ -32,10 +32,7 @@
 
 import copy
 import time
-try:
-    import threading
-except ImportError:
-    import dummy_threading as threading
+import threading
 from shove.cache.simple import SimpleCache
 from shove import synchronized
 
@@ -66,7 +63,7 @@ class MemoryCache(SimpleCache):
         '''        
         now, exp = time.time(), self._expire_info.get(key)
         if exp < now: del self[key]
-        return copy.deepcopy(self._cache[key])        
+        return copy.deepcopy(super(MemoryCache, self).__getitem__(key))
 
     @synchronized
     def __delitem__(self, key):
