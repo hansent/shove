@@ -4,9 +4,9 @@ try:
 except ImportError:
     from cStringIO import StringIO
 try:
-    from cPickle import Pickler, Unpickler
+    import cPickle as pickle
 except ImportError:
-    from pickle import Pickler, Unpickler
+    import pickle
 from ftplib import FTP, error_perm
 from shove import BaseStore
 
@@ -35,7 +35,7 @@ def FtpStore(BaseStore):
         try:
             local = StringIO()
             self._store.retrbinary('RETR %s' % key, local.write)
-            value = Unpickler(local).load()
+            value = pickle.load(local)
             self._updated = False
             return value
         except:
@@ -43,8 +43,7 @@ def FtpStore(BaseStore):
 
     def __setitem__(self, key, value):
         local = StringIO()
-        p = Pickler(local)
-        p.dump(value)
+        pickle.dump(value, local, 2)
         self._store.storbinary('STOR %s' % key, local)
         self._updated = True
 
