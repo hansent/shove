@@ -30,11 +30,11 @@
 
 import os
 import urllib
-import pysvn
 try:
     import cPickle as pickle
 except ImportError:
     import pickle
+import pysvn
 from shove import BaseStore, synchronized
 
 __all__ = ['SvnStore']

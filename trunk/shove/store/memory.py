@@ -45,9 +45,9 @@ class MemoryStore(SimpleStore):
 
     '''Thread-safe in-memory cache backend.'''    
 
-    def __init__(self, *a, **kw):
-        super(MemoryStore, self).__init__(*a, **kw)
-        self._store, self._lock = {}, threading.Condition()
+    def __init__(self, engine, **kw):
+        super(MemoryStore, self).__init__(engine, **kw)
+        self._lock = threading.Condition()
 
     @synchronized        
     def __getitem__(self, key):
@@ -56,7 +56,7 @@ class MemoryStore(SimpleStore):
 
         @param key Keyword of item in cache.
         '''
-        return copy.deepcopy(self._cache[key])            
+        return copy.deepcopy(super(MemoryStore, self).__getitem__(key))            
 
     @synchronized
     def __setitem__(self, key, value):
@@ -84,6 +84,6 @@ class MemoryStore(SimpleStore):
         @param default Default value (default: None)
         '''
         try:
-            return copy.deepcopy(self._cache[key])
+            return copy.deepcopy(self._store[key])
         except KeyError:
             return default
