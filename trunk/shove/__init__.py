@@ -45,7 +45,10 @@ stores = dict(simple='shove.store.simple.SimpleStore',
     oracle='shove.store.db.DbStore',
     svn='shove.store.svn.SvnStore',
     s3='shove.store.s3.S3Store',
-    ftp='shove.store.ftp.FtpStore')
+    ftp='shove.store.ftp.FtpStore',
+    zodb='shove.store.zodb.ZodbStore',
+    durus='shove.store.durus.DurusStore',
+    atom='shove.store.atom.AtomStore')
 
 caches = dict(simple='shove.cache.simple.SimpleCache',
     memory='shove.cache.memory.MemoryCache',
@@ -54,7 +57,8 @@ caches = dict(simple='shove.cache.simple.SimpleCache',
     postgres='shove.cache.db.DbCache',
     mysql='shove.cache.db.DbCache',
     oracle='shove.cache.db.DbCache',
-    memcached='shove.cache.memcached.MemCached')
+    memcached='shove.cache.memcached.MemCached',
+    bsddb='shove.cache.bsddb.BsddbCache')
 
 def _close(ref):
     store = ref()
