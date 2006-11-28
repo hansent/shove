@@ -4,7 +4,7 @@ except ImportError:
     import pickle
 from boto.connection import S3Connection
 from boto.key import Key
-from shove import BaseStore
+from shove.store import BaseStore
 
 
 class S3Store(BaseStore):    
