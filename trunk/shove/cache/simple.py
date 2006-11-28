@@ -30,6 +30,8 @@
 '''Single-process in-memory cache backend.'''
 
 import time
+import random
+import os
 from shove.cache import BaseCache
 
 __all__ = ['SimpleCache']
@@ -41,7 +43,9 @@ class SimpleCache(BaseCache):
     
     def __init__(self, engine, **kw):
         super(SimpleCache, self).__init__(**kw)
+        random.seed()
         self._cache, self._expire_info = dict(), dict()
+        self._cullnum = kw.get('cullnum', 10)
         max_entries = kw.get('max_entries', 300)
         try:
             self._max_entries = int(max_entries)
@@ -98,6 +102,14 @@ class SimpleCache(BaseCache):
         
     def _cull(self):
         '''Remove items in cache that have timed out.'''
-        now = time.time()
+        num = 0
         for key, exp in self._expire_info.iteritems():
-            if exp < now: del self[key]
+            if num < self._cullnum:
+                now = time.time()
+                if exp < now:
+                    del self[key]
+                    num += 1
+            else: break
+        if len(self._cache) >= self._max_entries:            
+            keys = self._expire_info.keys()            
+            for i in range(self._cullnum): del self[random.choice(keys)]                

@@ -30,6 +30,7 @@
 '''Database cache backend.'''
 
 import time
+import random
 from datetime import datetime
 try:
     from sqlalchemy import *
@@ -51,8 +52,7 @@ class DbCache(BaseCache):
         self._metadata = BoundMetaData(engine)
         # Make cache
         self._cache = Table('cache', self._metadata,
-            Column('id', Integer, primary_key=True, nullable=False, unique=True),
-            Column('cache_key', String(60), nullable=False),
+            Column('cache_key', String(60), primary_key=True, nullable=False, unique=True),
             Column('value', PickleType, nullable=False),
             Column('expires', DateTime, nullable=False))
         # Create cache if it does not exist
@@ -62,6 +62,7 @@ class DbCache(BaseCache):
             self._max_entries = int(max_entries)
         except (ValueError, TypeError):
             self._max_entries = 300
+        self._cullnum = kw.get('cullnum', 10)
 
     def __getitem__(self, key):
         '''Fetch a given key from the cache.  If the key does not exist, return
@@ -82,8 +83,7 @@ class DbCache(BaseCache):
         '''        
         timeout = self.timeout
         # Get count
-        num = self._cache.count().execute().fetchone()[0]
-        if num > self._max_entries: self._cull()
+        if len(self) >= self._max_entries: self._cull()
         # Get expiration time
         exp = datetime.fromtimestamp(time.time() + timeout).replace(microsecond=0)        
         try:
@@ -101,7 +101,10 @@ class DbCache(BaseCache):
 
         @param key Keyword of item in cache.
         '''
-        self._cache.delete().execute(cache_key=key)         
+        self._cache.delete().execute(cache_key=key)
+
+    def __len__(self):
+        return self._cache.count().execute().fetchone()[0]
 
     def get(self, key, default=None):
         '''Fetch a given key from the cache.  If the key does not exist, return
@@ -121,3 +124,11 @@ class DbCache(BaseCache):
         '''Remove items in cache that have timed out.'''
         now = datetime.now().replace(microsecond=0)
         self._cache.delete(self._cache.c.expires < now).execute()
+        if len(self) >= self._max_entries:
+            keys = [i[0] for i in select([self._store.c.store_key]).execute().fetchall()]
+            delkeys = list(random.choice(keys) for i in range(self._cullnum))
+            self._cache.delete(self._cache.c.cache_key.like(bindparam('key'))).execute(
+                *tuple({'key':'%' + key + '%'} for key in delkeys))
+            
+            
+            
