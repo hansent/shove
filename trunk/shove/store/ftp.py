@@ -8,7 +8,7 @@ try:
 except ImportError:
     import pickle
 from ftplib import FTP, error_perm
-from shove import BaseStore
+from shove.store import BaseStore
 
 __all__ = ['FtpStore']
 

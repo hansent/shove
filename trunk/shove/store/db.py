@@ -34,9 +34,22 @@ try:
 except ImportError:
     raise ImportError('DbCache module requires the SQLAlchemy package ' \
         'from http://www.sqlalchemy.org/')
-from shove import BaseStore
+from shove.store import BaseStore
 
-__all__ = ['DbStore']   
+__all__ = ['DbStore']
+
+types = dict(basestring=String,
+    int=Integer,
+    smallint=SmallInteger,
+    numeric=Numeric,
+    float=Float,
+    datetime=DateTime,
+    date=Date,
+    time=Time,
+    binary=Binary,
+    boolean=Boolean,
+    unicode=Unicode,
+    pickle=PickleType)
 
 
 class DbStore(BaseStore):     
@@ -86,3 +99,6 @@ class DbStore(BaseStore):
 
     def keys(self):
         return list(i[0] for i in select([self._store.c.store_key]).execute().fetchall())
+
+    def _buildtable(self, data):
+        pass

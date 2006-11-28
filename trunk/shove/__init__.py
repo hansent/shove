@@ -30,10 +30,43 @@
 
 '''Shove Base'''
 
-import weakref
 import atexit
+from shove.store import BaseStore
 
-__all__ = ['Base', 'BaseStore', 'Shove', 'synchronized']
+__all__ = ['Shove']
+
+def _close(ref):
+    shove = ref()
+    if shove is not None: store.close()
+
+def synchronized(func):
+    def wrapper(self, *__args, **__kw):
+        try:
+            rlock = self._lock
+        except AttributeError:
+            from threading import RLock
+            rlock = self.__dict__.setdefault('_lock', RLock())
+        rlock.acquire()
+        try:
+            return func(self, *__args, **__kw)
+        finally:
+            rlock.release()
+    wrapper.__name__ = func.__name__
+    wrapper.__dict__ = func.__dict__
+    wrapper.__doc__ = func.__doc__
+    return wrapper
+
+def getshove(shove, uri, **kw):
+    '''Loads a shove class.
+
+    @param shove A shove instance or name string
+    @param uri An init URI for a shove
+    @param kw Keywords'''
+    if isinstance(shove, basestring): 
+        dot = shove.rindex('.')
+        mod = getattr(__import__(shove[:dot], '', '', ['']), shove[dot+1:])
+        module = mod(uri, **kw)
+    return shove
 
 stores = dict(simple='shove.store.simple.SimpleStore',
     memory='shove.store.memory.MemoryStore',
@@ -59,34 +92,6 @@ caches = dict(simple='shove.cache.simple.SimpleCache',
     oracle='shove.cache.db.DbCache',
     memcached='shove.cache.memcached.MemCached',
     bsddb='shove.cache.bsddb.BsddbCache')
-
-def _close(ref):
-    store = ref()
-    if store is not None: store.close()
-
-def synchronized(func):
-    def wrapper(self, *__args, **__kw):
-        try:
-            rlock = self._lock
-        except AttributeError:
-            from threading import RLock
-            rlock = self.__dict__.setdefault('_lock', RLock())
-        rlock.acquire()
-        try:
-            return func(self, *__args, **__kw)
-        finally:
-            rlock.release()
-    wrapper.__name__ = func.__name__
-    wrapper.__dict__ = func.__dict__
-    wrapper.__doc__ = func.__doc__
-    return wrapper
-
-def getmod(module):
-    '''Loads a callable based on its name
-
-    @param module A module name'''
-    dot = module.rindex('.')
-    return getattr(__import__(module[:dot], '', '', ['']), module[dot+1:])
 
     
 class Base(object):
@@ -146,121 +151,25 @@ class Base(object):
             if val is not None: d[k] = val
         return d
 
-
-class BaseStore(Base):
-
-    '''Base Store.'''
     
-    def __init__(self):
-        super(BaseStore, self).__init__()
-
-    def keys(self):
-        raise NotImplementedError()
-
-    def __iter__(self):
-        for k in self.keys(): yield k
-
-    def iteritems(self):
-        for k in self: yield (k, self[k])
-            
-    def iterkeys(self):
-        return self.__iter__()
-
-    def itervalues(self):
-        for _, v in self.iteritems(): yield v
-        
-    def values(self):
-        return [v for _, v in self.iteritems()]
-    
-    def items(self):
-        return list(self.iteritems())
-    
-    def clear(self):
-        for key in self.keys(): del self[key]
-        
-    def setdefault(self, key, default=None):
-        try:
-            return self[key]
-        except KeyError:
-            self[key] = default
-        return default
-
-    def pop(self, key, *args):
-        if len(args) > 1:
-            raise TypeError('pop expected at most 2 arguments, got '\
-                + repr(1 + len(args)))
-        try:
-            value = self[key]
-        except KeyError:
-            if args: return args[0]
-            raise
-        del self[key]
-        return value
-
-    def popitem(self):
-        try:
-            k, v = self.iteritems().next()
-        except StopIteration:
-            raise KeyError('container is empty')
-        del self[k]
-        return (k, v)
-
-    def update(self, other=None, **kw):
-        # Make progressively weaker assumptions about "other"
-        if other is None:
-            pass
-        elif hasattr(other, 'iteritems'):  
-            for k, v in other.iteritems():
-                self[k] = v
-        elif hasattr(other, 'keys'):
-            for k in other.keys():
-                self[k] = other[k]
-        else:
-            for k, v in other:
-                self[k] = v
-        if kw:
-            self.update(kw)
-
-    def __repr__(self):
-        return repr(dict(self.iteritems()))
-
-    def __cmp__(self, other):
-        if other is None: return False
-        if isinstance(other, BaseStore): other = dict(other.iteritems())
-        return cmp(dict(self.iteritems()), other)
-
-    def __len__(self):
-        return len(self.keys())
-
-    def __del__(self):
-        # __init__ didn't succeed, so don't bother closing
-        if not hasattr(self, '_store'): return
-        self.close()    
-
-    def close(self):
-        try:
-            self._store.close()
-        except AttributeError: pass
-        self._store = None
-
-
 class Shove(BaseStore):
 
     '''Shove class.'''    
     
     def __init__(self, store='simple://', cache='simple://', **kw):
-        super(Shove, self).__init__(**kw)       
+        super(Shove, self).__init__(**kw)    
         sscheme = store.split(':', 1)[0] 
-        #try:
-        self._store = getmod(stores[sscheme])(store, **kw)
-        #except (KeyError, ImportError):
-        #    raise ImportError('Invalid store scheme "%s"' % sscheme)
+        try:
+            self._store = getshove(stores[sscheme], store, **kw)
+        except (KeyError, ImportError):
+            raise ImportError('Could not load store scheme "%s"' % sscheme)
         cscheme = cache.split(':', 1)[0]
         try:
-            self._cache = getmod(caches[cscheme])(cache, **kw)
+            self._cache = getshove(caches[cscheme], cache, **kw)
         except (KeyError, ImportError):
             raise ImportError('Invalid cache scheme "%s"' % cscheme)
-        atexit.register(_close, weakref.ref(self))
+        self._buffer, self._flushnum = dict(), kw.get('flushnum', 3)
+        atexit.register(_close, self)
 
     def __getitem__(self, key):
         try:
@@ -269,13 +178,26 @@ class Shove(BaseStore):
             return self._store[key]
 
     def __setitem__(self, key, value):
-        self._store[key], self._cache[key] = value, value
+        self._cache[key] = value
+        if len(self._buffer) >= self._flushnum: self.sync()
 
     def __delitem__(self, key):
-        del self._store[key]
         try:
             del self._cache[key]
         except KeyError: pass
+        try:
+            del self._buffer[key]
+        except KeyError: pass
+        del self._store[key]        
 
     def keys(self):
         return self._store.keys()
+
+    def sync(self):
+        for k, v in self._buffer.iteritems(): self._store[k] = v
+        self._buffer.clear()
+        
+    def close(self):
+        self.sync()
+        self._store.close()
+        self._store = self._cache = self._buffer = None        

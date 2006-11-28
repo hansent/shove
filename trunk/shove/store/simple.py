@@ -29,7 +29,7 @@
 
 '''Single-process in-memory store.'''
 
-from shove import BaseStore
+from shove.store import BaseStore
 
 __all__ = ['SimpleStore']
 

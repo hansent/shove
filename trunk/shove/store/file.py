@@ -35,7 +35,7 @@ try:
     import cPickle as pickle
 except ImportError:
     import pickle
-from shove import BaseStore
+from shove.store import BaseStore
 
 __all__ = ['FileStore']
 
