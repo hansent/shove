@@ -29,7 +29,10 @@
 
 '''File-based cache backend'''
 
-import os, time, urllib
+import os
+import time
+import urllib
+import random
 try:
     import cPickle as pickle
 except ImportError:
@@ -127,7 +130,6 @@ class FileCache(SimpleCache):
         except (IOError, OSError, EOFError, pickle.PickleError): pass
         return default
 
-
     def _cull(self):
         '''Remove items in cache that have timed out.'''
         try:
@@ -135,18 +137,22 @@ class FileCache(SimpleCache):
         except (IOError, OSError):
             self._createdir()
             filelist = list()
+        num = 0
         for fname in filelist:
-            # Remove expired items from cache.
-            try:
-                f = open(fname, 'rb')
-                exp = pickle.load(f)
-                now = time.time()
-                if exp < now:
-                    f.close()
-                    try:
-                        os.remove(os.path.join(self._dir, fname))
-                    except (IOError, OSError): pass
-            except (IOError, OSError, EOFError, pickle.PickleError): pass            
+            if num < self._cullnum:
+                # Remove expired items from cache.
+                try:
+                    f = open(fname, 'rb')
+                    exp = pickle.load(f)
+                    now = time.time()
+                    if exp < now:
+                        f.close()
+                        del self[fname]
+                        num += 1
+                except (IOError, OSError, EOFError, pickle.PickleError): pass
+            else: break            
+        if len(self._cache) >= self._max_entries:
+            for i in range(self._cullnum): del self[random.choice(filelist)]  
 
     def _createdir(self):
         '''Creates the cache directory.'''
