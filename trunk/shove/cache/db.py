@@ -121,7 +121,8 @@ class DbCache(BaseCache):
         return row.value
 
     def _cull(self):
-        '''Remove items in cache that have timed out.'''
+        '''Remove items in cache to make room.'''
+        # Remove items that have timed out
         now = datetime.now().replace(microsecond=0)
         self._cache.delete(self._cache.c.expires < now).execute()
         if len(self) >= self._max_entries:
@@ -129,6 +130,3 @@ class DbCache(BaseCache):
             delkeys = list(random.choice(keys) for i in range(self._cullnum))
             self._cache.delete(self._cache.c.cache_key.like(bindparam('key'))).execute(
                 *tuple({'key':'%' + key + '%'} for key in delkeys))
-            
-            
-            
