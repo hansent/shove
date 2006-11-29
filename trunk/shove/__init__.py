@@ -151,7 +151,7 @@ class Base(object):
     
 class Shove(BaseStore):
 
-    '''Shove storage class.'''
+    '''Shove class.'''
     
     def __init__(self, store='simple://', cache='simple://', **kw):
         super(Shove, self).__init__(**kw)
@@ -167,12 +167,13 @@ class Shove(BaseStore):
             self._cache = getshove(caches[cscheme], cache, **kw)
         except (KeyError, ImportError):
             raise ImportError('Invalid cache scheme "%s"' % cscheme)
-        self._buffer, self._limit = dict(), kw.get('flushnum', 3)
+        # Buffer for lazy writing and setting for frequency of syncing
+        self._buffer, self._limit = dict(), kw.get('limit', 3)
         # Ensure close is called before program termination
         atexit.register(_close, self)
 
     def __getitem__(self, key):
-        '''Gets a item from the shove storage.'''
+        '''Gets a item from shove.'''
         try:
             return self._cache[key]
         except KeyError:
@@ -183,13 +184,13 @@ class Shove(BaseStore):
             return value
 
     def __setitem__(self, key, value):
-        '''Sets an item in the shove storage.'''
+        '''Sets an item in shove.'''
         self._cache[key] = value
         # When the buffer reaches self._limit, writes the buffer to the store
         if len(self._buffer) >= self._limit: self.sync()
 
     def __delitem__(self, key):
-        '''Deletes an item from the shove storage.'''
+        '''Deletes an item from shove.'''
         try:
             del self._cache[key]
         except KeyError: pass
@@ -197,7 +198,7 @@ class Shove(BaseStore):
         del self._store[key]
 
     def keys(self):
-        '''Returns a list of keys in the shove storage store.'''
+        '''Returns a list of keys in shove.'''
         self.sync()
         return self._store.keys()
 
@@ -207,7 +208,7 @@ class Shove(BaseStore):
         self._buffer.clear()
         
     def close(self):
-        '''Finalizes all storage and closes stores.'''
+        '''Finalizes and closes shove.'''
         self.sync()
         self._store.close()
         self._store = self._cache = self._buffer = None        
