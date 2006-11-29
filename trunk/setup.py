@@ -24,7 +24,7 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-'''setup - setuptools based setup for wsgistate.'''
+'''setup - setuptools based setup for shove.'''
 
 import ez_setup
 ez_setup.use_setuptools()
@@ -36,7 +36,7 @@ except:
 
 setup(name='shove',
       version='0.1',
-      description='''Simple object persistence with caching''',
+      description='''Universal object persistence with caching.''',
       long_description='''Supports memory, filesystem, database, and memcached based backends.
 ''',
       author='L. C. Rees',
@@ -45,15 +45,11 @@ setup(name='shove',
       packages = ['shove'],
       test_suite='shove.tests',
       zip_safe = True,
-      keywords='persistence database shelve SQLAlchemy',
+      keywords='persistence database shelve',
       classifiers=['Development Status :: 3 - Alpha',
                     'Environment :: Web Environment',
                     'License :: OSI Approved :: BSD License',
                     'Natural Language :: English',
                     'Operating System :: OS Independent',
                     'Programming Language :: Python'],
-      install_requires = ['SQLAlchemy'],
-      entry_points = '''
-    [python.storage.stores]
-    db = turbowebstring.webstringsupport:TurboWebstring
-    ''',)
+      install_requires = ['SQLAlchemy'])
