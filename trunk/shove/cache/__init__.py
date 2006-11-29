@@ -31,12 +31,12 @@
 
 from shove import Base
 
-__all__ = ['BaseCache', 'db', 'file', 'memcached', 'memory', 'simple']
+__all__ = ['bsdb', 'db', 'file', 'memcached', 'memory', 'simple']
 
 
 class BaseCache(Base):
 
-    '''Base Cache.'''    
+    '''Base Cache class.'''    
     
     def __init__(self, **kw):
         super(BaseCache, self).__init__()
