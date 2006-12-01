@@ -2,13 +2,13 @@
 # Copyright (c) 2006 L. C. Rees
 # All rights reserved.
 #
-# Redistribution and use in source and binary forms, with or without modification,
-# are permitted provided that the following conditions are met:
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
 #
-#    1. Redistributions of source code must retain the above copyright notice, 
+#    1. Redistributions of source code must retain the above copyright notice,
 #       this list of conditions and the following disclaimer.
-#    
-#    2. Redistributions in binary form must reproduce the above copyright 
+#
+#    2. Redistributions in binary form must reproduce the above copyright
 #       notice, this list of conditions and the following disclaimer in the
 #       documentation and/or other materials provided with the distribution.
 #
@@ -16,22 +16,20 @@
 #       to endorse or promote products derived from this software without
 #       specific prior written permission.
 #
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-# ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-# ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-'''Single-process in-memory cache backend.'''
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+'''Single-process in-memory cache.'''
 
 import time
 import random
-import os
 from shove.cache import BaseCache
 
 __all__ = ['SimpleCache']
@@ -43,39 +41,28 @@ class SimpleCache(BaseCache):
     
     def __init__(self, engine, **kw):
         super(SimpleCache, self).__init__(**kw)
+        # Get random seed
         random.seed()
         self._cache, self._expire_info = dict(), dict()
-        self._cullnum = kw.get('cullnum', 10)
-        max_entries = kw.get('max_entries', 300)
-        try:
-            self._max_entries = int(max_entries)
-        except (ValueError, TypeError):
-            self._max_entries = 300
+        # Set maximum number of items to cull if over max
+        self._maxcull = kw.get('maxcull', 10)
+        # Set max entries
+        self._max_entries = kw.get('max_entries', 300)
 
     def __getitem__(self, key):
-        '''Fetch a given key from the cache.'''
         now, exp = time.time(), self._expire_info.get(key)
         # Delete if item timed out.
         if exp < now: del self._cache[key]
         return self._cache[key]   
 
     def __setitem__(self, key, value):
-        '''Set a value in the cache.
-
-        @param key Keyword of item in cache.
-        @param value Value to be inserted in cache.        
-        '''
-        # Cull timed out values if over max # of entries
+        # Cull values if over max # of entries
         if len(self._cache) >= self._max_entries: self._cull()
         self._cache[key] = value
         # Set timeout
         self._expire_info[key] = time.time() + self.timeout
 
     def __delitem__(self, key):
-        '''Delete a key from the cache, failing silently.
-
-        @param key Keyword of item in cache.
-        '''
         try:
             del self._cache[key]
         except KeyError: pass
@@ -84,32 +71,33 @@ class SimpleCache(BaseCache):
         except KeyError: pass          
 
     def get(self, key, default=None):
-        '''Fetch a given key from the cache.  If the key does not exist, return
-        default, which itself defaults to None.
+        '''Fetch a given key from the cache. If the key does not exist, return
+        default.
 
         @param key Keyword of item in cache.
         @param default Default value (default: None)
         '''
-        now, exp = time.time(), self._expire_info.get(key)
-        if exp is None:
-            return default
+        exp = self._expire_info.get(key)
+        if exp is None: return default
         # Delete if item timed out and return default.
-        elif exp < now:
+        if exp < time.time():
             del self._cache[key]
             return default
-        else:
-            return self._cache[key]
+        return self._cache[key]
         
     def _cull(self):
-        '''Remove items in cache that have timed out.'''
-        num = 0
-        for key, exp in self._expire_info.iteritems():
-            if num < self._cullnum:
-                now = time.time()
-                if exp < now:
+        '''Remove items in cache to make roomt.'''
+        # Cull number of items allowed (set by _maxcull)
+        keys, num = self._expire_info.keys(), 0
+        for key in keys:
+            if num < self._maxcull:
+                # Remove item if expired
+                if exp < time.time():
                     del self[key]
                     num += 1
             else: break
-        if len(self._cache) >= self._max_entries:            
-            keys = self._expire_info.keys()            
-            for i in range(self._cullnum): del self[random.choice(keys)]                
+        # Check if sufficient space has been created
+        if len(self._cache) >= self._max_entries:
+            # Cull remainder of allowed quota at random
+            keys = self._expire_info.keys()
+            for i in range(self._maxcull): del self[random.choice(keys)]
