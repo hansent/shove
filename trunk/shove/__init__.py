@@ -33,7 +33,7 @@
 import atexit
 from shove.store import BaseStore
 
-__all__ = ['Shove']
+__all__ = ['Shove', 'storage', 'cache']
 
 def _close(ref):
     '''Ensure store is closed at program termination.'''

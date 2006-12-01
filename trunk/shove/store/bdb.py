@@ -6,19 +6,20 @@ except ImportError:
 from shove.store.memory import MemoryStore
 
 
-class BsdbStore(MemoryStore):
+class BsdStore(MemoryStore):
 
     def __init__(self, engine, **kw):
-        super(BsdbStore, self).__init__(engine, **kw)
-        self._store = bsddb.hashopen(engine.split('/', 2))
+        super(BsdStore, self).__init__(engine, **kw)
+        if engine.startswith('bsd:'): engine = engine.split(':', 1)[1]
+        self._store = bsddb.hashopen(engine)
 
     def __getitem__(self, key):
-        return pickle.loads(super(BsdbStore, self).__getitem__(key))
+        return pickle.loads(super(BsdStore, self)[key])
 
     def __setitem__(self, key, value):
-        super(BsdbStore, self).__setitem__(key, pickle.dumps(value))
+        super(BsdStore, self)[key] = pickle.dumps(value)
         self._store.sync()
 
     def __delitem__(self, key):
-        super(BsdbStore, self).__delitem__(key)
+        del super(BsdStore, self)[key]
         self._store.sync()

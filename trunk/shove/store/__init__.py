@@ -1,4 +1,4 @@
-# Copyright © 2001-2006 Python Software Foundation; All Rights Reserved
+# Copyright ? 2001-2006 Python Software Foundation; All Rights Reserved
 # Copyright (c) 2006 L. C. Rees
 # All rights reserved.
 #
@@ -30,8 +30,8 @@
 from shove import Base
 from shove.store.simple import SimpleStore
 
-__all__ = ['bsdb', 'db', 'durus', 'file', 'ftp', 'memory', 's3', 'simple',
-    'svn', 'zodb']
+__all__ = ['bdb', 'db', 'durus', 'file', 'ftp', 'memory', 's3', 'simple', 'svn',
+    'zodb']
 
 
 class BaseStore(Base):
