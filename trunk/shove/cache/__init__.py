@@ -31,7 +31,7 @@
 
 from shove import Base
 
-__all__ = ['bsdb', 'db', 'file', 'memcached', 'memory', 'simple']
+__all__ = ['bdb', 'db', 'file', 'memcached', 'memory', 'simple']
 
 
 class BaseCache(Base):
@@ -40,9 +40,4 @@ class BaseCache(Base):
     
     def __init__(self, **kw):
         super(BaseCache, self).__init__()
-        timeout = kw.get('timeout', 300)
-        try:
-            timeout = int(timeout)
-        except (ValueError, TypeError):
-            timeout = 300
-        self.timeout = timeout     
+        self.timeout = kw.get('timeout', 300)

@@ -27,7 +27,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-'''Cache that uses the Berkeley Source Database.''' 
+'''Berkeley Source Database based cache.'''
 
 import bsddb
 import time
@@ -39,40 +39,52 @@ try:
     import cPickle as pickle
 except ImportError:
     import pickle
+from shove import synchronized
 from shove.cache.memory import MemoryCache
 
-__all__ = ['BsdbCache']
+__all__ = ['BsdCache']
 
 
-class BsdbCache(MemoryCache):
+class BsdCache(MemoryCache):
 
-    '''Class for cache that uses the Berkeley Source Database.'''    
+    '''Class for caching with a Berkeley Source Database.'''    
 
     def __init__(self, engine, **kw):
-        super(BsdbCache, self).__init__(engine, **kw)
-        self._cache = bsddb.hashopen(engine.split('/', 2))
+        super(BsdCache, self).__init__(engine, **kw)
+        if engine.startswith('bsd:'): engine = engine.split(':', 1)[1]
+        self._cache = bsddb.hashopen(engine)
         
+    @synchronized
     def __getitem__(self, key):
-        '''Fetch a given key from the cache.  If the key does not exist, return
-        default, which itself defaults to None.
-
-        @param key Keyword of item in cache.
-        @param default Default value (default: None)
-        '''
-        local = StringIO(super(BsdbCache, self)[key])
-        exp, now = pickle.load(local), time.time()
-        # Remove item if time has expired.
-        if exp < now: del self[key]
+        local = StringIO(self._cache[key])
+        exp = pickle.load(local)
+        # Remove item if expired.
+        if exp < time.time(): del self[key]
         return pickle.load(local)
                 
+    @synchronized
     def __setitem__(self, key, value):
-        '''Set a value in the cache.
-
-        @param key Keyword of item in cache.
-        @param value Value to be inserted in cache.        
-        '''
         if len(self._cache) > self._max_entries: self._cull()
         local = StringIO()
         pickle.dump(time.time() + self.timeout, local, 2)
         pickle.dump(value, local, 2)
-        super(BsdbCache, self)[key] = local.getvalue()
+        self._cache[key] = local.getvalue()
+        
+    @synchronized
+    def get(self, key, default=None):
+        '''Fetch a given key from the cache. If the key does not exist, return
+        the default.
+
+        @param key Keyword of item in cache.
+        @param default Default value (default: None)
+        '''
+        value = self._cache.get(key)
+        if value is None: return default
+        local = StringIO(value)
+        exp = pickle.load(local)
+        # Remove item if expired.
+        if exp < time.time():
+            del self._cache[key]
+            return default
+        # Return copy
+        return copy.deepcopy(pickle.load(local))

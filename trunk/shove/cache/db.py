@@ -2,13 +2,13 @@
 # Copyright (c) 2006 L. C. Rees
 # All rights reserved.
 #
-# Redistribution and use in source and binary forms, with or without modification,
-# are permitted provided that the following conditions are met:
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
 #
-#    1. Redistributions of source code must retain the above copyright notice, 
+#    1. Redistributions of source code must retain the above copyright notice,
 #       this list of conditions and the following disclaimer.
-#    
-#    2. Redistributions in binary form must reproduce the above copyright 
+#
+#    2. Redistributions in binary form must reproduce the above copyright
 #       notice, this list of conditions and the following disclaimer in the
 #       documentation and/or other materials provided with the distribution.
 #
@@ -16,18 +16,18 @@
 #       to endorse or promote products derived from this software without
 #       specific prior written permission.
 #
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-# ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-# ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-'''Database cache backend.'''
+'''Database cache.'''
 
 import time
 import random
@@ -47,60 +47,51 @@ class DbCache(BaseCache):
     '''Database cache backend.'''
 
     def __init__(self, engine, **kw):
-        super(DbCache, self).__init__(self, **kw)
+        super(DbCache, self).__init__(**kw)
+        # Get table name
+        tablename = kw.get('tablename', 'cache')
         # Bind metadata
         self._metadata = BoundMetaData(engine)
-        # Make cache
-        self._cache = Table('cache', self._metadata,
-            Column('cache_key', String(60), primary_key=True, nullable=False, unique=True),
+        # Make cache table
+        self._cache = Table(tablename, self._metadata,
+            Column('cache_key', String(60), primary_key=True,
+                nullable=False, unique=True),
             Column('value', PickleType, nullable=False),
             Column('expires', DateTime, nullable=False))
-        # Create cache if it does not exist
+        # Create cache table if it does not exist
         if not self._cache.exists(): self._cache.create()        
-        max_entries = kw.get('max_entries', 300)
-        try:
-            self._max_entries = int(max_entries)
-        except (ValueError, TypeError):
-            self._max_entries = 300
-        self._cullnum = kw.get('cullnum', 10)
+        self._max_entries = kw.get('max_entries', 300)
+        # Maximum number of entries to cull per call if cache is full
+        self._maxcull = kw.get('maxcull', 10)
 
     def __getitem__(self, key):
-        '''Fetch a given key from the cache.  If the key does not exist, return
-        default, which itself defaults to None.
-
-        @param key Keyword of item in cache.
-        @param default Default value (default: None)
-        '''
         row = self._cache.select().execute(cache_key=key).fetchone()
-        if row.expires < datetime.now().replace(microsecond=0): del self[key]
+        # Remove if item expired
+        if row.expires < datetime.now().replace(microsecond=0):
+            del self[key]
+            raise KeyError()
         return row.value
 
     def __setitem__(self, key, val):
-        '''Set a value in the cache.
-
-        @param key Keyword of item in cache.
-        @param value Value to be inserted in cache.        
-        '''        
         timeout = self.timeout
-        # Get count
+        # Cull if too many items
         if len(self) >= self._max_entries: self._cull()
-        # Get expiration time
-        exp = datetime.fromtimestamp(time.time() + timeout).replace(microsecond=0)        
+        # Generate expiration time
+        exp = datetime.fromtimestamp(
+            time.time() + timeout).replace(microsecond=0)
         try:
             # Update database if key already present
             if key in self:
-                self._cache.update(self._cache.c.cache_key==key).execute(value=val, expires=exp)
+                self._cache.update(self._cache.c.cache_key==key).execute(
+                    value=val, expires=exp)
             # Insert new key if key not present
             else:            
-                self._cache.insert().execute(cache_key=key, value=val, expires=exp)
+                self._cache.insert().execute(cache_key=key,
+                    value=val, expires=exp)
         # To be threadsafe, updates/inserts are allowed to fail silently
         except: pass
 
     def __delitem__(self, key):
-        '''Delete a key from the cache, failing silently.
-
-        @param key Keyword of item in cache.
-        '''
         self._cache.delete().execute(cache_key=key)
 
     def __len__(self):
@@ -108,25 +99,29 @@ class DbCache(BaseCache):
 
     def get(self, key, default=None):
         '''Fetch a given key from the cache.  If the key does not exist, return
-        default, which itself defaults to None.
+        default.
 
         @param key Keyword of item in cache.
         @param default Default value (default: None)
         '''
         row = self._cache.select().execute(cache_key=key).fetchone()
         if row is None: return default
+        # Remove if item is expired and return default
         if row.expires < datetime.now().replace(microsecond=0):
             del self[key]
             return default
         return row.value
 
     def _cull(self):
-        '''Remove items in cache to make room.'''
+        '''Remove items in cache to make more room.'''
         # Remove items that have timed out
         now = datetime.now().replace(microsecond=0)
         self._cache.delete(self._cache.c.expires < now).execute()
+        # Remove any items over the maximum allowed number in the cache
         if len(self) >= self._max_entries:
-            keys = [i[0] for i in select([self._store.c.store_key]).execute().fetchall()]
-            delkeys = list(random.choice(keys) for i in range(self._cullnum))
-            self._cache.delete(self._cache.c.cache_key.like(bindparam('key'))).execute(
-                *tuple({'key':'%' + key + '%'} for key in delkeys))
+            keys = [i[0] for i
+                in select([self._cache.c.store_key]).execute().fetchall()]
+            delkeys = list(random.choice(keys) for i in range(self._maxcull))
+            self._cache.delete(self._cache.c.cache_key.like(
+                bindparam('key'))).execute(*tuple({
+                    'key':'%' + key + '%'} for key in delkeys))
