@@ -35,21 +35,58 @@ except:
     from distutils.core import setup
 
 setup(name='shove',
-      version='0.1',
-      description='''Universal object storage.''',
-      long_description='''Supports memory, filesystem, database, and memcached based backends.
-''',
+      version='0.2',
+      description='''Universal object storage frontend.''',
+      long_description='''Shelve-like universal object storage frontend that
+supports dictionary-style access, caching, object serialization, and
+data compression.
+
+Currently supported storage backends:
+
+Amazon Simple Storage Service (S3)
+Berkeley Source Database
+Memory
+Filesystem
+Firebird
+FTP
+Durus
+Microsoft SQL Server
+MySQL
+Oracle
+PostgreSQL
+SQLite
+Subversion
+Zope Object Database (ZODB)
+
+Currently supported caching backends:
+
+Berkeley Source Database
+Memory
+Filesystem
+Firebird
+Memcache
+Microsoft SQL Server
+MySQL
+Oracle
+PostgreSQL
+SQLite
+
+Currently supported object serialization formats:
+
+marshal
+pickle
+JSON
+YAML''',
       author='L. C. Rees',
       author_email='lcrees@gmail.com',
       license='BSD',
       packages = ['shove'],
       test_suite='shove.tests',
       zip_safe = True,
-      keywords='persistence database shelve',
-      classifiers=['Development Status :: 3 - Alpha',
+      keywords='object storage persistence serialization database shelve',
+      classifiers=['Development Status :: 4 - Beta',
                     'Environment :: Web Environment',
                     'License :: OSI Approved :: BSD License',
                     'Natural Language :: English',
                     'Operating System :: OS Independent',
-                    'Programming Language :: Python'],
-      install_requires = ['SQLAlchemy'])
+                    'Programming Language :: Python'])
