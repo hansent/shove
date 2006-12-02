@@ -44,7 +44,6 @@ svn://<path>?url=<url>
 import os
 import urllib
 import threading
-
 try:
     import pysvn
 except ImportError:
@@ -72,6 +71,7 @@ class SvnStore(BaseStore):
             if '@' in path:
                 auth, path = path.split('@')
                 user, password = auth.split(':')
+            path = urllib.url2pathname(path)
         # Create subversion client
         self._client = pysvn.Client()
         # Assign username, password
@@ -84,8 +84,11 @@ class SvnStore(BaseStore):
         except pysvn.ClientError:
             self._client.mkdir(url)
         # Verify that local copy exists
-        if self._client.info(path) is None:
-            # Check it out if it doesn't exist
+        try:
+            if self._client.info(path) is None:
+                self._client.checkout(url, path)
+        # Check it out if it doesn't exist
+        except pysvn.ClientError:
             self._client.checkout(url, path)
         self._path, self._url = path, url
         # Lock
