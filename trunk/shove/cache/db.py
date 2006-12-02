@@ -93,6 +93,7 @@ class DbCache(BaseCache):
 
     def __setitem__(self, key, val):
         timeout = self.timeout
+        val=self.dumps(val)
         # Cull if too many items
         if len(self) >= self._max_entries: self._cull()
         # Generate expiration time
@@ -102,7 +103,7 @@ class DbCache(BaseCache):
             # Update database if key already present
             if key in self:
                 self._cache.update(self._cache.c.cache_key==key).execute(
-                    value=self.dumps(val), expires=exp)
+                    value=val, expires=exp)
             # Insert new key if key not present
             else:            
                 self._cache.insert().execute(cache_key=key,

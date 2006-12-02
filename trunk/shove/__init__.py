@@ -1,5 +1,5 @@
+# Copyright ? 2001-2006 Python Software Foundation
 # Copyright (c) 2005, the Lawrence Journal-World
-# Copyright (c) 2005 Allan Saddi <allan@saddi.com>
 # Copyright (c) 2006 L. C. Rees
 # All rights reserved.
 #
@@ -28,12 +28,12 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-'''Shove -- Universal Persistence and Caching.'''
+'''Universal object storage.'''
 
+import zlib
 import atexit
-from shove.store import BaseStore
 
-__all__ = ['Shove', 'storage', 'cache']
+__all__ = ['Shove', 'BaseStore', 'Base', 'storage', 'cache']
 
 def _close(ref):
     '''Ensure store is closed at program termination.'''
@@ -41,14 +41,14 @@ def _close(ref):
     if shove is not None: store.close()
 
 def synchronized(func):
-    '''Decorator that locks and unlocks a method (by Phillip J. Eby).'''
+    '''Decorator that locks and unlocks a method (Phillip J. Eby).'''
     def wrapper(self, *__args, **__kw):
         self._lock.acquire()
         try:
             return func(self, *__args, **__kw)
         finally:
             self._lock.release()
-    # Add same metainfo
+    # Add same meta info
     wrapper.__name__ = func.__name__
     wrapper.__dict__ = func.__dict__
     wrapper.__doc__ = func.__doc__
@@ -61,7 +61,7 @@ def getshove(shove, uri, **kw):
     @param uri An init URI for a shove
     @param kw Keywords'''
     # Load module from storage
-    if isinstance(shove, basestring): 
+    if isinstance(shove, basestring):
         dot = shove.rindex('.')
         # Load module
         mod = getattr(__import__(shove[:dot], '', '', ['']), shove[dot+1:])
@@ -69,54 +69,76 @@ def getshove(shove, uri, **kw):
         return mod(uri, **kw)
     return shove
 
+def getserializer(serializer):
+    '''Loads a serializer.
+
+    @param serializer An instance or name string'''
+    if isinstance(serializer, basestring):
+        if serializer == 'pickle':
+            try:
+                return __import__('cPickle')
+            except ImportError: pass
+        return __import__(serializer)
+    return serializer
+    
+
 # Store registry
 stores = dict(simple='shove.store.simple.SimpleStore',
     memory='shove.store.memory.MemoryStore',
     file='shove.store.file.FileStore',
-    bsddb='shove.store.bsddb.BsddbStore',
+    bsd='shove.store.bsd.BsdStore',
     sqlite='shove.store.db.DbStore',
     postgres='shove.store.db.DbStore',
     mysql='shove.store.db.DbStore',
     oracle='shove.store.db.DbStore',
+    firebird='shove.store.db.DbStore',
+    mssql='shove.store.db.DbStore',
     svn='shove.store.svn.SvnStore',
     s3='shove.store.s3.S3Store',
     ftp='shove.store.ftp.FtpStore',
     zodb='shove.store.zodb.ZodbStore',
-    durusdb='shove.store.durusdb.DurusStore')
+    durus='shove.store.durusdb.DurusStore')
 
 # Cache registry
 caches = dict(simple='shove.cache.simple.SimpleCache',
     memory='shove.cache.memory.MemoryCache',
     file='shove.cache.file.FileCache',
+    mssql='shove.cache.db.DbCache',
     sqlite='shove.cache.db.DbCache',
     postgres='shove.cache.db.DbCache',
+    firebird='shove.cache.db.DbCache',
     mysql='shove.cache.db.DbCache',
     oracle='shove.cache.db.DbCache',
-    memcached='shove.cache.memcached.MemCached',
-    bsddb='shove.cache.bsddb.BsddbCache')
+    memcache='shove.cache.memcached.MemCached',
+    bsd='shove.cache.bsd.BsdCache')
+    
+# Serializer registry
+serializers = dict(
+    pickle='pickle',
+    json='simplejson',
+    yaml='yaml',
+    marshal='marshal')
 
     
 class Base(object):
 
     '''Base Mapping class.'''
     
-    def __init__(self):
+    def __init__(self, **kw):
         super(Base, self).__init__()
+        self._compress = kw.get('compress', False)
+        self.serializer = getserializer(kw.get('serializer', 'pickle'))
     
     def __getitem__(self, key):
-        '''Fetch a given key from the mapping.'''
         raise NotImplementedError()
 
     def __setitem__(self, key, value):
-        '''Set a value in the mapping. '''
         raise NotImplementedError()
 
     def __delitem__(self, key):
-        '''Delete a key from the mapping.'''
         raise NotImplementedError()
 
     def __contains__(self, key):
-        '''Tell if a given key is in the mapping.'''
         try:
             value = self[key]
         except KeyError:
@@ -125,7 +147,7 @@ class Base(object):
 
     def get(self, key, default=None):
         '''Fetch a given key from the mapping. If the key does not exist,
-        return default, which defaults to None.
+        return the default.
 
         @param key Keyword of item in mapping.
         @param default Default value (default: None)
@@ -147,7 +169,139 @@ class Base(object):
             v = self.get(k)
             if v is not None: response[k] = v
         return response
+    
+    def dumps(self, value):
+        '''Serializes and optionally compresses an object.
+        
+        value Object'''
+        value = self.serializer.dumps(value)
+        if self._compress: value = zlib.compress(value, 9)
+        return value
+    
+    def loads(self, value):
+        '''Deserializes and optionally decompresses an object.
 
+        value Object'''
+        if self._compress: value = zlib.decompress(value)
+        value = self.serializer.loads(value)
+        return value
+
+
+class BaseStore(Base):
+
+    '''Base Store class.'''
+
+    def __init__(self, **kw):
+        super(BaseStore, self).__init__(**kw)
+        self._store = None
+
+    def __cmp__(self, other):
+        if other is None: return False
+        if isinstance(other, BaseStore):
+            return cmp(dict(self.iteritems()), dict(other.iteritems()))
+
+    def __del__(self):
+        '''Handles object clean up if store is deleted and gced.'''
+        # __init__ didn't succeed, so don't bother closing
+        if not hasattr(self, '_store'): return
+        self.close()
+
+    def __iter__(self):
+        for k in self.keys(): yield k
+
+    def __len__(self):
+        return len(self.keys())
+
+    def __repr__(self):
+        return repr(dict(self.iteritems()))
+
+    def close(self):
+        '''Closes internal store and clears object references.'''
+        try:
+            self._store.close()
+        except AttributeError: pass
+        self._store = None
+
+    def clear(self):
+        '''Removes all keys and values from a store.'''
+        for key in self.keys(): del self[key]
+
+    def items(self):
+        '''Returns a list with all key/value pairs in the store.'''
+        return list(self.iteritems())
+
+    def iteritems(self):
+        '''Lazily returns all key/value pairs in a store.'''
+        for k in self: yield (k, self[k])
+
+    def iterkeys(self):
+        '''Lazy returns all keys in a store.'''
+        return self.__iter__()
+
+    def itervalues(self):
+        '''Lazily returns all values in a store.'''
+        for _, v in self.iteritems(): yield v
+
+    def keys(self):
+        '''Returns a list with all keys in a store.'''
+        raise NotImplementedError()
+
+    def pop(self, key, *args):
+        '''Removes and returns a value from a store.
+
+        @param args Default to return if key not present.'''
+        if len(args) > 1:
+            raise TypeError('pop expected at most 2 arguments, got '\
+                + repr(1 + len(args)))
+        try:
+            value = self[key]
+        # Return default if key not in store
+        except KeyError:
+            if args: return args[0]
+        del self[key]
+        return value
+
+    def popitem(self):
+        '''Removes and returns a key, value pair from a store.'''
+        try:
+            k, v = self.iteritems().next()
+        except StopIteration:
+            raise KeyError('Container is empty')
+        del self[k]
+        return (k, v)
+
+    def setdefault(self, key, default=None):
+        '''Returns the value corresponding to an existing key or sets the
+        to key to the default and returns the default.
+
+        @param default Default value (default: None)
+        '''
+        try:
+            return self[key]
+        except KeyError:
+            self[key] = default
+        return default
+
+    def update(self, other=None, **kw):
+        '''Adds to or overwrites the values in this store with values from
+        another store.
+
+        other Another store
+        kw Additional keys and values to store
+        '''
+        if other is None: pass
+        elif hasattr(other, 'iteritems'):
+            for k, v in other.iteritems(): self[k] = v
+        elif hasattr(other, 'keys'):
+            for k in other.keys(): self[k] = other[k]
+        else:
+            for k, v in other: self[k] = v
+        if kw: self.update(kw)
+
+    def values(self):
+        '''Returns a list with all values in a store.'''
+        return list(v for _, v in self.iteritems())
+    
     
 class Shove(BaseStore):
 
