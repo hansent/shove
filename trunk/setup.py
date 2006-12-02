@@ -36,7 +36,7 @@ except:
 
 setup(name='shove',
       version='0.1',
-      description='''Universal object persistence with caching.''',
+      description='''Universal object storage.''',
       long_description='''Supports memory, filesystem, database, and memcached based backends.
 ''',
       author='L. C. Rees',
