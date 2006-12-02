@@ -29,7 +29,7 @@
 
 '''Thread-safe in-memory cache.
 
-The shove psuedo-URL for a memory store is:
+The shove psuedo-URL for a memory cache is:
 
 memory://
 '''
