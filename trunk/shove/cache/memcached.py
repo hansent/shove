@@ -31,7 +31,7 @@
 
 The shove psuedo-URL for a memcache cache is:
     
-memcache://<memcache host>
+memcache://<memcache_server>
 '''
 
 try:
@@ -62,14 +62,3 @@ class MemCached(BaseCache):
 
     def __delitem__(self, key):
         self._cache.delete(key)
-
-    def get_many(self, keys):
-        '''Fetch a bunch of keys from the cache.
-
-        Returns a dict mapping each key in keys to its value. If the given
-        key is missing, it will be missing from the response dict.
-
-        @param keys Keywords of items in cache.        
-        '''
-        return dict((k, self.loads(v))
-            for k, v in self._cache.get_multi(keys).iteritems())
