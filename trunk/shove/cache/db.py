@@ -27,7 +27,26 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-'''Database cache.'''
+'''Database object cache.
+
+
+The shove psuedo-URL used for database object caches is the format used by
+SQLAlchemy:
+
+<driver>://<username>:<password>@<host>:<port>/<database>
+
+<driver> is the database engine. The engines currently supported SQLAlchemy are
+sqlite, mysql, postgres, oracle, mssql, and firebird.
+<username> is the database account user name
+<password> is the database accound password
+<host> is the database location
+<port> is the database port
+<database> is the name of the specific database
+
+For more information on specific databases see:
+
+http://www.sqlalchemy.org/docs/dbengine.myt#dbengine_supported
+'''
 
 import time
 import random
@@ -42,7 +61,7 @@ from shove.cache import BaseCache
 __all__ = ['DbCache']
 
 
-class DbCache(BaseCache):     
+class DbCache(BaseCache):
 
     '''Database cache backend.'''
 
@@ -56,7 +75,7 @@ class DbCache(BaseCache):
         self._cache = Table(tablename, self._metadata,
             Column('cache_key', String(60), primary_key=True,
                 nullable=False, unique=True),
-            Column('value', PickleType, nullable=False),
+            Column('value', Binary, nullable=False),
             Column('expires', DateTime, nullable=False))
         # Create cache table if it does not exist
         if not self._cache.exists(): self._cache.create()        
@@ -70,7 +89,7 @@ class DbCache(BaseCache):
         if row.expires < datetime.now().replace(microsecond=0):
             del self[key]
             raise KeyError()
-        return row.value
+        return self.loads(row.value)
 
     def __setitem__(self, key, val):
         timeout = self.timeout
@@ -83,7 +102,7 @@ class DbCache(BaseCache):
             # Update database if key already present
             if key in self:
                 self._cache.update(self._cache.c.cache_key==key).execute(
-                    value=val, expires=exp)
+                    value=self.dumps(val), expires=exp)
             # Insert new key if key not present
             else:            
                 self._cache.insert().execute(cache_key=key,
@@ -96,21 +115,6 @@ class DbCache(BaseCache):
 
     def __len__(self):
         return self._cache.count().execute().fetchone()[0]
-
-    def get(self, key, default=None):
-        '''Fetch a given key from the cache.  If the key does not exist, return
-        default.
-
-        @param key Keyword of item in cache.
-        @param default Default value (default: None)
-        '''
-        row = self._cache.select().execute(cache_key=key).fetchone()
-        if row is None: return default
-        # Remove if item is expired and return default
-        if row.expires < datetime.now().replace(microsecond=0):
-            del self[key]
-            return default
-        return row.value
 
     def _cull(self):
         '''Remove items in cache to make more room.'''

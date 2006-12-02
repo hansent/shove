@@ -27,7 +27,12 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-'''Thread-safe in-memory cache.'''
+'''Thread-safe in-memory cache.
+
+The shove psuedo-URL for a memory store is:
+
+memory://
+'''
 
 import copy
 import time
@@ -48,34 +53,15 @@ class MemoryCache(SimpleCache):
 
     @synchronized
     def __setitem__(self, key, value):
-        super(MemoryCache, self).__setitem__(key, value)
+        super(MemoryCache, self)[key] = value
 
     @synchronized        
     def __getitem__(self, key):
         exp = self._expire_info.get(key)
         # Delete item if expired
         if exp < time.time(): del self[key]
-        return copy.deepcopy(super(MemoryCache, self).__getitem__(key))
+        return copy.deepcopy(super(MemoryCache, self)[key])
 
     @synchronized
     def __delitem__(self, key):
-        super(MemoryCache, self).__delitem__(key)        
-
-    @synchronized        
-    def get(self, key, default=None):
-        '''Fetch a given key from the cache. If the key does not exist, return
-        the default.
-
-        @param key Keyword of item in cache.
-        @param default Default value (default: None)
-        '''        
-        exp = self._expire_info.get(key)
-        if exp is None:
-            return default
-        # Return default value if item expired
-        elif exp < time.time():
-            del self._cache[key]
-            return default
-        # Return copy
-        else:
-            return copy.deepcopy(self._cache[key])
+        del super(MemoryCache, self)[key]

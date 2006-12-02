@@ -26,12 +26,18 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-'''"memcache" cache.'''
+
+'''"memcache" cache.
+
+The shove psuedo-URL for a memcache cache is:
+    
+memcache://<memcache host>
+'''
 
 try:
     import memcache
 except ImportError:
-    raise ImportError("Memcached cache backend requires the 'memcache' library")
+    raise ImportError("Memcache cache requires the 'memcache' library")
 from shove.cache import BaseCache
 
 __all__ = ['MemCached']
@@ -43,28 +49,19 @@ class MemCached(BaseCache):
     
     def __init__(self, engine, **kw):
         super(MemCached, self).__init__(**kw)
-        if engine.startswith('memcached:'): engine = engine.split(':', 1)[1]
+        if engine.startswith('memcache://'): engine = engine.split('://')[1]
         self._cache = memcache.Client(engine.split(';'))
 
     def __getitem__(self, key):
-        return self._cache.get(key)
+        value = self._cache.get(self.loads(key))
+        if value is None: raise KeyError('Key not in cache.')
+        return value
         
     def __setitem__(self, key, value):
-        self._cache.set(key, value, self.timeout)
+        self._cache.set(key, self.dumps(value), self.timeout)
 
     def __delitem__(self, key):
-        self._cache.delete(key)        
-
-    def get(self, key, default=None):
-        '''Fetch a given key from the cache. If the key does not exist, return
-        default.
-
-        @param key Keyword of item in cache.
-        @param default Default value (default: None)
-        '''
-        val = self._cache.get(key)
-        if val is None: return default
-        return val
+        self._cache.delete(key)
 
     def get_many(self, keys):
         '''Fetch a bunch of keys from the cache.
@@ -74,4 +71,5 @@ class MemCached(BaseCache):
 
         @param keys Keywords of items in cache.        
         '''
-        return self._cache.get_multi(keys)
+        return dict((k, self.loads(v))
+            for k, v in self._cache.get_multi(keys).iteritems())

@@ -26,7 +26,13 @@
 # CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-'''Single-process in-memory cache.'''
+
+'''Single-process in-memory cache.
+
+The shove psuedo-URL for a simple cache is:
+
+simple://
+'''
 
 import time
 import random
@@ -37,7 +43,7 @@ __all__ = ['SimpleCache']
 
 class SimpleCache(BaseCache):
 
-    '''Single-process in-memory cache backend.'''    
+    '''Single-process in-memory cache.'''    
     
     def __init__(self, engine, **kw):
         super(SimpleCache, self).__init__(**kw)
@@ -68,22 +74,7 @@ class SimpleCache(BaseCache):
         except KeyError: pass
         try:
             del self._expire_info[key]
-        except KeyError: pass          
-
-    def get(self, key, default=None):
-        '''Fetch a given key from the cache. If the key does not exist, return
-        default.
-
-        @param key Keyword of item in cache.
-        @param default Default value (default: None)
-        '''
-        exp = self._expire_info.get(key)
-        if exp is None: return default
-        # Delete if item timed out and return default.
-        if exp < time.time():
-            del self._cache[key]
-            return default
-        return self._cache[key]
+        except KeyError: pass
         
     def _cull(self):
         '''Remove items in cache to make roomt.'''
@@ -92,8 +83,9 @@ class SimpleCache(BaseCache):
         for key in keys:
             if num < self._maxcull:
                 # Remove item if expired
-                if exp < time.time():
-                    del self[key]
+                try:
+                    self[key]
+                except KeyError:
                     num += 1
             else: break
         # Check if sufficient space has been created

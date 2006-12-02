@@ -27,16 +27,21 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-'''File-based cache backend'''
+'''File-based cache
+
+shove's psuedo-URL for file caches follows the form:
+
+file://<path>
+
+Where the path is a URL path to a directory on a local filesystem.
+Alternatively, a native pathname to the directory can be passed as the 'engine'
+argument.
+'''
 
 import os
 import time
 import urllib
 import random
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
 from shove.cache.simple import SimpleCache
 
 __all__ = ['FileCache']
@@ -48,7 +53,7 @@ class FileCache(SimpleCache):
     
     def __init__(self, engine, **kw):
         super(FileCache, self).__init__(engine, **kw)
-        if engine.startswith('file:'): engine = engine.split(':', 1)[1]
+        if engine.startswith('file://'): engine = engine.split('://')[1]
         # Create directory
         self._dir = engine
         if not os.path.exists(self._dir): self._createdir()
@@ -56,16 +61,21 @@ class FileCache(SimpleCache):
         del self._cache, self._expire_info
 
     def __getitem__(self, key):
-        fname = self._key_to_file(key)
         try:
-            local = open(fname, 'rb')
-            exp = pickle.load(local),
-            # Remove item if time has expired.
-            if exp < time.time():
+            try:
+                fname = self._key_to_file(key)
+                local = open(fname, 'rb')
+                exp = self.loads(local.readline().rstrip())
+                # Remove item if time has expired.
+                if exp < time.time():
+                    local.close()
+                    os.remove(fname)
+                value = self.loads(local.readline())
+                return value
+            finally:
                 local.close()
-                os.remove(fname)
-            return pickle.load(local)
-        except (IOError, OSError, EOFError, pickle.PickleError): pass
+        except:
+            raise KeyError('Key not in cache.')
                 
 
     def __setitem__(self, key, value):
@@ -73,9 +83,10 @@ class FileCache(SimpleCache):
         if len(self) > self._max_entries: self._cull()
         try:
             local = open(fname, 'wb')
-            pickle.dump(time.time() + self.timeout, local, 2)
-            pickle.dump(value, local, 2)
-        except (IOError, OSError): pass
+            local.write(self.dumps(time.time() + self.timeout) + '\n')
+            local.write(self.dumps(value))
+        finally:
+            local.close()
 
     def __delitem__(self, key):
         try:
@@ -90,23 +101,15 @@ class FileCache(SimpleCache):
 
     def get(self, key, default=None):
         '''Fetch a given key from the cache.  If the key does not exist, return
-        default, which itself defaults to None.
+        default.
 
         @param key Keyword of item in cache.
         @param default Default value (default: None)
         '''
-        fname = self._key_to_file(key)
         try:
-            local = open(fname, 'rb')
-            exp = pickle.load(local),
-            # Remove item if time has expired.
-            if exp < time.time():
-                local.close()
-                os.remove(fname)
-            else:
-                return pickle.load(local)
-        except: pass
-        return default
+            return self[key]
+        except KeyError:
+            return default
 
     def _cull(self):
         '''Remove items in cache to make room.'''
@@ -115,13 +118,9 @@ class FileCache(SimpleCache):
             if num < self._maxcull:
                 # Remove expired items from cache.
                 try:
-                    local = open(fname, 'rb')
-                    exp = pickle.load(local)
-                    if exp < time.time():
-                        local.close()
-                        del self[fname]
-                        num += 1
-                except: pass
+                    self[fname]
+                except KeyError:
+                    num += 1
             else: break
         if len(self._cache) >= self._max_entries:
             for i in range(self._maxcull): del self[random.choice(filelist)]

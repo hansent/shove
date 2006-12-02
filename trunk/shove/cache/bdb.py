@@ -35,10 +35,6 @@ try:
     from cStringIO import StringIO
 except ImportError:
     from cStringIO import StringIO
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
 from shove import synchronized
 from shove.cache.memory import MemoryCache
 
@@ -51,40 +47,23 @@ class BsdCache(MemoryCache):
 
     def __init__(self, engine, **kw):
         super(BsdCache, self).__init__(engine, **kw)
-        if engine.startswith('bsd:'): engine = engine.split(':', 1)[1]
+        if engine.startswith('bsd://'): engine = engine.split('://')[1]
         self._cache = bsddb.hashopen(engine)
         
     @synchronized
     def __getitem__(self, key):
         local = StringIO(self._cache[key])
-        exp = pickle.load(local)
-        # Remove item if expired.
-        if exp < time.time(): del self[key]
-        return pickle.load(local)
+        exp = self.loads(local.readlines().rstrip())
+        # Remove item if expired
+        if exp < time.time():
+            del self[key]
+            raise KeyError('Key not in cache.')
+        return self.loads(local.readlines())
                 
     @synchronized
     def __setitem__(self, key, value):
         if len(self._cache) > self._max_entries: self._cull()
         local = StringIO()
-        pickle.dump(time.time() + self.timeout, local, 2)
-        pickle.dump(value, local, 2)
+        local.write(self.dumps(time.time() + self.timeout) + '\n')
+        local.write(self.dumps(value))
         self._cache[key] = local.getvalue()
-        
-    @synchronized
-    def get(self, key, default=None):
-        '''Fetch a given key from the cache. If the key does not exist, return
-        the default.
-
-        @param key Keyword of item in cache.
-        @param default Default value (default: None)
-        '''
-        value = self._cache.get(key)
-        if value is None: return default
-        local = StringIO(value)
-        exp = pickle.load(local)
-        # Remove item if expired.
-        if exp < time.time():
-            del self._cache[key]
-            return default
-        # Return copy
-        return copy.deepcopy(pickle.load(local))
