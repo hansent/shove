@@ -155,20 +155,7 @@ class Base(object):
         try:
             return self[key]
         except KeyError:
-            return default        
-
-    def get_many(self, keys):
-        '''Fetch a bunch of keys from the mapping. Returns a dict mapping each
-        key in keys to its value. If the given key is missing, it will be
-        missing from the response dict.
-
-        @param keys Keywords of items in cache.
-                '''
-        response = dict()
-        for k in keys:
-            v = self.get(k)
-            if v is not None: response[k] = v
-        return response
+            return default
     
     def dumps(self, value):
         '''Serializes and optionally compresses an object.
@@ -182,7 +169,10 @@ class Base(object):
         '''Deserializes and optionally decompresses an object.
 
         value Object'''
-        if self._compress: value = zlib.decompress(value)
+        if self._compress:
+            try:
+                value = zlib.decompress(value)
+            except: pass
         value = self.serializer.loads(value)
         return value
 
