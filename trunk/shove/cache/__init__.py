@@ -31,7 +31,7 @@
 
 from shove import Base
 
-__all__ = ['bdb', 'db', 'file', 'memcached', 'memory', 'simple']
+__all__ = ['bsdb', 'db', 'file', 'memcached', 'memory', 'simple']
 
 
 class BaseCache(Base):
