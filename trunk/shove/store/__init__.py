@@ -28,7 +28,7 @@
 
 from shove.store.simple import SimpleStore
 
-__all__ = ['bdb', 'db', 'durus', 'file', 'ftp', 'memory', 's3', 'simple', 'svn',
+__all__ = ['bsdb', 'db', 'durus', 'file', 'ftp', 'memory', 's3', 'simple', 'svn',
     'zodb']
 
 

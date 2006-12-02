@@ -86,7 +86,7 @@ def getserializer(serializer):
 stores = dict(simple='shove.store.simple.SimpleStore',
     memory='shove.store.memory.MemoryStore',
     file='shove.store.file.FileStore',
-    bsd='shove.store.bsd.BsdStore',
+    bsd='shove.store.bsdb.BsdStore',
     sqlite='shove.store.db.DbStore',
     postgres='shove.store.db.DbStore',
     mysql='shove.store.db.DbStore',
@@ -110,7 +110,7 @@ caches = dict(simple='shove.cache.simple.SimpleCache',
     mysql='shove.cache.db.DbCache',
     oracle='shove.cache.db.DbCache',
     memcache='shove.cache.memcached.MemCached',
-    bsd='shove.cache.bsd.BsdCache')
+    bsd='shove.cache.bsdb.BsdCache')
     
 # Serializer registry
 serializers = dict(
