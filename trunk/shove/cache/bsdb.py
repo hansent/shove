@@ -61,17 +61,17 @@ class BsdCache(MemoryCache):
     @synchronized
     def __getitem__(self, key):
         local = StringIO(self._cache[key])
-        exp = self.loads(local.readlines().rstrip())
+        exp = self.loads(local.readline() + local.readline())
         # Remove item if expired
         if exp < time.time():
             del self[key]
             raise KeyError('Key not in cache.')
-        return self.loads(local.readlines())
+        return self.loads(local.readline() + local.readline())
                 
     @synchronized
     def __setitem__(self, key, value):
         if len(self._cache) > self._max_entries: self._cull()
         local = StringIO()
-        local.write(self.dumps(time.time() + self.timeout) + '\n')
+        local.write(self.dumps(time.time() + self.timeout))
         local.write(self.dumps(value))
         self._cache[key] = local.getvalue()
