@@ -1,4 +1,3 @@
-# Copyright ? 2001-2006 Python Software Foundation; All Rights Reserved
 # Copyright (c) 2006 L. C. Rees
 # All rights reserved.
 #
@@ -27,127 +26,10 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-from shove import Base
 from shove.store.simple import SimpleStore
 
 __all__ = ['bdb', 'db', 'durus', 'file', 'ftp', 'memory', 's3', 'simple', 'svn',
     'zodb']
-
-
-class BaseStore(Base):
-
-    '''Base Store class.'''
-    
-    def __init__(self):
-        super(BaseStore, self).__init__()
-        self._store = None
-
-    def __cmp__(self, other):
-        if other is None: return False
-        if isinstance(other, BaseStore):  
-            return cmp(dict(self.iteritems()), dict(other.iteritems()))
-
-    def __del__(self):
-        '''Handles object clean up if store is deleted and gced.'''
-        # __init__ didn't succeed, so don't bother closing
-        if not hasattr(self, '_store'): return
-        self.close()
-        
-    def __iter__(self):
-        for k in self.keys(): yield k
-
-    def __len__(self):
-        return len(self.keys())
-
-    def __repr__(self):
-        return repr(dict(self.iteritems()))
-
-    def close(self):
-        '''Closes internal store and clears object references.'''
-        try:
-            self._store.close()
-        except AttributeError: pass
-        self._store = None
-
-    def clear(self):
-        '''Removes all keys and values from a store.'''
-        for key in self.keys(): del self[key]
-     
-    def items(self):
-        '''Returns a list with all key/value pairs in the store.'''
-        return list(self.iteritems())
-
-    def iteritems(self):
-        '''Lazily returns all key/value pairs in a store.'''        
-        for k in self: yield (k, self[k])
-            
-    def iterkeys(self):
-        '''Lazy returns all keys in a store.'''
-        return self.__iter__()
-
-    def itervalues(self):
-        '''Lazily returns all values in a store.'''
-        for _, v in self.iteritems(): yield v
-
-    def keys(self):
-        '''Returns a list with all keys in a store.'''
-        raise NotImplementedError()        
-
-    def pop(self, key, *args):
-        '''Removes and returns a value from a store.
-
-        @param args Default to return if key not present.'''
-        if len(args) > 1:
-            raise TypeError('pop expected at most 2 arguments, got '\
-                + repr(1 + len(args)))
-        try:
-            value = self[key]            
-        # Return default if key not in store
-        except KeyError:
-            if args: return args[0]
-        del self[key]
-        return value
-        
-    def popitem(self):
-        '''Removes and returns a key, value pair from a store.'''
-        try:
-            k, v = self.iteritems().next()
-        except StopIteration:
-            raise KeyError('Container is empty')
-        del self[k]
-        return (k, v)
-        
-    def setdefault(self, key, default=None):
-        '''Returns the value corresponding to an existing key or sets the
-        to key to the default and returns the default.
-
-        @param default Default value (default: None)        
-        ''' 
-        try:
-            return self[key]
-        except KeyError:
-            self[key] = default
-        return default
-
-    def update(self, other=None, **kw):
-        '''Adds to or overwrites the values in this store with values from
-        another store.
-
-        other Another store
-        kw Additional keys and values to store
-        '''        
-        if other is None: pass
-        elif hasattr(other, 'iteritems'):  
-            for k, v in other.iteritems(): self[k] = v
-        elif hasattr(other, 'keys'):
-            for k in other.keys(): self[k] = other[k]
-        else:
-            for k, v in other: self[k] = v
-        if kw: self.update(kw)
-
-    def values(self):
-        '''Returns a list with all values in a store.'''
-        return list(v for _, v in self.iteritems())
 
 
 class SyncStore(SimpleStore):
@@ -156,11 +38,14 @@ class SyncStore(SimpleStore):
 
     def __init__(self, engine, **kw):
         super(SyncStore, self).__init__(engine, **kw)
+        
+    def __setitem__(self, key, value):
+        return self.loads(super(SyncStore, self)[key])
 
     def __setitem__(self, key, value):        
-        super(SyncStore, self).__setitem__(key, value)
+        super(SyncStore, self)[key] = self.dumps(value)
         self.sync()
 
     def __delitem__(self, key):
-        super(SyncStore, self).__delitem__(key)
+        del super(SyncStore, self)[key]
         self.sync()

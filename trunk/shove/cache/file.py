@@ -65,12 +65,12 @@ class FileCache(SimpleCache):
             try:
                 fname = self._key_to_file(key)
                 local = open(fname, 'rb')
-                exp = self.loads(local.readline().rstrip())
+                exp = self.loads(local.readline() + local.readline())
                 # Remove item if time has expired.
                 if exp < time.time():
                     local.close()
                     os.remove(fname)
-                value = self.loads(local.readline())
+                value = self.loads(local.readline() + local.readline())
                 return value
             finally:
                 local.close()
@@ -83,7 +83,7 @@ class FileCache(SimpleCache):
         if len(self) > self._max_entries: self._cull()
         try:
             local = open(fname, 'wb')
-            local.write(self.dumps(time.time() + self.timeout) + '\n')
+            local.write(self.dumps(time.time() + self.timeout))
             local.write(self.dumps(value))
         finally:
             local.close()
