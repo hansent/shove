@@ -102,17 +102,3 @@ class S3Store(BaseStore):
     def iteritems(self):
         '''Lazily returns items from the store.'''
         for k in self.items(): yield (k.key, k)
-
-    def get_many(self, keys):
-        '''Fetch a bunch of keys from the cache.
-
-        Returns a dict mapping each key in keys to its value. If the given
-        key is missing, it will be missing from the response dict.
-
-        @param keys Keywords of items in cache.
-        '''
-        # Use cached keys if not updated recently or doesn't exist
-        keyset = set(i for i in self.keys())
-        # Return any keys that match as a dictionary
-        return dict((k[1].name, k[1]) for k in
-            self.items() if (k in keyset and k in keys))

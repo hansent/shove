@@ -43,6 +43,8 @@ svn://<path>?url=<url>
 
 import os
 import urllib
+import threading
+
 try:
     import pysvn
 except ImportError:
@@ -64,7 +66,7 @@ class SvnStore(BaseStore):
         user, password = kw.get('user'), kw.get('password')
         # Process psuedo URL if used
         if engine is not None:
-            path, query = engine.split('://')[1].split('?')
+            path, query = engine.split('n://')[1].split('?')
             url = query.split('=')[1]
             # Check for username, password
             if '@' in path:
@@ -82,12 +84,12 @@ class SvnStore(BaseStore):
         except pysvn.ClientError:
             self._client.mkdir(url)
         # Verify that local copy exists
-        try:
-            self._client.info(path)
-        # Check it out if it doesn't exist
-        except pysvn.ClientError:              
+        if self._client.info(path) is None:
+            # Check it out if it doesn't exist
             self._client.checkout(url, path)
         self._path, self._url = path, url
+        # Lock
+        self._lock = threading.Condition()
 
     @synchronized
     def __getitem__(self, key):
