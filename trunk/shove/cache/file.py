@@ -79,37 +79,29 @@ class FileCache(SimpleCache):
                 
 
     def __setitem__(self, key, value):
-        fname = self._key_to_file(key)
-        if len(self) > self._max_entries: self._cull()
         try:
-            local = open(fname, 'wb')
-            local.write(self.dumps(time.time() + self.timeout))
-            local.write(self.dumps(value))
-        finally:
-            local.close()
+            try:
+                fname = self._key_to_file(key)
+                if len(self) > self._max_entries: self._cull()
+                local = open(fname, 'wb')
+                local.write(self.dumps(time.time() + self.timeout))
+                local.write(self.dumps(value))
+            finally:
+                local.close()
+        except:
+            raise KeyError('%s' % key)            
 
     def __delitem__(self, key):
         try:
             os.remove(self._key_to_file(key))
-        except (IOError, OSError): pass        
+        except (IOError, OSError):
+            raise KeyError('%s' % key)
 
     def __contains__(self, key):
         return os.path.exists(self._key_to_file(key))
     
     def __len__(self):
         return len(os.listdir(self._dir))
-
-    def get(self, key, default=None):
-        '''Fetch a given key from the cache.  If the key does not exist, return
-        default.
-
-        @param key Keyword of item in cache.
-        @param default Default value (default: None)
-        '''
-        try:
-            return self[key]
-        except KeyError:
-            return default
 
     def _cull(self):
         '''Remove items in cache to make room.'''
