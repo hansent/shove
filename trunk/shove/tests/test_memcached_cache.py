@@ -1,10 +1,13 @@
 import unittest
 import time
+from shove import Shove
 
 class TestMemcached(unittest.TestCase):
 
+    initstring = 'memcache://localhost'
+
     def setUp(self): 
-        self.cache = Shove('simple://', 'memcached://localhost', compressed=True)
+        self.cache = Shove('simple://', self.initstring, compressed=True)
 
     def tearDown(self): 
         self.cache = None    
@@ -33,17 +36,17 @@ class TestMemcached(unittest.TestCase):
     def test_in_false(self):
         '''Tests in (false) on MemCache.'''
         self.cache['test2'] = 'test'
-        self.assertEqual('test' in self.cache, False)
+        self.assertEqual('test2' in self.cache, False)
 
     def test_get(self):
-        self.assertEqual(self.store.get('min'), None)        
+        self.assertEqual(self.cache.get('min'), None)        
 
     def test_timeout(self):
         '''Tests timeout in MemCached.'''
-        cache = Shove('simple://', 'memcached://localhost', timeout=1)
-        self.cache['test'] = 'test'
+        cache = Shove('simple://', self.initstring, timeout=1)
+        cache['test'] = 'test'
         time.sleep(1)
-        self.assertEqual(self.cache['test'], None)
+        self.assertEqual(cache['test'], None)
         
 
 if __name__ == '__main__':
