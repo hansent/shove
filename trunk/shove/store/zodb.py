@@ -64,8 +64,9 @@ class ZodbStore(SyncStore):
     def close(self):
         '''Closes all open storage and connections.'''
         self.sync()
+        super(ZodbStore, self).close()
         self._connection.close()
         self._db.close()
         self._storage.close()
-        super(ZodbStore, self).close()
+        
         
