@@ -62,7 +62,7 @@ class DbStore(BaseStore):
     '''Database cache backend.'''
 
     def __init__(self, engine, **kw):
-        super(DbStore, self).__init__(engine, **kw)
+        super(DbStore, self).__init__(**kw)
         # Bind metadata
         self._metadata = BoundMetaData(engine)
         # Get tablename
@@ -77,8 +77,9 @@ class DbStore(BaseStore):
 
     def __getitem__(self, key):
         row = self._store.select().execute(store_key=key).fetchone()
-        if row is not None: return self.loads(row.store_value)
-        raise KeyError('Key not in store.')
+        if row is not None:
+            return self.loads(str(row.store_value))
+        raise KeyError('Key "%s" not found.' % key)
         
     def __setitem__(self, key, value):
         value = self.dumps(value)
@@ -91,7 +92,7 @@ class DbStore(BaseStore):
             self._store.insert().execute(store_key=key, store_value=value)
        
     def __delitem__(self, key):
-        self._store.delete().execute(store_key=key)
+        self._store.delete(self._store.c.store_key==key).execute()
 
     def keys(self):
         '''Returns a list of keys in the store.'''

@@ -37,6 +37,7 @@ pathname to a BSD database can be passed as the 'engine' argument.
 '''
 
 import bsddb
+import threading
 from urllib import url2pathname
 try:
     import cPickle as pickle
@@ -57,16 +58,17 @@ class BsdStore(SyncStore):
         if engine.startswith('bsddb://'):
             engine = url2pathname(engine.split('://')[1])
         self._store = bsddb.hashopen(engine)
+        self._lock = threading.Condition()
         self.sync = self._store.sync
 
     @synchronized
     def __getitem__(self, key):
-        return super(BsdStore, self)[key]
+        return super(BsdStore, self).__getitem__(key)
 
     @synchronized
     def __setitem__(self, key, value):
-        super(BsdStore, self)[key] = value
+        super(BsdStore, self).__setitem__(key, value)
 
     @synchronized
     def __delitem__(self, key):
-        del super(BsdStore, self)[key]
+        super(BsdStore, self).__delitem__(key)

@@ -39,13 +39,13 @@ class SyncStore(SimpleStore):
     def __init__(self, engine, **kw):
         super(SyncStore, self).__init__(engine, **kw)
         
-    def __setitem__(self, key, value):
-        return self.loads(super(SyncStore, self)[key])
+    def __getitem__(self, key):
+        return self.loads(super(SyncStore, self).__getitem__(key))
 
     def __setitem__(self, key, value):        
-        super(SyncStore, self)[key] = self.dumps(value)
+        super(SyncStore, self).__setitem__(key, self.dumps(value))
         self.sync()
 
     def __delitem__(self, key):
-        del super(SyncStore, self)[key]
+        super(SyncStore, self).__delitem__(key)
         self.sync()
