@@ -37,7 +37,6 @@ Where the path is a URL path to a ZODB FileStorage database. Alternatively, a
 native pathname to a ZODB database can be passed as the 'engine' argument.
 '''
 
-from urllib import url2pathname
 from ZODB import FileStorage, DB
 import transaction
 from shove.store import SyncStore
@@ -49,12 +48,12 @@ class ZodbStore(SyncStore):
     
     '''ZODB store front end.'''
 
+    init = 'zodb://'    
+
     def __init__(self, engine, **kw):
         super(ZodbStore, self).__init__(engine, **kw)
-        # Handle psuedo-URL
-        if engine.startswith('zodb://'):
-            engine = url2pathname(engine.split('://')[1])
-        self._storage = FileStorage.FileStorage(engine)
+        # Handle psuedo-URL        
+        self._storage = FileStorage.FileStorage(self._engine)
         self._db = DB(self._storage)
         self._connection = self._db.open()
         self._store = self._connection.root()

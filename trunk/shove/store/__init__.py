@@ -26,10 +26,11 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+from urllib import url2pathname
 from shove.store.simple import SimpleStore
 
-__all__ = ['bsdb', 'db', 'durus', 'file', 'ftp', 'memory', 's3', 'simple', 'svn',
-    'zodb']
+__all__ = ['bsdb', 'db', 'dbm', 'durus', 'file', 'ftp', 'memory', 's3',
+    'simple', 'svn', 'zodb']
 
 
 class SyncStore(SimpleStore):
@@ -38,6 +39,8 @@ class SyncStore(SimpleStore):
 
     def __init__(self, engine, **kw):
         super(SyncStore, self).__init__(engine, **kw)
+        if engine.startswith(self.init):
+            self._engine = url2pathname(engine.split('://')[1])
         
     def __getitem__(self, key):
         return self.loads(super(SyncStore, self).__getitem__(key))
