@@ -31,14 +31,8 @@
 '''Universal object storage.'''
 
 import zlib
-import atexit
 
 __all__ = ['Shove', 'BaseStore', 'Base', 'storage', 'cache']
-
-def _close(ref):
-    '''Ensure store is closed at program termination.'''
-    shove = ref()
-    if shove is not None: store.close()
 
 def synchronized(func):
     '''Decorator that locks and unlocks a method (Phillip J. Eby).'''
@@ -79,14 +73,13 @@ def getserializer(serializer):
                 return __import__('cPickle')
             except ImportError: pass
         return __import__(serializer)
-    return serializer
-    
+    return serializer    
 
 # Store registry
 stores = dict(simple='shove.store.simple.SimpleStore',
     memory='shove.store.memory.MemoryStore',
     file='shove.store.file.FileStore',
-    bsd='shove.store.bsdb.BsdStore',
+    bsddb='shove.store.bsdb.BsdStore',
     sqlite='shove.store.db.DbStore',
     postgres='shove.store.db.DbStore',
     mysql='shove.store.db.DbStore',
@@ -110,7 +103,7 @@ caches = dict(simple='shove.cache.simple.SimpleCache',
     mysql='shove.cache.db.DbCache',
     oracle='shove.cache.db.DbCache',
     memcache='shove.cache.memcached.MemCached',
-    bsd='shove.cache.bsdb.BsdCache')
+    bsddb='shove.cache.bsdb.BsdCache')
     
 # Serializer registry
 serializers = dict(
@@ -256,7 +249,7 @@ class BaseStore(Base):
         try:
             k, v = self.iteritems().next()
         except StopIteration:
-            raise KeyError('Container is empty')
+            raise KeyError('Store is empty.')
         del self[k]
         return (k, v)
 
@@ -312,9 +305,7 @@ class Shove(BaseStore):
         except (KeyError, ImportError):
             raise ImportError('Invalid cache scheme "%s"' % cscheme)
         # Buffer for lazy writing and setting for frequency of syncing
-        self._buffer, self._limit = dict(), kw.get('limit', 3)
-        # Ensure close is called before program termination
-        atexit.register(_close, self)
+        self._buffer, self._sync = dict(), kw.get('sync', 2)
 
     def __getitem__(self, key):
         '''Gets a item from shove.'''
@@ -329,9 +320,9 @@ class Shove(BaseStore):
 
     def __setitem__(self, key, value):
         '''Sets an item in shove.'''
-        self._cache[key] = value
+        self._cache[key] = self._buffer[key] = value
         # When the buffer reaches self._limit, writes the buffer to the store
-        if len(self._buffer) >= self._limit: self.sync()
+        if len(self._buffer) >= self._sync: self.sync()
 
     def __delitem__(self, key):
         '''Deletes an item from shove.'''
@@ -353,6 +344,8 @@ class Shove(BaseStore):
         
     def close(self):
         '''Finalizes and closes shove.'''
-        self.sync()
-        self._store.close()
-        self._store = self._cache = self._buffer = None        
+        # If close has been called, pass
+        if self._store is not None:
+            self.sync()
+            self._store.close()
+            self._store = self._cache = self._buffer = None        
