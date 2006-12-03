@@ -43,4 +43,8 @@ class TestMemcached(unittest.TestCase):
         cache = Shove('simple://', 'memcached://localhost', timeout=1)
         self.cache['test'] = 'test'
         time.sleep(1)
-        self.assertEqual(self.cache['test'], None)   
+        self.assertEqual(self.cache['test'], None)
+        
+
+if __name__ == '__main__':
+    unittest.main()        
