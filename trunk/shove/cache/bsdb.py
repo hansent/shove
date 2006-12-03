@@ -65,7 +65,7 @@ class BsdCache(MemoryCache):
         # Remove item if expired
         if exp < time.time():
             del self[key]
-            raise KeyError('Key not in cache.')
+            raise KeyError('%s' % key)
         return self.loads(local.readline() + local.readline())
                 
     @synchronized

@@ -58,7 +58,9 @@ class SimpleCache(BaseCache):
     def __getitem__(self, key):
         now, exp = time.time(), self._expire_info.get(key)
         # Delete if item timed out.
-        if exp < now: del self._cache[key]
+        if exp < now:
+            del self._cache[key]
+            raise KeyError('%s' % key)
         return self._cache[key]   
 
     def __setitem__(self, key, value):
@@ -71,7 +73,8 @@ class SimpleCache(BaseCache):
     def __delitem__(self, key):
         try:
             del self._cache[key]
-        except KeyError: pass
+        except KeyError:
+            raise KeyError('%s' % key)
         try:
             del self._expire_info[key]
         except KeyError: pass
