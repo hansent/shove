@@ -28,7 +28,8 @@
 
 '''S3-accessed stores
 
-shove's psuedo-URL for stores found on Amazon.com's s3 service follow this form:
+shove's psuedo-URL for stores found on Amazon.com's S3 web service follows this
+form:
 
 s3://<s3_key>:<s3_secret>@<bucket>
 
@@ -70,7 +71,7 @@ class S3Store(BaseStore):
 
     def __getitem__(self, key):
         rkey = self._store.lookup(key)
-        if rkey is None: raise KeyError()
+        if rkey is None: raise KeyError('%s' % key)
         # Fetch string
         value = self.loads(rkey.get_contents_as_string())
         # Flag that the store has not been updated
@@ -85,9 +86,12 @@ class S3Store(BaseStore):
         self._updated = True
 
     def __delitem__(self, key):
-        self._store.delete_key(key)
-        # Flag that the store has been updated
-        self._updated = True
+        try:
+            self._store.delete_key(key)
+            # Flag that the store has been updated
+            self._updated = True
+        except:
+            raise KeyError('%s' % key)
 
     def keys(self):
         '''Returns a list of keys in the store.'''

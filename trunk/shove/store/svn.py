@@ -99,7 +99,7 @@ class SvnStore(BaseStore):
         try:
             return self.loads(self._client.cat(self._key_to_file(key)))
         except:
-            raise KeyError()
+            raise KeyError('%s' % key)
 
     @synchronized
     def __setitem__(self, key, value):
@@ -112,10 +112,13 @@ class SvnStore(BaseStore):
         
     @synchronized
     def __delitem__(self, key):
-        fname = self._key_to_file(key)
-        self._client.remove(fname)
-        # Remove deleted value from repository
-        self._client.checkin([fname], 'Removing %s' % fname)
+        try:
+            fname = self._key_to_file(key)
+            self._client.remove(fname)
+            # Remove deleted value from repository
+            self._client.checkin([fname], 'Removing %s' % fname)
+        except:
+            raise KeyError('%s' % key)
 
     @synchronized
     def keys(self):
