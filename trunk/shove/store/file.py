@@ -27,9 +27,9 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-'''File-based object store
+'''Filesystem-based object store
 
-shove's psuedo-URL for file-based stores follows the form:
+shove's psuedo-URL for filesystem-based stores follows the form:
 
 file://<path>
 
@@ -40,7 +40,7 @@ argument.
 
 import os
 import urllib
-from shove.store import BaseStore
+from shove import BaseStore
 
 __all__ = ['FileStore']
 
@@ -50,14 +50,12 @@ class FileStore(BaseStore):
     '''File-based store.'''    
     
     def __init__(self, engine, **kw):
-        super(FileCache, self).__init__(engine, **kw)
+        super(FileStore, self).__init__(**kw)
         if engine.startswith('file://'):
             engine = urllib.url2pathname(engine.split('://')[1])
         self._dir = engine
         # Create directory
-        if not os.path.exists(self._dir): self._createdir()
-        # Remove unneeded methods and attributes
-        del self._cache, self._expire_info
+        if not os.path.exists(self._dir): self._createdir()        
 
     def __getitem__(self, key):
         try:
