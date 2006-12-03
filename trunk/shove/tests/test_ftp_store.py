@@ -2,12 +2,16 @@ import unittest
 import os
 from shove import Shove
 
+
 class TestFtpStore(unittest.TestCase):
 
-    def setUp(self): 
-        self.store = Shove('ftp://lcrees:56Thiers6@thecommandingheights.com', compressed=True)
+    ftpstring = 'put ftp string here'    
 
-    def tearDown(self): 
+    def setUp(self):
+        self.store = Shove(ftpstring, compressed=True)
+     
+    def tearDown(self):
+        self.store.clear()
         self.store.close()
         
     def test__getitem__(self):
@@ -41,16 +45,14 @@ class TestFtpStore(unittest.TestCase):
     def test__len__(self):
         self.store['max'] = 3
         self.store['min'] = 6
+        self.store.sync()
         self.assertEqual(len(self.store), 2)
-
-    def test_close(self):
-        self.store.close()
-        self.assertEqual(self.store, None)
 
     def test_clear(self):
         self.store['max'] = 3
         self.store['min'] = 6
         self.store['pow'] = 7
+        self.store.sync()
         self.store.clear()
         self.assertEqual(len(self.store), 0)
 
@@ -58,6 +60,7 @@ class TestFtpStore(unittest.TestCase):
         self.store['max'] = 3
         self.store['min'] = 6
         self.store['pow'] = 7
+        self.store.sync()
         slist = list(self.store.items())
         self.assertEqual(('min', 6) in slist, True)
 
@@ -65,6 +68,7 @@ class TestFtpStore(unittest.TestCase):
         self.store['max'] = 3
         self.store['min'] = 6
         self.store['pow'] = 7
+        self.store.sync()
         slist = list(self.store.iteritems())
         self.assertEqual(('min', 6) in slist, True)
 
@@ -72,6 +76,7 @@ class TestFtpStore(unittest.TestCase):
         self.store['max'] = 3
         self.store['min'] = 6
         self.store['pow'] = 7
+        self.store.sync()
         slist = list(self.store.iterkeys())
         self.assertEqual('min' in slist, True)
 
@@ -79,12 +84,14 @@ class TestFtpStore(unittest.TestCase):
         self.store['max'] = 3
         self.store['min'] = 6
         self.store['pow'] = 7
+        self.store.sync()
         slist = list(self.store.itervalues())
         self.assertEqual(6 in slist, True)
 
     def test_pop(self):
         self.store['max'] = 3
         self.store['min'] = 6
+        self.store.sync()
         item = self.store.pop('min')
         self.assertEqual(item, 6)
         
@@ -92,7 +99,9 @@ class TestFtpStore(unittest.TestCase):
         self.store['max'] = 3
         self.store['min'] = 6
         self.store['pow'] = 7
+        self.store.sync()
         item = self.store.popitem()
+        self.store.sync()
         self.assertEqual(len(item) + len(self.store), 4)
 
     def test_setdefault(self):
@@ -100,6 +109,7 @@ class TestFtpStore(unittest.TestCase):
         self.store['min'] = 6
         self.store['powl'] = 7
         self.store.setdefault('pow', 8)
+        self.store.sync()
         self.assertEqual(self.store['pow'], 8)
 
     def test_update(self):
@@ -110,20 +120,24 @@ class TestFtpStore(unittest.TestCase):
         self.store['max'] = 2
         self.store['min'] = 3
         self.store['pow'] = 7
+        self.store.sync()
         self.store.update(tstore)
+        self.store.sync()
         self.assertEqual(self.store['min'], 6)
 
     def test_values(self):
         self.store['max'] = 3
         self.store['min'] = 6
         self.store['pow'] = 7
-        slist = self.store.values()
+        self.store.sync()
+        slist = self.store.values()        
         self.assertEqual(6 in slist, True)
 
     def test_keys(self):
         self.store['max'] = 3
         self.store['min'] = 6
         self.store['pow'] = 7
+        self.store.sync()
         slist = self.store.keys()
         self.assertEqual('min' in slist, True)
 
