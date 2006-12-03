@@ -49,6 +49,7 @@ Memory
 Filesystem
 Firebird
 FTP
+DBM
 Durus
 Microsoft SQL Server
 MySQL
