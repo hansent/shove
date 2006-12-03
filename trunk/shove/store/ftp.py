@@ -77,7 +77,7 @@ class FtpStore(BaseStore):
             self._updated = False
             return self.loads(local.getvalue())
         except:
-            raise KeyError()
+            raise KeyError('%s' % key)
 
     def __setitem__(self, key, value):
         local = StringIO(self.dumps(value))
@@ -85,8 +85,11 @@ class FtpStore(BaseStore):
         self._updated = True
 
     def __delitem__(self, key):
-        self._store.delete(key)
-        self._updated = True
+        try:
+            self._store.delete(key)
+            self._updated = True
+        except:
+            raise KeyError('%s' % key)
 
     def _makedir(self, path):
         '''Makes remote paths on an FTP server.'''
@@ -101,12 +104,12 @@ class FtpStore(BaseStore):
         if self._updated or self._keys is None:
             rlist, nlist = list(), list()
             # Remote directory listing
-            self._store.retrlines('LIST -a', rlist.append)
+            self._store.retrlines('LIST -a', rlist.append)           
             for rlisting in rlist:
                 # Split remote file based on whitespace
-                rfile = rlisting.split()
+                rfile = rlisting.split()  
                 # Append tuple of remote item type & name
-                if rfile[-1] not in ('.', '..') and rfile[0] == '-':
+                if rfile[-1] not in ('.', '..') and rfile[0].startswith('-'):
                     nlist.append(rfile[-1])
             self._keys = nlist
         return self._keys
