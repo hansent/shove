@@ -112,7 +112,7 @@ class DbCache(BaseCache):
         except: pass
 
     def __delitem__(self, key):
-        self._cache.delete().execute(cache_key=key)
+        self._cache.delete(self._store.c.store_key==key).execute()
 
     def __len__(self):
         return self._cache.count().execute().fetchone()[0]
