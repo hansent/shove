@@ -53,9 +53,9 @@ class MemCached(BaseCache):
         self._cache = memcache.Client(engine.split(';'))
 
     def __getitem__(self, key):
-        value = self._cache.get(self.loads(key))
+        value = self._cache.get(key)
         if value is None: raise KeyError('Key not in cache.')
-        return value
+        return self.loads(value)
         
     def __setitem__(self, key, value):
         self._cache.set(key, self.dumps(value), self.timeout)
