@@ -9,14 +9,17 @@ class TestFileStore(unittest.TestCase):
 
     def tearDown(self): 
         self.store.close()
+        for x in os.listdir('test'): os.remove(os.path.join('test', x))
         os.rmdir('test')
 
     def test__getitem__(self):
         self.store['max'] = 3
+        self.store.sync()
         self.assertEqual(self.store['max'], 3)
 
     def test__setitem__(self):
         self.store['max'] = 3
+        self.store.sync()
         self.assertEqual(self.store['max'], 3)
 
     def test__delitem__(self):
@@ -25,13 +28,16 @@ class TestFileStore(unittest.TestCase):
         self.assertEqual('max' in self.store, False)
 
     def test_get(self):
-        self.store['max'] = 3        
+        self.store['max'] = 3
+        self.store.sync()
         self.assertEqual(self.store.get('min'), None)
             
     def test__cmp__(self):
         tstore = Shove()
         self.store['max'] = 3
         tstore['max'] = 3
+        self.store.sync()
+        tstore.sync()
         self.assertEqual(self.store, tstore)
 
     def test__len__(self):

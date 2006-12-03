@@ -4,7 +4,7 @@ import unittest
 import os
 from shove import Shove
 
-class TestBsdbStore(unittest.TestCase):
+class TestZodbStore(unittest.TestCase):
 
     def setUp(self): 
         self.store = Shove('zodb://test.db', compressed=True)
