@@ -32,17 +32,12 @@ shove's psuedo-URL for BSDDB stores follows the form:
 
 bsddb://<path>
 
-Where the path is a URL path to a BSDDB database. Alternatively, a native
-pathname to a BSD database can be passed as the 'engine' argument.
+Where the path is a URL path to a BSDDB database. Alternatively, the native
+pathname to a BSDDB database can be passed as the 'engine' parameter.
 '''
 
 import bsddb
 import threading
-from urllib import url2pathname
-try:
-    import cPickle as pickle
-except ImportError:
-    import pickle
 from shove import synchronized
 from shove.store import SyncStore
 
@@ -53,11 +48,11 @@ class BsdStore(SyncStore):
     
     '''Class for Berkeley Source Database Store.'''
 
+    init = 'bsddb://'   
+
     def __init__(self, engine, **kw):
         super(BsdStore, self).__init__(engine, **kw)
-        if engine.startswith('bsddb://'):
-            engine = url2pathname(engine.split('://')[1])
-        self._store = bsddb.hashopen(engine)
+        self._store = bsddb.hashopen(self._engine)
         self._lock = threading.Condition()
         self.sync = self._store.sync
 

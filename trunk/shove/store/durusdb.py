@@ -28,16 +28,15 @@
 
 '''Durus object database frontend.
 
-shove's psuedo-URL for durus stores follows the form:
+shove's psuedo-URL for Durus stores follows the form:
 
 durus://<path>
 
 
 Where the path is a URL path to a durus FileStorage database. Alternatively, a
-native pathname to a durus database can be passed as the 'engine' argument.
+native pathname to a durus database can be passed as the 'engine' parameter.
 '''
 
-from urllib import url2pathname
 from durus.file_storage import FileStorage
 from durus.connection import Connection
 from shove.store import SyncStore
@@ -49,11 +48,11 @@ class DurusStore(SyncStore):
     
     '''Class for Durus object database frontend.'''
 
+    init = 'durus://'    
+
     def __init__(self, engine, **kw):
         super(DurusStore, self).__init__(engine, **kw)
-        if engine.startswith('durus:'):
-            engine = url2pathname(engine.split('://')[1])
-        self._db = FileStorage(engine)
+        self._db = FileStorage(self._engine)
         self._connection = Connection(self._db)
         self.sync = self._connection.commit
         self._store = self._connection.get_root() 

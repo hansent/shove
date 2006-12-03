@@ -37,7 +37,6 @@ pathname to a DBM database can be passed as the 'engine' parameter.
 '''
 
 import anydbm
-from urllib import url2pathname
 from shove.store import SyncStore
 
 __all__ = ['DbmStore']
@@ -47,9 +46,9 @@ class DbmStore(SyncStore):
     
     '''Class for variants of the DBM database.'''
 
+    init = 'dbm://'
+
     def __init__(self, engine, **kw):
-        super(BsdStore, self).__init__(engine, **kw)
-        if engine.startswith('dbm://'):
-            engine = url2pathname(engine.split('://')[1])
-        self._store = anydbm.open(engine, 'c')
+        super(DbmStore, self).__init__(engine, **kw)
+        self._store = anydbm.open(self._engine, 'c')
         self.sync = self._store.sync
