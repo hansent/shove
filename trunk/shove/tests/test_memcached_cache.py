@@ -1,13 +1,13 @@
 import unittest
 import time
-from shove import Shove
+from shove.cache.memcached import MemCached
 
 class TestMemcached(unittest.TestCase):
 
     initstring = 'memcache://localhost'
 
     def setUp(self): 
-        self.cache = Shove('simple://', self.initstring, compressed=True)
+        self.cache = MemCached(self.initstring, timeout=1)
 
     def tearDown(self): 
         self.cache = None    
@@ -26,27 +26,18 @@ class TestMemcached(unittest.TestCase):
         '''Tests __delitem__ on MemCache.'''
         self.cache['test'] = 'test'
         del self.cache['test']
-        self.assertEqual(self.cache['test'], None)
-
-    def test_in_true(self):
-        '''Tests in (true) on MemCache.'''
-        self.cache['test'] = 'test'
-        self.assertEqual('test' in self.cache, True)
-
-    def test_in_false(self):
-        '''Tests in (false) on MemCache.'''
-        self.cache['test2'] = 'test'
-        self.assertEqual('test2' in self.cache, False)
+        self.assertEqual('test' in self.cache, False)
 
     def test_get(self):
         self.assertEqual(self.cache.get('min'), None)        
 
     def test_timeout(self):
-        '''Tests timeout in MemCached.'''
-        cache = Shove('simple://', self.initstring, timeout=1)
+        '''Tests timeout in MemCached.'''        
+        cache = MemCached(self.initstring, timeout=1)
         cache['test'] = 'test'
         time.sleep(1)
-        self.assertEqual(cache['test'], None)
+        def tmp(): cache['test']            
+        self.assertRaises(KeyError, tmp)
         
 
 if __name__ == '__main__':
