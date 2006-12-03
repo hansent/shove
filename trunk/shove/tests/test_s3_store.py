@@ -3,12 +3,12 @@ import os
 from shove import Shove
 
 
-class TestFtpStore(unittest.TestCase):
+class TestS3Store(unittest.TestCase):
 
-    s3string = '1FXG2XAN4X14VSQWD7G2:ASwqkXNBDg2hNqm1nJQzY+eGpRTe8l8BL74aQf0m@unit'    
+    s3string = 's3 test string here'    
 
     def setUp(self):
-        self.store = Shove(s3string, compressed=True)
+        self.store = Shove(self.s3string, compressed=True)
      
     def tearDown(self):
         self.store.clear()
