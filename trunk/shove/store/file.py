@@ -61,17 +61,19 @@ class FileStore(BaseStore):
         try:
             return self.loads(open(self._key_to_file(key), 'rb').read())
         except:
-            raise KeyError('Key not found.')
+            raise KeyError('%s' % key)
 
     def __setitem__(self, key, value):
         try:
             open(self._key_to_file(key), 'wb').write(self.dumps(value))
-        except (IOError, OSError): pass
+        except (IOError, OSError):
+            raise KeyError('%s' % key)
 
     def __delitem__(self, key):
         try:
             os.remove(self._key_to_file(key))
-        except (IOError, OSError): pass
+        except (IOError, OSError):
+            raise KeyError('%s' % key)
 
     def __contains__(self, key):
         return os.path.exists(self._key_to_file(key))       
