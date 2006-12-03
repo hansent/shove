@@ -42,7 +42,7 @@ try:
     from boto.key import Key
 except ImportError:
     raise ImportError('Requires boto library.')
-from shove.store import BaseStore
+from shove import BaseStore
 
 
 class S3Store(BaseStore):    
@@ -52,7 +52,7 @@ class S3Store(BaseStore):
         self._updated, self._keys = True, None
         key, secret, bucket = kw.get('key'), kw.get('secret'), kw.get('bucket')
         if engine is not None:
-            auth, bucket = engine.split('://')[2].split('@')
+            auth, bucket = engine.split('://')[1].split('@')
             key, secret = auth.split(':')
         self._conn = S3Connection(key, secret, kw.get('secure', False))
         buckets = self._conn.get_all_buckets()
