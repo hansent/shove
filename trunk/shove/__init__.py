@@ -79,6 +79,7 @@ def getserializer(serializer):
 stores = dict(simple='shove.store.simple.SimpleStore',
     memory='shove.store.memory.MemoryStore',
     file='shove.store.file.FileStore',
+    dbm='shove.store.dbm.DbmStore',
     bsddb='shove.store.bsdb.BsdStore',
     sqlite='shove.store.db.DbStore',
     postgres='shove.store.db.DbStore',
