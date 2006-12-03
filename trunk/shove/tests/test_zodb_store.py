@@ -12,6 +12,8 @@ class TestBsdbStore(unittest.TestCase):
     def tearDown(self): 
         self.store.close()
         os.remove('test.db')
+        os.remove('test.db.index')
+        os.remove('test.db.tmp')
 
     def test__getitem__(self):
         self.store['max'] = 3
