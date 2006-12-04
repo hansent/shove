@@ -43,7 +43,7 @@ data compression.
 
 Currently supported storage backends:
 
-Amazon Simple Storage Service (S3)
+Amazon S3 Web Service
 Berkeley Source Database
 Memory
 Filesystem
@@ -65,7 +65,7 @@ Berkeley Source Database
 Memory
 Filesystem
 Firebird
-Memcache
+memcache
 Microsoft SQL Server
 MySQL
 Oracle
@@ -84,10 +84,42 @@ YAML''',
       packages = ['shove'],
       test_suite='shove.tests',
       zip_safe = True,
-      keywords='object storage persistence serialization database shelve',
+      keywords='object storage persistence database shelve',
       classifiers=['Development Status :: 4 - Beta',
-                    'Environment :: Web Environment',
-                    'License :: OSI Approved :: BSD License',
-                    'Natural Language :: English',
-                    'Operating System :: OS Independent',
-                    'Programming Language :: Python'])
+          'Environment :: Web Environment',
+          'License :: OSI Approved :: BSD License',
+          'Operating System :: OS Independent',
+          'Programming Language :: Python',
+          'Topic :: Database :: Front-Ends'],
+    install_requires = ['SQLAlchemy>=0.3', 'boto'],
+    entry_points = '''
+    [shove.stores]   
+    bsddb=shove.store.bsdb:BsdStore    
+    dbm=shove.store.dbm:DbmStore
+    durus=shove.store.durusdb:DurusStore
+    file=shove.store.file:FileStore
+    firebird=shove.store.db:DbStore
+    ftp=shove.store.ftp:FtpStore   
+    memory=shove.store.memory:MemoryStore
+    mssql=shove.store.db:DbStore
+    mysql=shove.store.db:DbStore
+    oracle=shove.store.db:DbStore
+    postgres=shove.store.db:DbStore
+    simple=shove.store.simple:SimpleStore
+    sqlite=shove.store.db:DbStore
+    s3=shove.store.s3:S3Store
+    svn=shove.store.svn:SvnStore
+    zodb=shove.store.zodb:ZodbStore
+    [shove.caches]
+    bsddb=shove.cache.bsdb:BsdCache    
+    file=shove.cache.file:FileCache
+    firebird=shove.cache.db:DbCache
+    memcache=shove.cache.memcached:MemCached
+    memory=shove.cache.memory:MemoryCache
+    mssql=shove.cache.db:DbCache
+    mysql=shove.cache.db:DbCache
+    oracle=shove.cache.db:DbCache
+    postgres=shove.cache.db:DbCache
+    simple=shove.cache.simple:SimpleCache
+    sqlite=shove.cache.db:DbCache
+    ''')

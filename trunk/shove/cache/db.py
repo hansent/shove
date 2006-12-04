@@ -74,7 +74,7 @@ class DbCache(BaseCache):
         # Make cache table
         self._cache = Table(tablename, self._metadata,
             Column('cache_key', String(60), primary_key=True,
-                nullable=False, unique=True),
+                nullable=False),
             Column('value', Binary, nullable=False),
             Column('expires', DateTime, nullable=False))
         # Create cache table if it does not exist
@@ -85,11 +85,13 @@ class DbCache(BaseCache):
 
     def __getitem__(self, key):
         row = self._cache.select().execute(cache_key=key).fetchone()
-        # Remove if item expired
-        if row.expires < datetime.now().replace(microsecond=0):
-            del self[key]
-            raise KeyError('%s' % key)
-        return self.loads(row.value)
+        if row is not None:
+            # Remove if item expired
+            if row.expires < datetime.now().replace(microsecond=0):
+                del self[key]
+                raise KeyError('%s' % key)
+            return self.loads(str(row.value))
+        raise KeyError('%s' % key)
 
     def __setitem__(self, key, val):
         timeout = self.timeout
@@ -99,20 +101,17 @@ class DbCache(BaseCache):
         # Generate expiration time
         exp = datetime.fromtimestamp(
             time.time() + timeout).replace(microsecond=0)
-        try:
-            # Update database if key already present
-            if key in self:
-                self._cache.update(self._cache.c.cache_key==key).execute(
-                    value=val, expires=exp)
-            # Insert new key if key not present
-            else:            
-                self._cache.insert().execute(cache_key=key,
-                    value=val, expires=exp)
-        # To be threadsafe, updates/inserts are allowed to fail silently
-        except: pass
+        # Update database if key already present
+        if key in self:
+            self._cache.update(self._cache.c.cache_key==key).execute(
+                value=val, expires=exp)
+        # Insert new key if key not present
+        else:            
+            self._cache.insert().execute(cache_key=key,
+                value=val, expires=exp)
 
     def __delitem__(self, key):
-        self._cache.delete(self._store.c.store_key==key).execute()
+        self._cache.delete(self._cache.c.cache_key==key).execute()
 
     def __len__(self):
         return self._cache.count().execute().fetchone()[0]

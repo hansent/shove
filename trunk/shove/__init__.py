@@ -1,4 +1,4 @@
-# Copyright ? 2001-2006 Python Software Foundation
+# Copyright (c) 2001-2006 Python Software Foundation
 # Copyright (c) 2005, the Lawrence Journal-World
 # Copyright (c) 2006 L. C. Rees
 # All rights reserved.
@@ -35,7 +35,10 @@ import zlib
 __all__ = ['Shove', 'BaseStore', 'Base', 'storage', 'cache']
 
 def synchronized(func):
-    '''Decorator that locks and unlocks a method (Phillip J. Eby).'''
+    '''Decorator that locks and unlocks a method (Phillip J. Eby).
+
+    @param func Function to decorate
+    '''
     def wrapper(self, *__args, **__kw):
         self._lock.acquire()
         try:
@@ -48,19 +51,27 @@ def synchronized(func):
     wrapper.__doc__ = func.__doc__
     return wrapper
 
-def getshove(shove, uri, **kw):
-    '''Loads a shove class.
+def getbackend(uri, engines, **kw):
+    '''Loads the right shove backend based on URI.
 
-    @param shove An instance or name string
-    @param uri An init URI for a shove
+    @param uri An instance or name string
+    @param engines A dictionary of scheme/class pairs
     @param kw Keywords'''
     # Load module from storage
     if isinstance(shove, basestring):
-        dot = shove.rindex('.')
-        # Load module
-        mod = getattr(__import__(shove[:dot], '', '', ['']), shove[dot+1:])
+        mod = engines[cache.split('://', 1)[0]]
+        # Load if setuptools not present
+        if isinstance(mod, basestring): 
+            # Isolate classname from dot path
+            module, klass = mod.split(':')
+            # Load module
+            mod = getattr(__import__(module, '', '', ['']), klass)
+        # Load appropriate class from setuptools entry point
+        else:
+            mod = mod.load()
         # Return instance
         return mod(uri, **kw)
+    # No-op for existing instances
     return shove
 
 def getserializer(serializer):
@@ -69,42 +80,52 @@ def getserializer(serializer):
     @param serializer An instance or name string'''
     if isinstance(serializer, basestring):
         if serializer == 'pickle':
+            # Use cPickle if available
             try:
                 return __import__('cPickle')
-            except ImportError: pass
+            except ImportError: pass 
         return __import__(serializer)
     return serializer    
 
-# Store registry
-stores = dict(simple='shove.store.simple.SimpleStore',
-    memory='shove.store.memory.MemoryStore',
-    file='shove.store.file.FileStore',
-    dbm='shove.store.dbm.DbmStore',
-    bsddb='shove.store.bsdb.BsdStore',
-    sqlite='shove.store.db.DbStore',
-    postgres='shove.store.db.DbStore',
-    mysql='shove.store.db.DbStore',
-    oracle='shove.store.db.DbStore',
-    firebird='shove.store.db.DbStore',
-    mssql='shove.store.db.DbStore',
-    svn='shove.store.svn.SvnStore',
-    s3='shove.store.s3.S3Store',
-    ftp='shove.store.ftp.FtpStore',
-    zodb='shove.store.zodb.ZodbStore',
-    durus='shove.store.durusdb.DurusStore')
-
-# Cache registry
-caches = dict(simple='shove.cache.simple.SimpleCache',
-    memory='shove.cache.memory.MemoryCache',
-    file='shove.cache.file.FileCache',
-    mssql='shove.cache.db.DbCache',
-    sqlite='shove.cache.db.DbCache',
-    postgres='shove.cache.db.DbCache',
-    firebird='shove.cache.db.DbCache',
-    mysql='shove.cache.db.DbCache',
-    oracle='shove.cache.db.DbCache',
-    memcache='shove.cache.memcached.MemCached',
-    bsddb='shove.cache.bsdb.BsdCache')
+try:
+    # Import store and cache entry points if setuptools installed
+    import pkg_resources
+    stores = dict((_store.name, _store) for _store in
+        pkg_resources.iter_entry_points('shove.stores'))
+    caches = dict((_cache.name, _cache) for _cache in
+        pkg_resources.iter_entry_points('shove.caches'))
+except ImportError:
+    # Static store registry
+    stores = dict(
+        simple='shove.store.simple:SimpleStore',
+        memory='shove.store.memory:MemoryStore',
+        file='shove.store.file:FileStore',
+        dbm='shove.store.dbm:DbmStore',
+        bsddb='shove.store.bsdb:BsdStore',
+        sqlite='shove.store.db:DbStore',
+        postgres='shove.store.db:DbStore',
+        mysql='shove.store.db:DbStore',
+        oracle='shove.store.db:DbStore',
+        firebird='shove.store.db:DbStore',
+        mssql='shove.store.db:DbStore',
+        svn='shove.store.svn:SvnStore',
+        s3='shove.store.s3:S3Store',
+        ftp='shove.store.ftp:FtpStore',
+        zodb='shove.store.zodb:ZodbStore',
+        durus='shove.store.durusdb:DurusStore')
+    # Cache registry
+    caches = dict(
+        simple='shove.cache.simple:SimpleCache',
+        memory='shove.cache.memory:MemoryCache',
+        file='shove.cache.file:FileCache',
+        mssql='shove.cache.db:DbCache',
+        sqlite='shove.cache.db:DbCache',
+        postgres='shove.cache.db:DbCache',
+        firebird='shove.cache.db:DbCache',
+        mysql='shove.cache.db:DbCache',
+        oracle='shove.cache.db:DbCache',
+        memcache='shove.cache.memcached:MemCached',
+        bsddb='shove.cache.bsdb:BsdCache')
     
 # Serializer registry
 serializers = dict(
@@ -294,18 +315,16 @@ class Shove(BaseStore):
     def __init__(self, store='simple://', cache='simple://', **kw):
         super(Shove, self).__init__(**kw)
         # Load store
-        sscheme = store.split(':', 1)[0]
         try:
-            self._store = getshove(stores[sscheme], store, **kw)
+            self._store = getbackend(store, stores, **kw)
         except (KeyError, ImportError):
             raise ImportError('Could not load store scheme "%s"' % sscheme)
         # Load cache
-        cscheme = cache.split(':', 1)[0]
         try:
-            self._cache = getshove(caches[cscheme], cache, **kw)
+            self._cache = getbackend(cache, caches, **kw)
         except (KeyError, ImportError):
             raise ImportError('Invalid cache scheme "%s"' % cscheme)
-        # Buffer for lazy writing and setting for frequency of syncing
+        # Buffer for lazy writing and setting for syncing frequency
         self._buffer, self._sync = dict(), kw.get('sync', 2)
 
     def __getitem__(self, key):
