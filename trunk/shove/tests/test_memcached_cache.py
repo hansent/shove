@@ -1,29 +1,27 @@
 import unittest
 import time
-from shove.cache.memcached import MemCached
+from shove.cache.simple import Memcached
 
 class TestMemcached(unittest.TestCase):
 
     initstring = 'memcache://localhost'
+    cacheclass = Memcached
 
     def setUp(self): 
-        self.cache = MemCached(self.initstring, timeout=1)
+        self.cache = self.cacheclass(self.initstring)
 
     def tearDown(self): 
         self.cache = None    
     
     def test_getitem(self):
-        '''Tests __setitem__ and __setitem__ on MemCache.'''
         self.cache['test'] = 'test'
         self.assertEqual(self.cache['test'], 'test')
 
     def test_setitem(self):
-        '''Tests set and get on MemCache.'''
         self.cache['test'] = 'test'
         self.assertEqual(self.cache['test'], 'test')
 
     def test_delitem(self):
-        '''Tests __delitem__ on MemCache.'''
         self.cache['test'] = 'test'
         del self.cache['test']
         self.assertEqual('test' in self.cache, False)
@@ -31,9 +29,8 @@ class TestMemcached(unittest.TestCase):
     def test_get(self):
         self.assertEqual(self.cache.get('min'), None)        
 
-    def test_timeout(self):
-        '''Tests timeout in MemCached.'''        
-        cache = MemCached(self.initstring, timeout=1)
+    def test_timeout(self):      
+        cache = self.cacheclass(self.initstring, timeout=1)
         cache['test'] = 'test'
         time.sleep(1)
         def tmp(): cache['test']            
