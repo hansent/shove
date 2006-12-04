@@ -124,7 +124,7 @@ class DbCache(BaseCache):
         # Remove any items over the maximum allowed number in the cache
         if len(self) >= self._max_entries:
             keys = [i[0] for i
-                in select([self._cache.c.store_key]).execute().fetchall()]
+                in select([self._cache.c.cache_key]).execute().fetchall()]
             delkeys = list(random.choice(keys) for i in range(self._maxcull))
             self._cache.delete(self._cache.c.cache_key.like(
                 bindparam('key'))).execute(*tuple({
