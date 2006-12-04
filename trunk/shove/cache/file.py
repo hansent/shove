@@ -74,9 +74,9 @@ class FileCache(SimpleCache):
             raise KeyError('%s' % key)                
 
     def __setitem__(self, key, value):
+        if len(self) >= self._max_entries: self._cull()
         try:
-            try:                
-                if len(self) > self._max_entries: self._cull()
+            try:
                 local = open(self._key_to_file(key), 'wb')                
                 local.write(self.dumps((time.time() + self.timeout, value)))
             finally:
@@ -107,8 +107,8 @@ class FileCache(SimpleCache):
                 except KeyError:
                     num += 1
             else: break
-        if len(self._cache) >= self._max_entries:
-            for i in range(self._maxcull): del self[random.choice(filelist)]
+        while len(self) >= self._max_entries:
+            del self[random.choice(filelist)]
 
     def _createdir(self):
         '''Creates the cache directory.'''

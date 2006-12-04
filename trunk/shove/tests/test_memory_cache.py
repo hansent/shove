@@ -36,6 +36,13 @@ class TestMemoryCache(unittest.TestCase):
         time.sleep(1)
         def tmp(): cache['test']            
         self.assertRaises(KeyError, tmp)
+
+    def test_cull(self):      
+        cache = self.cacheclass(self.initstring, max_entries=1)
+        cache['test'] = 'test'
+        cache['test2'] = 'test'
+        cache['test2'] = 'test'    
+        self.assertEquals(len(cache), 1)           
         
 
 if __name__ == '__main__':

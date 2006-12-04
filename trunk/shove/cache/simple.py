@@ -65,7 +65,7 @@ class SimpleCache(BaseCache):
 
     def __setitem__(self, key, value):
         # Cull values if over max # of entries
-        if len(self._cache) >= self._max_entries: self._cull()
+        if len(self) >= self._max_entries: self._cull()
         self._cache[key] = value
         # Set timeout
         self._expire_info[key] = time.time() + self.timeout
@@ -78,6 +78,9 @@ class SimpleCache(BaseCache):
         try:
             del self._expire_info[key]
         except KeyError: pass
+
+    def __len__(self):
+        return len(self._cache)
         
     def _cull(self):
         '''Remove items in cache to make roomt.'''
@@ -92,7 +95,6 @@ class SimpleCache(BaseCache):
                     num += 1
             else: break
         # Check if sufficient space has been created
-        if len(self._cache) >= self._max_entries:
+        while len(self._cache) >= self._max_entries:
             # Cull remainder of allowed quota at random
-            keys = self._expire_info.keys()
-            for i in range(self._maxcull): del self[random.choice(keys)]
+            del self[random.choice(self._cache.keys())]

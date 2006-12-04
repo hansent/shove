@@ -67,3 +67,4 @@ class BsdCache(MemoryCache):
     def __setitem__(self, key, value):
         if len(self._cache) > self._max_entries: self._cull()
         self._cache[key] = self.dumps((time.time() + self.timeout, value))
+        self._cache.sync()
