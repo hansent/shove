@@ -1,33 +1,41 @@
 import unittest
-from shove import Shove
+import time
+from shove.cache.simple import SimpleCache
 
-class TestSimpleStore(unittest.TestCase):
+class TestSimpleCache(unittest.TestCase):
+
+    initstring = 'simple://'
+    cacheclass = SimpleCache
 
     def setUp(self): 
-        self.store = Shove('simple://', 'simple://', compressed=True)
+        self.cache = self.cacheclass(self.initstring)
 
     def tearDown(self): 
-        self.store.close()
+        self.cache = None    
+    
+    def test_getitem(self):
+        self.cache['test'] = 'test'
+        self.assertEqual(self.cache['test'], 'test')
 
-    def test__getitem__(self):
-        self.store['max'] = 3
-        self.store.sync()
-        self.assertEqual(self.store['max'], 3)
+    def test_setitem(self):
+        self.cache['test'] = 'test'
+        self.assertEqual(self.cache['test'], 'test')
 
-    def test__setitem__(self):
-        self.store['max'] = 3
-        self.store.sync()
-        self.assertEqual(self.store['max'], 3)
-
-    def test__delitem__(self):
-        self.store['max'] = 3
-        del self.store['max']
-        self.assertEqual('max' in self.store, False)
+    def test_delitem(self):
+        self.cache['test'] = 'test'
+        del self.cache['test']
+        self.assertEqual('test' in self.cache, False)
 
     def test_get(self):
-        self.store['max'] = 3
-        self.store.sync()
-        self.assertEqual(self.store.get('min'), None)
+        self.assertEqual(self.cache.get('min'), None)        
+
+    def test_timeout(self):      
+        cache = self.cacheclass(self.initstring, timeout=1)
+        cache['test'] = 'test'
+        time.sleep(1)
+        def tmp(): cache['test']            
+        self.assertRaises(KeyError, tmp)
         
+
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main()        
