@@ -62,30 +62,23 @@ class FileCache(SimpleCache):
 
     def __getitem__(self, key):
         try:
-            try:
-                fname = self._key_to_file(key)
-                local = open(fname, 'rb')
-                exp = self.loads(local.readline() + local.readline())
-                # Remove item if time has expired.
-                if exp < time.time():
-                    local.close()
-                    os.remove(fname)
-                value = self.loads(local.readline() + local.readline())
-                return value
-            finally:
-                local.close()
+            local = open(self._key_to_file(key), 'rb')
+            values = self.loads(local.read())
+            local.close()
+            # Remove item if time has expired.
+            if values[0] < time.time():
+                del self[key]
+                raise KeyError('%s' % key)  
+            return values[1]
         except:
-            raise KeyError('Key not in cache.')
-                
+            raise KeyError('%s' % key)                
 
     def __setitem__(self, key, value):
         try:
-            try:
-                fname = self._key_to_file(key)
+            try:                
                 if len(self) > self._max_entries: self._cull()
-                local = open(fname, 'wb')
-                local.write(self.dumps(time.time() + self.timeout))
-                local.write(self.dumps(value))
+                local = open(self._key_to_file(key), 'wb')                
+                local.write(self.dumps((time.time() + self.timeout, value)))
             finally:
                 local.close()
         except:

@@ -39,10 +39,6 @@ pathname to a BSD database can be passed as the 'engine' argument.
 
 import bsddb
 import time
-try:
-    from cStringIO import StringIO
-except ImportError:
-    from cStringIO import StringIO
 from shove import synchronized
 from shove.cache.memory import MemoryCache
 
@@ -55,23 +51,19 @@ class BsdCache(MemoryCache):
 
     def __init__(self, engine, **kw):
         super(BsdCache, self).__init__(engine, **kw)
-        if engine.startswith('bsd://'): engine = engine.split('://')[1]
+        if engine.startswith('bsddb://'): engine = engine.split('://')[1]
         self._cache = bsddb.hashopen(engine)
         
     @synchronized
     def __getitem__(self, key):
-        local = StringIO(self._cache[key])
-        exp = self.loads(local.readline() + local.readline())
+        values = self.loads(self._cache[key])
         # Remove item if expired
-        if exp < time.time():
+        if values[0] < time.time():
             del self[key]
             raise KeyError('%s' % key)
-        return self.loads(local.readline() + local.readline())
+        return values[1]
                 
     @synchronized
     def __setitem__(self, key, value):
         if len(self._cache) > self._max_entries: self._cull()
-        local = StringIO()
-        local.write(self.dumps(time.time() + self.timeout))
-        local.write(self.dumps(value))
-        self._cache[key] = local.getvalue()
+        self._cache[key] = self.dumps((time.time() + self.timeout, value))
