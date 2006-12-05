@@ -122,7 +122,7 @@ def getbackend(uri, engines, **kw):
         # Return instance
         return mod(uri, **kw)
     # No-op for existing instances
-    return shove
+    return uri
 
 def getserializer(serializer):
     '''Loads a serializer.
