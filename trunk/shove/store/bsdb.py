@@ -32,8 +32,8 @@ shove's psuedo-URL for BSDDB stores follows the form:
 
 bsddb://<path>
 
-Where the path is a URL path to a BSDDB database. Alternatively, the native
-pathname to a BSDDB database can be passed as the 'engine' parameter.
+Where the path is a URL path to a Berkeley database. Alternatively, the native
+pathname to a Berkeley database can be passed as the 'engine' parameter.
 '''
 
 import bsddb

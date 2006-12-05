@@ -62,7 +62,7 @@ class DbStore(BaseStore):
     '''Database cache backend.'''
 
     def __init__(self, engine, **kw):
-        super(DbStore, self).__init__(**kw)
+        super(DbStore, self).__init__(engine, **kw)
         # Bind metadata
         self._metadata = BoundMetaData(engine)
         # Get tablename

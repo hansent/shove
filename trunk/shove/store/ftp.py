@@ -48,8 +48,7 @@ __all__ = ['FtpStore']
 class FtpStore(BaseStore):
 
     def __init__(self, engine, **kw):
-        super(FtpStore, self).__init__()
-        
+        super(FtpStore, self).__init__(engine, **kw)        
         user = kw.get('user', 'anonymous')
         password = kw.get('password', '')
         spliturl = urlparse.urlsplit(engine)

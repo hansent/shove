@@ -67,5 +67,3 @@ class ZodbStore(SyncStore):
         self._connection.close()
         self._db.close()
         self._storage.close()
-        
-        

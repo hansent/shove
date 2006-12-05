@@ -39,23 +39,17 @@ argument.
 '''
 
 import os
-import urllib
-from shove import BaseStore
+from shove import BaseStore, FileBase
 
 __all__ = ['FileStore']
 
 
-class FileStore(BaseStore):
+class FileStore(FileBase, BaseStore):
 
     '''File-based store.'''    
     
     def __init__(self, engine, **kw):
-        super(FileStore, self).__init__(**kw)
-        if engine.startswith('file://'):
-            engine = urllib.url2pathname(engine.split('://')[1])
-        self._dir = engine
-        # Create directory
-        if not os.path.exists(self._dir): self._createdir()        
+        super(FileStore, self).__init__(engine, **kw)
 
     def __getitem__(self, key):
         try:
@@ -69,29 +63,6 @@ class FileStore(BaseStore):
         except (IOError, OSError):
             raise KeyError('%s' % key)
 
-    def __delitem__(self, key):
-        try:
-            os.remove(self._key_to_file(key))
-        except (IOError, OSError):
-            raise KeyError('%s' % key)
-
-    def __contains__(self, key):
-        return os.path.exists(self._key_to_file(key))       
-
     def keys(self):
         '''Returns a list of keys in the store.'''
-        try:
-            return os.listdir(self._dir)
-        except (IOError, OSError): return list()            
-
-    def _createdir(self):
-        '''Creates the store directory.'''
-        try:
-            os.makedirs(self._dir)
-        except OSError:
-            raise EnvironmentError('Cache directory "%s" does not exist and ' \
-                'could not be created' % self._dir)
-
-    def _key_to_file(self, key):
-        '''Gives the filesystem path for a key.'''
-        return os.path.join(self._dir, urllib.quote_plus(key))
+        return os.listdir(self._dir)
