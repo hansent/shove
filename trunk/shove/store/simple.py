@@ -44,7 +44,7 @@ class SimpleStore(BaseStore):
     '''Single-process in-memory store.'''    
     
     def __init__(self, engine, **kw):
-        super(SimpleStore, self).__init__(**kw)
+        super(SimpleStore, self).__init__(engine, **kw)
         self._store = dict()
 
     def __getitem__(self, key):

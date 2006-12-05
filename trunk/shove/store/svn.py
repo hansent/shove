@@ -58,7 +58,7 @@ class SvnStore(BaseStore):
     '''Class for subversion store.'''
     
     def __init__(self, engine=None, **kw):
-        super(SvnStore, self).__init__(**kw)
+        super(SvnStore, self).__init__(engine, **kw)
         # Get path, url from keywords if used
         path, url = kw.get('path'), kw.get('url')
         # Get username. password from keywords if used

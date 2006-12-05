@@ -35,7 +35,7 @@ s3://<s3_key>:<s3_secret>@<bucket>
 
 <s3_key> is the Access Key issued by Amazon
 <s3_secret> is the Secret Access Key issued by Amazon
-<bucket> is the name of the storage bucket accessed through the S3 service
+<bucket> is the name of the bucket accessed through the S3 service
 '''
 
 try:
@@ -49,12 +49,15 @@ from shove import BaseStore
 class S3Store(BaseStore):    
 
     def __init__(self, engine=None, **kw):
-        super(S3Store, self).__init__(**kw)
+        super(S3Store, self).__init__(engine, **kw)
+        # Updated flag used for avoiding network calls
         self._updated, self._keys = True, None
+        # key = Access Key, secret=Secret Access Key, bucket=bucket name 
         key, secret, bucket = kw.get('key'), kw.get('secret'), kw.get('bucket')
         if engine is not None:
             auth, bucket = engine.split('://')[1].split('@')
             key, secret = auth.split(':')
+        # kw 'secure' = (True or False, use HTTPS)
         self._conn = S3Connection(key, secret, kw.get('secure', False))
         buckets = self._conn.get_all_buckets()
         # Use bucket if it exists
@@ -65,9 +68,9 @@ class S3Store(BaseStore):
         # Create bucket if it doesn't exist
         else:
             self._store = self._conn.create_bucket(bucket)
-            self._store.set_acl(kw.get('acl', 'private'))
-        # Flag to use compression
-        self._compressed = kw.get('compressed', False)
+        # Set bucket permission ('private', 'public-read',
+        # 'public-read-write', 'authenticated-read'
+        self._store.set_acl(kw.get('acl', 'private'))
 
     def __getitem__(self, key):
         rkey = self._store.lookup(key)
