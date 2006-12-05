@@ -30,63 +30,9 @@
 
 '''Universal object storage.'''
 
+import os
 import zlib
-
-__all__ = ['Shove', 'BaseStore', 'Base', 'storage', 'cache']
-
-def synchronized(func):
-    '''Decorator that locks and unlocks a method (Phillip J. Eby).
-
-    @param func Function to decorate
-    '''
-    def wrapper(self, *__args, **__kw):
-        self._lock.acquire()
-        try:
-            return func(self, *__args, **__kw)
-        finally:
-            self._lock.release()
-    # Add same meta info
-    wrapper.__name__ = func.__name__
-    wrapper.__dict__ = func.__dict__
-    wrapper.__doc__ = func.__doc__
-    return wrapper
-
-def getbackend(uri, engines, **kw):
-    '''Loads the right shove backend based on URI.
-
-    @param uri An instance or name string
-    @param engines A dictionary of scheme/class pairs
-    @param kw Keywords'''
-    # Load module from storage
-    if isinstance(shove, basestring):
-        mod = engines[cache.split('://', 1)[0]]
-        # Load if setuptools not present
-        if isinstance(mod, basestring): 
-            # Isolate classname from dot path
-            module, klass = mod.split(':')
-            # Load module
-            mod = getattr(__import__(module, '', '', ['']), klass)
-        # Load appropriate class from setuptools entry point
-        else:
-            mod = mod.load()
-        # Return instance
-        return mod(uri, **kw)
-    # No-op for existing instances
-    return shove
-
-def getserializer(serializer):
-    '''Loads a serializer.
-
-    @param serializer An instance or name string'''
-    if isinstance(serializer, basestring):
-        if serializer == 'pickle':
-            # Use cPickle if available
-            try:
-                return __import__('cPickle')
-            except ImportError: pass 
-        return __import__(serializer)
-    return serializer    
-
+import urllib
 try:
     # Import store and cache entry points if setuptools installed
     import pkg_resources
@@ -94,6 +40,8 @@ try:
         pkg_resources.iter_entry_points('shove.stores'))
     caches = dict((_cache.name, _cache) for _cache in
         pkg_resources.iter_entry_points('shove.caches'))
+    # Pass if nothing loaded
+    if not stores and not caches: raise ImportError()
 except ImportError:
     # Static store registry
     stores = dict(
@@ -126,6 +74,8 @@ except ImportError:
         oracle='shove.cache.db:DbCache',
         memcache='shove.cache.memcached:MemCached',
         bsddb='shove.cache.bsdb:BsdCache')
+
+__all__ = ['Shove', 'BaseStore', 'Base', 'storage', 'cache']
     
 # Serializer registry
 serializers = dict(
@@ -134,12 +84,67 @@ serializers = dict(
     yaml='yaml',
     marshal='marshal')
 
+def synchronized(func):
+    '''Decorator that locks and unlocks a method (Phillip J. Eby).
+
+    @param func Function to decorate
+    '''
+    def wrapper(self, *__args, **__kw):
+        self._lock.acquire()
+        try:
+            return func(self, *__args, **__kw)
+        finally:
+            self._lock.release()
+    # Add same meta info
+    wrapper.__name__ = func.__name__
+    wrapper.__dict__ = func.__dict__
+    wrapper.__doc__ = func.__doc__
+    return wrapper
+
+def getbackend(uri, engines, **kw):
+    '''Loads the right shove backend based on URI.
+
+    @param uri An instance or name string
+    @param engines A dictionary of scheme/class pairs
+    @param kw Keywords'''
+    # Load module from storage
+    if isinstance(uri, basestring):
+        mod = engines[uri.split('://', 1)[0]]
+        # Load if setuptools not present
+        if isinstance(mod, basestring): 
+            # Isolate classname from dot path
+            module, klass = mod.split(':')
+            # Load module
+            mod = getattr(__import__(module, '', '', ['']), klass)
+        # Load appropriate class from setuptools entry point
+        else:
+            mod = mod.load()
+        # Return instance
+        return mod(uri, **kw)
+    # No-op for existing instances
+    return shove
+
+def getserializer(serializer):
+    '''Loads a serializer.
+
+    @param serializer An instance or name string'''
+    if isinstance(serializer, basestring):
+        if serializer == 'pickle':
+            # Use cPickle if available
+            try:
+                return __import__('cPickle')
+            except ImportError: pass 
+        return __import__(serializer)
+    return serializer    
+
+
+
     
 class Base(object):
 
     '''Base Mapping class.'''
     
-    def __init__(self, **kw):
+    def __init__(self, engine, **kw):
         super(Base, self).__init__()
         self._compress = kw.get('compress', False)
         self.serializer = getserializer(kw.get('serializer', 'pickle'))
@@ -196,8 +201,8 @@ class BaseStore(Base):
 
     '''Base Store class.'''
 
-    def __init__(self, **kw):
-        super(BaseStore, self).__init__(**kw)
+    def __init__(self, engine, **kw):
+        super(BaseStore, self).__init__(engine, **kw)
         self._store = None
 
     def __cmp__(self, other):
@@ -305,7 +310,7 @@ class BaseStore(Base):
 
     def values(self):
         '''Returns a list with all values in a store.'''
-        return list(v for _, v in self.iteritems())
+        return list(v for _, v in self.iteritems()) 
     
     
 class Shove(BaseStore):
@@ -313,17 +318,11 @@ class Shove(BaseStore):
     '''Shove class.'''
     
     def __init__(self, store='simple://', cache='simple://', **kw):
-        super(Shove, self).__init__(**kw)
+        super(Shove, self).__init__(store, **kw)
         # Load store
-        try:
-            self._store = getbackend(store, stores, **kw)
-        except (KeyError, ImportError):
-            raise ImportError('Could not load store scheme "%s"' % sscheme)
+        self._store = getbackend(store, stores, **kw)
         # Load cache
-        try:
-            self._cache = getbackend(cache, caches, **kw)
-        except (KeyError, ImportError):
-            raise ImportError('Invalid cache scheme "%s"' % cscheme)
+        self._cache = getbackend(cache, caches, **kw)
         # Buffer for lazy writing and setting for syncing frequency
         self._buffer, self._sync = dict(), kw.get('sync', 2)
 
@@ -368,4 +367,41 @@ class Shove(BaseStore):
         if self._store is not None:
             self.sync()
             self._store.close()
-            self._store = self._cache = self._buffer = None        
+            self._store = self._cache = self._buffer = None
+
+
+class FileBase(Base):
+
+    '''Base class for file based storage.'''    
+
+    def __init__(self, engine, **kw):
+        super(FileBase, self).__init__(engine, **kw)
+        if engine.startswith('file://'):
+            engine = urllib.url2pathname(engine.split('://')[1])
+        self._dir = engine
+        # Create directory
+        if not os.path.exists(self._dir): self._createdir()  
+
+    def __delitem__(self, key):
+        try:
+            os.remove(self._key_to_file(key))
+        except (IOError, OSError):
+            raise KeyError('%s' % key)    
+
+    def __contains__(self, key):
+        return os.path.exists(self._key_to_file(key))
+    
+    def __len__(self):
+        return len(os.listdir(self._dir))    
+
+    def _createdir(self):
+        '''Creates the cache directory.'''
+        try:
+            os.makedirs(self._dir)
+        except OSError:
+            raise EnvironmentError('Cache directory "%s" does not exist and ' \
+                'could not be created' % self._dir)
+
+    def _key_to_file(self, key):
+        '''Gives the filesystem path for a key.'''
+        return os.path.join(self._dir, urllib.quote_plus(key))
