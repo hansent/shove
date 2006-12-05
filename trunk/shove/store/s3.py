@@ -49,9 +49,7 @@ from shove import BaseStore
 class S3Store(BaseStore):    
 
     def __init__(self, engine=None, **kw):
-        super(S3Store, self).__init__(engine, **kw)
-        # Updated flag used for avoiding network calls
-        self._updated, self._keys = True, None
+        super(S3Store, self).__init__(engine, **kw)       
         # key = Access Key, secret=Secret Access Key, bucket=bucket name 
         key, secret, bucket = kw.get('key'), kw.get('secret'), kw.get('bucket')
         if engine is not None:
@@ -71,6 +69,8 @@ class S3Store(BaseStore):
         # Set bucket permission ('private', 'public-read',
         # 'public-read-write', 'authenticated-read'
         self._store.set_acl(kw.get('acl', 'private'))
+        # Updated flag used for avoiding network calls
+        self._updated, self._keys = True, None
 
     def __getitem__(self, key):
         rkey = self._store.lookup(key)
