@@ -1,11 +1,11 @@
 import unittest
 import time
-from shove.cache.simple import Memcached
+from shove.cache.memcached import MemCached
 
 class TestMemcached(unittest.TestCase):
 
     initstring = 'memcache://localhost'
-    cacheclass = Memcached
+    cacheclass = MemCached
 
     def setUp(self): 
         self.cache = self.cacheclass(self.initstring)
