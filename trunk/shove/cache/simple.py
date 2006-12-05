@@ -46,38 +46,32 @@ class SimpleCache(BaseCache):
     '''Single-process in-memory cache.'''    
     
     def __init__(self, engine, **kw):
-        super(SimpleCache, self).__init__(**kw)
+        super(SimpleCache, self).__init__(engine, **kw)
         # Get random seed
         random.seed()
-        self._cache, self._expire_info = dict(), dict()
         # Set maximum number of items to cull if over max
-        self._maxcull = kw.get('maxcull', 10)
+        self._maxcull, self._cache = kw.get('maxcull', 10), dict()
         # Set max entries
         self._max_entries = kw.get('max_entries', 300)
 
     def __getitem__(self, key):
-        now, exp = time.time(), self._expire_info.get(key)
+        values = self.loads(self._cache[key]) 
         # Delete if item timed out.
-        if exp < now:
+        if values[0] < time.time():
             del self._cache[key]
             raise KeyError('%s' % key)
-        return self._cache[key]   
+        return values[1]
 
     def __setitem__(self, key, value):
         # Cull values if over max # of entries
         if len(self) >= self._max_entries: self._cull()
-        self._cache[key] = value
-        # Set timeout
-        self._expire_info[key] = time.time() + self.timeout
+        self._cache[key] = self.dumps((time.time() + self.timeout, value)) 
 
     def __delitem__(self, key):
         try:
             del self._cache[key]
         except KeyError:
             raise KeyError('%s' % key)
-        try:
-            del self._expire_info[key]
-        except KeyError: pass
 
     def __len__(self):
         return len(self._cache)
@@ -85,9 +79,9 @@ class SimpleCache(BaseCache):
     def _cull(self):
         '''Remove items in cache to make roomt.'''
         # Cull number of items allowed (set by _maxcull)
-        keys, num = self._expire_info.keys(), 0
-        for key in keys:
-            if num < self._maxcull:
+        num = 0
+        for key in self._cache.keys():
+            if num <= self._maxcull:
                 # Remove item if expired
                 try:
                     self[key]
@@ -95,6 +89,6 @@ class SimpleCache(BaseCache):
                     num += 1
             else: break
         # Check if sufficient space has been created
-        while len(self._cache) >= self._max_entries:
+        while len(self) >= self._max_entries and num <= self._maxcull:
             # Cull remainder of allowed quota at random
             del self[random.choice(self._cache.keys())]

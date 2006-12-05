@@ -35,7 +35,6 @@ memory://
 '''
 
 import copy
-import time
 import threading
 from shove import synchronized
 from shove.cache.simple import SimpleCache
@@ -56,9 +55,6 @@ class MemoryCache(SimpleCache):
 
     @synchronized        
     def __getitem__(self, key):
-        exp = self._expire_info.get(key)
-        # Delete item if expired
-        if exp < time.time(): del self[key]
         return copy.deepcopy(super(MemoryCache, self).__getitem__(key))
 
     @synchronized

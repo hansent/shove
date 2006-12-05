@@ -66,7 +66,7 @@ class DbCache(BaseCache):
     '''Database cache backend.'''
 
     def __init__(self, engine, **kw):
-        super(DbCache, self).__init__(**kw)
+        super(DbCache, self).__init__(engine, **kw)
         # Get table name
         tablename = kw.get('tablename', 'cache')
         # Bind metadata

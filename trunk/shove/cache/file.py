@@ -40,25 +40,19 @@ argument.
 
 import os
 import time
-import urllib
 import random
+from shove import FileBase
 from shove.cache.simple import SimpleCache
 
 __all__ = ['FileCache']
 
 
-class FileCache(SimpleCache):
+class FileCache(FileBase, SimpleCache):
 
     '''File-based cache backend'''    
     
     def __init__(self, engine, **kw):
         super(FileCache, self).__init__(engine, **kw)
-        if engine.startswith('file://'): engine = engine.split('://')[1]
-        # Create directory
-        self._dir = engine
-        if not os.path.exists(self._dir): self._createdir()
-        # Remove unneeded methods and attributes
-        del self._cache, self._expire_info
 
     def __getitem__(self, key):
         try:
@@ -77,47 +71,24 @@ class FileCache(SimpleCache):
         if len(self) >= self._max_entries: self._cull()
         try:
             try:
-                local = open(self._key_to_file(key), 'wb')                
+                local = open(self._key_to_file(key), 'wb')
                 local.write(self.dumps((time.time() + self.timeout, value)))
             finally:
                 local.close()
         except:
             raise KeyError('%s' % key)            
 
-    def __delitem__(self, key):
-        try:
-            os.remove(self._key_to_file(key))
-        except (IOError, OSError):
-            raise KeyError('%s' % key)
-
-    def __contains__(self, key):
-        return os.path.exists(self._key_to_file(key))
-    
-    def __len__(self):
-        return len(os.listdir(self._dir))
-
     def _cull(self):
         '''Remove items in cache to make room.'''
         filelist, num = os.listdir(self._dir), 0
         for fname in filelist:
-            if num < self._maxcull:
+            if num <= self._maxcull:
                 # Remove expired items from cache.
                 try:
                     self[fname]
                 except KeyError:
                     num += 1
             else: break
-        while len(self) >= self._max_entries:
+        num = 0
+        while len(self) >= self._max_entries and num <= self._maxcull:
             del self[random.choice(filelist)]
-
-    def _createdir(self):
-        '''Creates the cache directory.'''
-        try:
-            os.makedirs(self._dir)
-        except OSError:
-            raise EnvironmentError('Cache directory "%s" does not exist and ' \
-                'could not be created' % self._dir)
-
-    def _key_to_file(self, key):
-        '''Gives the filesystem path for a key.'''
-        return os.path.join(self._dir, urllib.quote_plus(key))
