@@ -33,13 +33,11 @@ shove's psuedo-URL for BSDDB caches follows the form:
 
 bsddb://<path>
 
-Where the path is a URL path to a BSDDB database. Alternatively, a native
-pathname to a BSD database can be passed as the 'engine' argument.
+Where the path is a URL path to a Berkeley database. Alternatively, the native
+pathname to a database can be passed as the 'engine' argument.
 '''
 
 import bsddb
-import time
-from shove import synchronized
 from shove.cache.memory import MemoryCache
 
 __all__ = ['BsdCache']
@@ -53,18 +51,11 @@ class BsdCache(MemoryCache):
         super(BsdCache, self).__init__(engine, **kw)
         if engine.startswith('bsddb://'): engine = engine.split('://')[1]
         self._cache = bsddb.hashopen(engine)
-        
-    @synchronized
-    def __getitem__(self, key):
-        values = self.loads(self._cache[key])
-        # Remove item if expired
-        if values[0] < time.time():
-            del self[key]
-            raise KeyError('%s' % key)
-        return values[1]
-                
-    @synchronized
+              
     def __setitem__(self, key, value):
-        if len(self._cache) > self._max_entries: self._cull()
-        self._cache[key] = self.dumps((time.time() + self.timeout, value))
+        super(BsdCache, self).__setitem__(key, value)
+        self._cache.sync()
+
+    def __delitem__(self, key):
+        super(BsdCache, self).__delitem__(key)
         self._cache.sync()

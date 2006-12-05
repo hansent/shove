@@ -48,7 +48,7 @@ class MemCached(BaseCache):
     '''Memcached cache backend'''    
     
     def __init__(self, engine, **kw):
-        super(MemCached, self).__init__(**kw)
+        super(MemCached, self).__init__(engine, **kw)
         if engine.startswith('memcache://'): engine = engine.split('://')[1]
         self._cache = memcache.Client(engine.split(';'))
 
