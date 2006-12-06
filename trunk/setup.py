@@ -37,11 +37,11 @@ except:
 setup(name='shove',
       version='0.2',
       description='''Universal object storage frontend.''',
-      long_description='''Shelve-like universal object storage frontend that
-supports dictionary-style access, caching, object serialization, and
-data compression.
+      long_description='''Universal object storage frontend that
+supports dictionary-style access, automatic object serialization and
+compression, and multiple storage and caching backends.
 
-Currently supported storage backends:
+The currently supported storage backends are:
 
 Amazon S3 Web Service
 Berkeley Source Database
@@ -59,7 +59,7 @@ SQLite
 Subversion
 Zope Object Database (ZODB)
 
-Currently supported caching backends:
+The currently supported caching backends are:
 
 Berkeley Source Database
 Memory
@@ -70,14 +70,7 @@ Microsoft SQL Server
 MySQL
 Oracle
 PostgreSQL
-SQLite
-
-Currently supported object serialization formats:
-
-marshal
-pickle
-JSON
-YAML''',
+SQLite''',
       author='L. C. Rees',
       author_email='lcrees@gmail.com',
       license='BSD',
