@@ -38,27 +38,29 @@ try:
     import memcache
 except ImportError:
     raise ImportError("Memcache cache requires the 'memcache' library")
-from shove.cache import BaseCache
+from shove import Base
 
 __all__ = ['MemCached']
 
 
-class MemCached(BaseCache):
+class MemCached(Base):
 
     '''Memcached cache backend'''    
     
     def __init__(self, engine, **kw):
         super(MemCached, self).__init__(engine, **kw)
         if engine.startswith('memcache://'): engine = engine.split('://')[1]
-        self._cache = memcache.Client(engine.split(';'))
+        self._store = memcache.Client(engine.split(';'))
+        # Set timeout
+        self.timeout = kw.get('timeout', 300)
 
     def __getitem__(self, key):
-        value = self._cache.get(key)
+        value = self._store.get(key)
         if value is None: raise KeyError('%s' % key)
         return self.loads(value)
         
     def __setitem__(self, key, value):
-        self._cache.set(key, self.dumps(value), self.timeout)
+        self._store.set(key, self.dumps(value), self.timeout)
 
     def __delitem__(self, key):
-        self._cache.delete(key)
+        self._store.delete(key)
