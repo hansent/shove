@@ -34,33 +34,14 @@ The shove psuedo-URL for a simple store is:
 simple://
 '''
 
-from shove import BaseStore
+from shove import BaseStore, SimpleBase
 
 __all__ = ['SimpleStore']
 
 
-class SimpleStore(BaseStore):
+class SimpleStore(SimpleBase, BaseStore):
 
     '''Single-process in-memory store.'''    
     
     def __init__(self, engine, **kw):
         super(SimpleStore, self).__init__(engine, **kw)
-        self._store = dict()
-
-    def __getitem__(self, key):
-        try:
-            return self._store[key]
-        except:
-            raise KeyError('%s' % key)
-
-    def __setitem__(self, key, value):
-        self._store[key] = value
-
-    def __delitem__(self, key):
-        try:
-            del self._store[key]
-        except:
-            raise KeyError('%s' % key)
-
-    def keys(self):
-        return self._store.keys() 

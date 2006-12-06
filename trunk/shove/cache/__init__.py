@@ -1,4 +1,4 @@
-__all__ = ['bsdb', 'db', 'file', 'memcached', 'memory', 'simple']
+__all__ = ['db', 'file', 'memcached', 'memory', 'simple']
 
 
         

@@ -161,7 +161,7 @@ class Base(object):
         '''Optionally serializes and  compresses an object.
         
         value An object'''
-        # Serialize everything but non-ascii strings
+        # Serialize everything but ASCII strings
         if not isinstance(value, str): value = pickle.dumps(value)
         # Apply maximum compression
         if self._compress: value = zlib.compress(value, 9)
@@ -170,7 +170,7 @@ class Base(object):
     def loads(self, value):
         '''Deserializes and optionally decompresses an object.
 
-        value Object'''
+        value An object'''
         if self._compress:
             try:
                 value = zlib.decompress(value)
@@ -178,8 +178,9 @@ class Base(object):
         # Load serialized objects
         try:
             value = pickle.loads(value)
-        # Pass on strings
-        except IndexError: pass
+        # Skip non strings
+        except (pickle.UnpicklingError, IndexError, ValueError):
+            if isinstance(value, str): pass
         return value
 
 
@@ -366,13 +367,25 @@ class FileBase(Base):
             engine = urllib.url2pathname(engine.split('://')[1])
         self._dir = engine
         # Create directory
-        if not os.path.exists(self._dir): self._createdir()  
+        if not os.path.exists(self._dir): self._createdir()
+
+    def __getitem__(self, key):
+        try:
+            return self.loads(open(self._key_to_file(key), 'rb').read())
+        except:
+            raise KeyError('%s' % key)
+
+    def __setitem__(self, key, value):
+        try:
+            open(self._key_to_file(key), 'wb').write(self.dumps(value))
+        except (IOError, OSError):
+            raise KeyError('%s' % key)        
 
     def __delitem__(self, key):
         try:
             os.remove(self._key_to_file(key))
         except (IOError, OSError):
-            raise KeyError('%s' % key)    
+            raise KeyError('%s' % key)
 
     def __contains__(self, key):
         return os.path.exists(self._key_to_file(key))
@@ -386,8 +399,57 @@ class FileBase(Base):
             os.makedirs(self._dir)
         except OSError:
             raise EnvironmentError('Cache directory "%s" does not exist and ' \
-                'could not be created' % self._dir)
+                'could not be created' % self._dir)    
 
     def _key_to_file(self, key):
         '''Gives the filesystem path for a key.'''
         return os.path.join(self._dir, urllib.quote_plus(key))
+
+    def keys(self):
+        '''Returns a list of keys in the store.'''
+        return os.listdir(self._dir)       
+
+
+class SimpleBase(Base):
+
+    '''Single-process in-memory store base class.'''    
+    
+    def __init__(self, engine, **kw):
+        super(SimpleBase, self).__init__(engine, **kw)
+        self._store = dict()
+
+    def __getitem__(self, key):
+        try:
+            return self._store[key]
+        except:
+            raise KeyError('%s' % key)
+
+    def __setitem__(self, key, value):
+        self._store[key] = value
+
+    def __delitem__(self, key):
+        try:
+            del self._store[key]
+        except:
+            raise KeyError('%s' % key)
+
+    def __len__(self):
+        return len(self._store)        
+
+    def keys(self):
+        '''Returns a list of keys in the store.'''
+        return self._store.keys()        
+
+
+class DbBase(Base):     
+
+    '''Database cache backend.'''
+
+    def __init__(self, engine, **kw):
+        super(DbBase, self).__init__(engine, **kw)
+      
+    def __delitem__(self, key):
+        self._store.delete(self._store.c.key==key).execute()
+
+    def __len__(self):
+        return self._store.count().execute().fetchone()[0]

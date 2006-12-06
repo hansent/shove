@@ -50,19 +50,3 @@ class FileStore(FileBase, BaseStore):
     
     def __init__(self, engine, **kw):
         super(FileStore, self).__init__(engine, **kw)
-
-    def __getitem__(self, key):
-        try:
-            return self.loads(open(self._key_to_file(key), 'rb').read())
-        except:
-            raise KeyError('%s' % key)
-
-    def __setitem__(self, key, value):
-        try:
-            open(self._key_to_file(key), 'wb').write(self.dumps(value))
-        except (IOError, OSError):
-            raise KeyError('%s' % key)
-
-    def keys(self):
-        '''Returns a list of keys in the store.'''
-        return os.listdir(self._dir)
