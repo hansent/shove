@@ -35,13 +35,13 @@ except:
     from distutils.core import setup
 
 setup(name='shove',
-      version='0.2',
-      description='''Universal object storage frontend.''',
-      long_description='''Universal object storage frontend that
-supports dictionary-style access, automatic object serialization and
-compression, and multiple storage and caching backends.
+      version='0.1',
+      description='''Common object storage frontend.''',
+      long_description='''Common object storage frontend that supports
+dictionary-style access, object serialization and compression, and
+multiple storage and caching backends.
 
-The currently supported storage backends are:
+Currently supported storage backends are:
 
 Amazon S3 Web Service
 Berkeley Source Database
@@ -59,9 +59,8 @@ SQLite
 Subversion
 Zope Object Database (ZODB)
 
-The currently supported caching backends are:
+Currently supported caching backends are:
 
-Berkeley Source Database
 Memory
 Filesystem
 Firebird
@@ -70,7 +69,32 @@ Microsoft SQL Server
 MySQL
 Oracle
 PostgreSQL
-SQLite''',
+SQLite
+
+The simplest shove use case is:
+
+from shove import Shove
+
+store = Shove()
+
+which creates an in-memory store and cache.
+
+The use of other backends for storage and caching involves
+passing an module URI or existing store or cache instance
+to shove following the form:
+
+from shove import Shove
+
+<storename> = Shove(<store_uri>, <cache_uri>)
+
+The module-specific URI form is documented in its module. The
+form follows the URI form used by SQLAlchemy:
+
+http://www.sqlalchemy.org/docs/dbengine.myt#dbengine_establishing
+
+shove's access API is the Python mapping API:
+
+http://docs.python.org/lib/typesmapping.html''',
       author='L. C. Rees',
       author_email='lcrees@gmail.com',
       license='BSD',
