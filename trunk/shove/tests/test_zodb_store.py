@@ -6,8 +6,10 @@ from shove import Shove
 
 class TestZodbStore(unittest.TestCase):
 
+    init = 'zodb://test.db'    
+
     def setUp(self): 
-        self.store = Shove('zodb://test.db', compressed=True)
+        self.store = Shove(self.init, compressed=True)
 
     def tearDown(self): 
         self.store.close()
@@ -126,6 +128,7 @@ class TestZodbStore(unittest.TestCase):
         self.store['pow'] = 7
         slist = self.store.keys()
         self.assertEqual('min' in slist, True)
+        
 
 if __name__ == '__main__':
     unittest.main()
