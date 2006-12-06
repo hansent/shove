@@ -29,7 +29,6 @@
 
 '''Database object store.
 
-
 The shove psuedo-URL used for database object stores is the format used by
 SQLAlchemy:
     
@@ -51,50 +50,44 @@ http://www.sqlalchemy.org/docs/dbengine.myt#dbengine_supported
 try:
     from sqlalchemy import *
 except ImportError:
-    raise ImportError('DbCache cache requires the SQLAlchemy package.')
-from shove import BaseStore
+    raise ImportError('DbStore requires the SQLAlchemy package.')
+from shove import BaseStore, DbBase
 
 __all__ = ['DbStore']
 
 
-class DbStore(BaseStore):     
+class DbStore(BaseStore, DbBase):     
 
     '''Database cache backend.'''
 
     def __init__(self, engine, **kw):
         super(DbStore, self).__init__(engine, **kw)
+        # Get tablename
+        tablename = kw.get('tablename', 'store')        
         # Bind metadata
         self._metadata = BoundMetaData(engine)
-        # Get tablename
-        tablename = kw.get('tablename', 'store')
         # Make store table
         self._store = Table(tablename, self._metadata,
-            Column('store_key', String(256), primary_key=True,
-                nullable=False),
-            Column('store_value', Binary, nullable=False))
+            Column('key', String(256), primary_key=True, nullable=False),
+            Column('value', Binary, nullable=False))
         # Create store table if it does not exist
         if not self._store.exists(): self._store.create()
 
-    def __getitem__(self, key):
-        row = self._store.select().execute(store_key=key).fetchone()
-        if row is not None:
-            return self.loads(str(row.store_value))
-        raise KeyError('Key "%s" not found.' % key)
+    def __getitem__(self, k):
+        row = self._store.select().execute(key=k).fetchone()
+        if row is not None: return self.loads(str(row.value))
+        raise KeyError('Key "%s" not found.' % k)
         
-    def __setitem__(self, key, value):
-        value = self.dumps(value)
+    def __setitem__(self, k, v):
+        v, store = self.dumps(v), self._store
         # Update database if key already present
-        if key in self:
-            self._store.update(
-                self._store.c.store_key==key).execute(store_value=value)
+        if k in self:
+            store.update(store.c.key==k).execute(value=v)
         # Insert new key if key not present
         else:            
-            self._store.insert().execute(store_key=key, store_value=value)
-       
-    def __delitem__(self, key):
-        self._store.delete(self._store.c.store_key==key).execute()
+            store.insert().execute(key=k, value=v)
 
     def keys(self):
         '''Returns a list of keys in the store.'''
-        return list(i[0] for i in select(
-            [self._store.c.store_key]).execute().fetchall())
+        store = self._store
+        return list(i[0] for i in select([store.c.key]).execute().fetchall())
