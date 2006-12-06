@@ -34,6 +34,10 @@ import os
 import zlib
 import urllib
 try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
+try:
     # Import store and cache entry points if setuptools installed
     import pkg_resources
     stores = dict((_store.name, _store) for _store in
@@ -77,17 +81,10 @@ except ImportError:
 
 __all__ = ['Shove', 'BaseStore', 'Base', 'storage', 'cache']
     
-# Serializer registry
-serializers = dict(
-    pickle='pickle',
-    json='simplejson',
-    yaml='yaml',
-    marshal='marshal')
-
 def synchronized(func):
-    '''Decorator that locks and unlocks a method (Phillip J. Eby).
+    '''Decorator to lock and unlock a method (Phillip J. Eby).
 
-    @param func Function to decorate
+    @param func Method to decorate
     '''
     def wrapper(self, *__args, **__kw):
         self._lock.acquire()
@@ -102,15 +99,14 @@ def synchronized(func):
     return wrapper
 
 def getbackend(uri, engines, **kw):
-    '''Loads the right shove backend based on URI.
+    '''Loads the right backend based on a URI.
 
-    @param uri An instance or name string
+    @param uri Instance or name string
     @param engines A dictionary of scheme/class pairs
     @param kw Keywords'''
-    # Load module from storage
     if isinstance(uri, basestring):
         mod = engines[uri.split('://', 1)[0]]
-        # Load if setuptools not present
+        # Manual load if setuptools not present
         if isinstance(mod, basestring): 
             # Isolate classname from dot path
             module, klass = mod.split(':')
@@ -124,22 +120,7 @@ def getbackend(uri, engines, **kw):
     # No-op for existing instances
     return uri
 
-def getserializer(serializer):
-    '''Loads a serializer.
 
-    @param serializer An instance or name string'''
-    if isinstance(serializer, basestring):
-        if serializer == 'pickle':
-            # Use cPickle if available
-            try:
-                return __import__('cPickle')
-            except ImportError: pass 
-        return __import__(serializer)
-    return serializer    
-
-
-
-    
 class Base(object):
 
     '''Base Mapping class.'''
@@ -147,7 +128,6 @@ class Base(object):
     def __init__(self, engine, **kw):
         super(Base, self).__init__()
         self._compress = kw.get('compress', False)
-        self.serializer = getserializer(kw.get('serializer', 'pickle'))
     
     def __getitem__(self, key):
         raise NotImplementedError()
@@ -178,10 +158,12 @@ class Base(object):
             return default
     
     def dumps(self, value):
-        '''Serializes and optionally compresses an object.
+        '''Optionally serializes and  compresses an object.
         
-        value Object'''
-        value = self.serializer.dumps(value)
+        value An object'''
+        # Serialize everything but non-ascii strings
+        if not isinstance(value, str): value = pickle.dumps(value)
+        # Apply maximum compression
         if self._compress: value = zlib.compress(value, 9)
         return value
     
@@ -192,14 +174,18 @@ class Base(object):
         if self._compress:
             try:
                 value = zlib.decompress(value)
-            except: pass
-        value = self.serializer.loads(value)
+            except zlib.error: pass
+        # Load serialized objects
+        try:
+            value = pickle.loads(value)
+        # Pass on strings
+        except IndexError: pass
         return value
 
 
 class BaseStore(Base):
 
-    '''Base Store class.'''
+    '''Base Store class (based on DictMixin).'''
 
     def __init__(self, engine, **kw):
         super(BaseStore, self).__init__(engine, **kw)
