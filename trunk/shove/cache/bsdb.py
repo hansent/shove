@@ -50,12 +50,12 @@ class BsdCache(MemoryCache):
     def __init__(self, engine, **kw):
         super(BsdCache, self).__init__(engine, **kw)
         if engine.startswith('bsddb://'): engine = engine.split('://')[1]
-        self._cache = bsddb.hashopen(engine)
+        self._store = bsddb.hashopen(engine)
               
     def __setitem__(self, key, value):
         super(BsdCache, self).__setitem__(key, value)
-        self._cache.sync()
+        self._store.sync()
 
     def __delitem__(self, key):
         super(BsdCache, self).__delitem__(key)
-        self._cache.sync()
+        self._store.sync()

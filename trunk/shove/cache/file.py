@@ -38,7 +38,6 @@ Alternatively, a native pathname to the directory can be passed as the 'engine'
 argument.
 '''
 
-import os
 import time
 import random
 from shove import FileBase
@@ -56,39 +55,15 @@ class FileCache(FileBase, SimpleCache):
 
     def __getitem__(self, key):
         try:
-            local = open(self._key_to_file(key), 'rb')
-            values = self.loads(local.read())
-            local.close()
+            exp, value = super(FileCache, self).__getitem__(key)
             # Remove item if time has expired.
-            if values[0] < time.time():
+            if exp < time.time():
                 del self[key]
                 raise KeyError('%s' % key)  
-            return values[1]
+            return value
         except:
             raise KeyError('%s' % key)                
 
     def __setitem__(self, key, value):
         if len(self) >= self._max_entries: self._cull()
-        try:
-            try:
-                local = open(self._key_to_file(key), 'wb')
-                local.write(self.dumps((time.time() + self.timeout, value)))
-            finally:
-                local.close()
-        except:
-            raise KeyError('%s' % key)            
-
-    def _cull(self):
-        '''Remove items in cache to make room.'''
-        filelist, num = os.listdir(self._dir), 0
-        for fname in filelist:
-            if num <= self._maxcull:
-                # Remove expired items from cache.
-                try:
-                    self[fname]
-                except KeyError:
-                    num += 1
-            else: break
-        num = 0
-        while len(self) >= self._max_entries and num <= self._maxcull:
-            del self[random.choice(filelist)]
+        super(FileCache, self).__setitem__(key, (time.time() + self.timeout, value))

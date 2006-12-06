@@ -36,12 +36,12 @@ simple://
 
 import time
 import random
-from shove.cache import BaseCache
+from shove import SimpleBase
 
 __all__ = ['SimpleCache']
 
 
-class SimpleCache(BaseCache):
+class SimpleCache(SimpleBase):
 
     '''Single-process in-memory cache.'''    
     
@@ -50,45 +50,42 @@ class SimpleCache(BaseCache):
         # Get random seed
         random.seed()
         # Set maximum number of items to cull if over max
-        self._maxcull, self._cache = kw.get('maxcull', 10), dict()
+        self._maxcull = kw.get('maxcull', 10)
         # Set max entries
         self._max_entries = kw.get('max_entries', 300)
+        # Set timeout
+        self.timeout = kw.get('timeout', 300)
 
     def __getitem__(self, key):
-        values = self.loads(self._cache[key]) 
+        exp, value = super(SimpleCache, self).__getitem__(key) 
         # Delete if item timed out.
-        if values[0] < time.time():
-            del self._cache[key]
+        if exp < time.time():
+            super(SimpleCache, self).__delitem__(key)
             raise KeyError('%s' % key)
-        return values[1]
+        return value
 
     def __setitem__(self, key, value):
         # Cull values if over max # of entries
         if len(self) >= self._max_entries: self._cull()
-        self._cache[key] = self.dumps((time.time() + self.timeout, value)) 
+        # Set expiration time and value
+        exp = time.time() + self.timeout
+        super(SimpleCache, self).__setitem__(key, (exp, value)) 
 
-    def __delitem__(self, key):
-        try:
-            del self._cache[key]
-        except KeyError:
-            raise KeyError('%s' % key)
-
-    def __len__(self):
-        return len(self._cache)
-        
     def _cull(self):
-        '''Remove items in cache to make roomt.'''
-        # Cull number of items allowed (set by _maxcull)
-        num = 0
-        for key in self._cache.keys():
-            if num <= self._maxcull:
-                # Remove item if expired
+        '''Remove items in cache to make room.'''        
+        num, maxcull = 0, self._maxcull
+        # Cull number of items allowed (set by self._maxcull)
+        for key in self.keys():
+            # Remove only maximum # of items allowed by maxcull
+            if num <= maxcull:
+                # Remove items if expired
                 try:
                     self[key]
                 except KeyError:
                     num += 1
             else: break
-        # Check if sufficient space has been created
-        while len(self) >= self._max_entries and num <= self._maxcull:
+        # Remove any additional items up to max # of items allowed by maxcull
+        while len(self) >= self._max_entries and num <= maxcull:
             # Cull remainder of allowed quota at random
-            del self[random.choice(self._cache.keys())]
+            del self[random.choice(self.keys())]
+            num += 1            
