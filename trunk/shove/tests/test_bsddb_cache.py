@@ -13,7 +13,7 @@ class TestBsdCache(unittest.TestCase):
         self.cache = self.cacheclass(self.initstring)
 
     def tearDown(self): 
-        self.cache._cache.close()
+        self.cache._store.close()
         os.remove('test.db')
     
     def test_getitem(self):
