@@ -94,8 +94,7 @@ class DbCache(BaseCache):
         raise KeyError('%s' % key)
 
     def __setitem__(self, key, val):
-        timeout = self.timeout
-        val=self.dumps(val)
+        timeout, val, cache = self.timeout, self.dumps(val), self._cache
         # Cull if too many items
         if len(self) >= self._max_entries: self._cull()
         # Generate expiration time
@@ -103,12 +102,10 @@ class DbCache(BaseCache):
             time.time() + timeout).replace(microsecond=0)
         # Update database if key already present
         if key in self:
-            self._cache.update(self._cache.c.cache_key==key).execute(
-                value=val, expires=exp)
+            cache.update(cache.c.cache_key==key).execute(value=val, expires=exp)
         # Insert new key if key not present
         else:            
-            self._cache.insert().execute(cache_key=key,
-                value=val, expires=exp)
+            cache.insert().execute(cache_key=key, value=val, expires=exp)
 
     def __delitem__(self, key):
         self._cache.delete(self._cache.c.cache_key==key).execute()
@@ -119,13 +116,17 @@ class DbCache(BaseCache):
     def _cull(self):
         '''Remove items in cache to make more room.'''
         # Remove items that have timed out
+        cache, maxcull = self._cache, self._maxcull
         now = datetime.now().replace(microsecond=0)
-        self._cache.delete(self._cache.c.expires < now).execute()
+        cache.delete(cache.c.expires < now).execute()
         # Remove any items over the maximum allowed number in the cache
         if len(self) >= self._max_entries:
-            keys = [i[0] for i
-                in select([self._cache.c.cache_key]).execute().fetchall()]
-            delkeys = list(random.choice(keys) for i in range(self._maxcull))
-            self._cache.delete(self._cache.c.cache_key.like(
-                bindparam('key'))).execute(*tuple({
-                    'key':'%' + key + '%'} for key in delkeys))
+            # Upper limit for key query
+            ul = maxcull * 2
+            # Get keys
+            keys = [i[0] for i in select([cache.c.cache_key], limit=ul).execute().fetchall()]
+            # Get some keys at random
+            delkeys = list(random.choice(keys) for i in range(maxcull))
+            # Delete keys
+            fkeys = tuple({'key':key} for key in delkeys)
+            cache.delete(cache.c.cache_key.in_(bindparam('key'))).execute(*fkeys)
