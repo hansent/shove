@@ -28,7 +28,7 @@
 # OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-'''Universal object storage.'''
+'''Common object storage frontend.'''
 
 import os
 import zlib
@@ -47,7 +47,7 @@ try:
     # Pass if nothing loaded
     if not stores and not caches: raise ImportError()
 except ImportError:
-    # Static store registry
+    # Static store backend registry
     stores = dict(
         simple='shove.store.simple:SimpleStore',
         memory='shove.store.memory:MemoryStore',
@@ -65,7 +65,7 @@ except ImportError:
         ftp='shove.store.ftp:FtpStore',
         zodb='shove.store.zodb:ZodbStore',
         durus='shove.store.durusdb:DurusStore')
-    # Cache registry
+    # Static cache backend registry
     caches = dict(
         simple='shove.cache.simple:SimpleCache',
         memory='shove.cache.memory:MemoryCache',
@@ -79,7 +79,7 @@ except ImportError:
         memcache='shove.cache.memcached:MemCached',
         bsddb='shove.cache.bsdb:BsdCache')
 
-__all__ = ['Shove', 'BaseStore', 'Base', 'storage', 'cache']
+__all__ = ['Shove', 'storage', 'cache']
     
 def synchronized(func):
     '''Decorator to lock and unlock a method (Phillip J. Eby).
@@ -92,7 +92,6 @@ def synchronized(func):
             return func(self, *__args, **__kw)
         finally:
             self._lock.release()
-    # Add same meta info
     wrapper.__name__ = func.__name__
     wrapper.__dict__ = func.__dict__
     wrapper.__doc__ = func.__doc__
@@ -106,7 +105,7 @@ def getbackend(uri, engines, **kw):
     @param kw Keywords'''
     if isinstance(uri, basestring):
         mod = engines[uri.split('://', 1)[0]]
-        # Manual load if setuptools not present
+        # Load module if setuptools not present
         if isinstance(mod, basestring): 
             # Isolate classname from dot path
             module, klass = mod.split(':')
@@ -158,9 +157,7 @@ class Base(object):
             return default
     
     def dumps(self, value):
-        '''Optionally serializes and  compresses an object.
-        
-        value An object'''
+        '''Optionally serializes and  compresses an object.'''
         # Serialize everything but ASCII strings
         if not isinstance(value, str): value = pickle.dumps(value)
         # Apply maximum compression
@@ -168,9 +165,7 @@ class Base(object):
         return value
     
     def loads(self, value):
-        '''Deserializes and optionally decompresses an object.
-
-        value An object'''
+        '''Deserializes and optionally decompresses an object.'''
         if self._compress:
             try:
                 value = zlib.decompress(value)
@@ -186,7 +181,7 @@ class Base(object):
 
 class BaseStore(Base):
 
-    '''Base Store class (based on DictMixin).'''
+    '''Base Store class (based on UserDict.DictMixin).'''
 
     def __init__(self, engine, **kw):
         super(BaseStore, self).__init__(engine, **kw)
@@ -198,7 +193,6 @@ class BaseStore(Base):
             return cmp(dict(self.iteritems()), dict(other.iteritems()))
 
     def __del__(self):
-        '''Handles object clean up if store is deleted and gced.'''
         # __init__ didn't succeed, so don't bother closing
         if not hasattr(self, '_store'): return
         self.close()
@@ -302,7 +296,7 @@ class BaseStore(Base):
     
 class Shove(BaseStore):
 
-    '''Shove class.'''
+    '''Common object frontend class.'''
     
     def __init__(self, store='simple://', cache='simple://', **kw):
         super(Shove, self).__init__(store, **kw)
@@ -394,7 +388,7 @@ class FileBase(Base):
         return len(os.listdir(self._dir))    
 
     def _createdir(self):
-        '''Creates the cache directory.'''
+        '''Creates the store directory.'''
         try:
             os.makedirs(self._dir)
         except OSError:
@@ -443,7 +437,7 @@ class SimpleBase(Base):
 
 class DbBase(Base):     
 
-    '''Database cache backend.'''
+    '''Database common base class.'''
 
     def __init__(self, engine, **kw):
         super(DbBase, self).__init__(engine, **kw)
