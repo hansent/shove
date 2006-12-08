@@ -38,38 +38,39 @@ setup(name='shove',
       version='0.1',
       description='''Common object storage frontend.''',
       long_description='''Common object storage frontend that supports
-dictionary-style access, object serialization and compression, and
-multiple storage and caching backends.
+dictionary-style access, object serialization 
+and compression, and multiple storage and caching
+backends.
 
 Currently supported storage backends are:
 
-Amazon S3 Web Service
-Berkeley Source Database
-Memory
-Filesystem
-Firebird
-FTP
-DBM
-Durus
-Microsoft SQL Server
-MySQL
-Oracle
-PostgreSQL
-SQLite
-Subversion
-Zope Object Database (ZODB)
+* Amazon S3 Web Service
+* Berkeley Source Database
+* Memory
+* Filesystem
+* Firebird
+* FTP
+* DBM
+* Durus
+* Microsoft SQL Server
+* MySQL
+* Oracle
+* PostgreSQL
+* SQLite
+* Subversion
+* Zope Object Database (ZODB)
 
 Currently supported caching backends are:
 
-Memory
-Filesystem
-Firebird
-memcache
-Microsoft SQL Server
-MySQL
-Oracle
-PostgreSQL
-SQLite
+* Memory
+* Filesystem
+* Firebird
+* memcache
+* Microsoft SQL Server
+* MySQL
+* Oracle
+* PostgreSQL
+* SQLite
 
 The simplest shove use case is:
 
@@ -88,11 +89,11 @@ from shove import Shove
 <storename> = Shove(<store_uri>, <cache_uri>)
 
 The module-specific URI form is documented in its module. The
-form follows the URI form used by SQLAlchemy:
+URI form follows the URI form used by SQLAlchemy:
 
 http://www.sqlalchemy.org/docs/dbengine.myt#dbengine_establishing
 
-shove's access API is the Python mapping API:
+shove fully implements the Python dictionary/mapping API:
 
 http://docs.python.org/lib/typesmapping.html''',
       author='L. C. Rees',
