@@ -71,6 +71,8 @@ class SvnStore(BaseStore):
             if '@' in path:
                 auth, path = path.split('@')
                 user, password = auth.split(':')
+            # Ensure matching URL and path ends
+            epath, eurl = path.split('/')[-1], url.split('/')[-1]
             path = urllib.url2pathname(path)
         # Create subversion client
         self._client = pysvn.Client()
@@ -82,11 +84,11 @@ class SvnStore(BaseStore):
             self._client.info2(url)
         # Create store in repository if it doesn't exist
         except pysvn.ClientError:
-            self._client.mkdir(url)
+            self._client.mkdir(url, 'Adding directory')
         # Verify that local copy exists
-        try:
-            if self._client.info(path) is None:
-                self._client.checkout(url, path)
+        try:			
+            if self._client.info(path) is None: 
+                self._client.checkout(url, path)            
         # Check it out if it doesn't exist
         except pysvn.ClientError:
             self._client.checkout(url, path)
