@@ -51,11 +51,16 @@ http://www.sqlalchemy.org/docs/dbengine.myt#dbengine_supported
 import time
 import random
 from datetime import datetime
+
+from sqlalchemy import (
+        Table, Column, String, Binary, DateTime,
+        bindparam, select, update, insert, delete,
+    )
 try:
-    from sqlalchemy import *
+    from sqlalchemy import BoundMetaData
 except ImportError:
-    raise ImportError('DbCache requires the SQLAlchemy package ' \
-        'from http://www.sqlalchemy.org/')
+    from sqlalchemy import MetaData as BoundMetaData
+
 from shove import DbBase
 
 __all__ = ['DbCache']
@@ -85,44 +90,56 @@ class DbCache(DbBase):
         # Set timeout
         self.timeout = kw.get('timeout', 300)
 
-    def __getitem__(self, k):
-        row = self._store.select().execute(key=k).fetchone()
+    def __getitem__(self, key):
+        row = select(
+             [self._store.c.value, self._store.c.expires],
+            self._store.c.key==key
+        ).execute().fetchone()
         if row is not None:
             # Remove if item expired
             if row.expires < datetime.now().replace(microsecond=0):
-                del self[k]
-                raise KeyError('%s' % k)
+                del self[key]
+                raise KeyError('%s' % key)
             return self.loads(str(row.value))
-        raise KeyError('%s' % k)
+        raise KeyError('%s' % key)
 
-    def __setitem__(self, k, v):
-        timeout, v, cache = self.timeout, self.dumps(v), self._store
+    def __setitem__(self, key, value):
+        timeout, value, cache = self.timeout, self.dumps(value), self._store
         # Cull if too many items
         if len(self) >= self._max_entries: self._cull()
         # Generate expiration time
-        exp = datetime.fromtimestamp(
-            time.time() + timeout).replace(microsecond=0)
+        expires = datetime.fromtimestamp(
+            time.time() + timeout
+        ).replace(microsecond=0)
         # Update database if key already present
-        if k in self:
-            cache.update(cache.c.key==k).execute(value=v, expires=exp)
+        if key in self:
+            update(
+                cache,
+                cache.c.key==key,
+                dict(value=value, expires=expires)
+            ).execute()
         # Insert new key if key not present
-        else:            
-            cache.insert().execute(key=k, value=v, expires=exp)
+        else:
+            insert(cache, dict(key=key, value=value, expires=expires)).execute()
 
     def _cull(self):
-        '''Remove items in cache to make more room.'''        
+        '''Remove items in cache to make more room.'''
         cache, maxcull = self._store, self._maxcull
         # Remove items that have timed out
         now = datetime.now().replace(microsecond=0)
-        cache.delete(cache.c.expires < now).execute()
+        delete(cache, cache.c.expires < now).execute()
         # Remove any items over the maximum allowed number in the cache
         if len(self) >= self._max_entries:
             # Upper limit for key query
             ul = maxcull * 2
             # Get list of keys
-            keys = [i[0] for i in select([cache.c.key], limit=ul).execute().fetchall()]
+            keys = [
+                i[0] for i in select(
+                    [cache.c.key], limit=ul
+                ).execute().fetchall()
+            ]
             # Get some keys at random
-            delkeys = list(random.choice(keys) for i in range(maxcull))
+            delkeys = list(random.choice(keys) for i in xrange(maxcull))
             # Delete keys
             fkeys = tuple({'key':k} for k in delkeys)
-            cache.delete(cache.c.key.in_(bindparam('key'))).execute(*fkeys)
+            delete(cache, cache.c.key.in_(bindparam('key'))).execute(*fkeys)

@@ -31,46 +31,44 @@ ez_setup.use_setuptools()
 
 try:
     from setuptools import setup
-except:
+except ImportError:
     from distutils.core import setup
 
-setup(name='shove',
-      version='0.1',
-      description='''Common object storage frontend.''',
-      long_description='''Common object storage frontend that supports
-dictionary-style access, object serialization 
-and compression, and multiple storage and caching
-backends.
+setup(
+    name='shove',
+    version='0.1.1',
+    description='''Common object storage frontend.''',
+    long_description='''Common object storage frontend that supports dictionary-style access, object serialization and compression, and multiple storage and caching backends.
 
 Currently supported storage backends are:
 
-* Amazon S3 Web Service
-* Berkeley Source Database
-* Memory
-* Filesystem
-* Firebird
-* FTP
-* DBM
-* Durus
-* Microsoft SQL Server
-* MySQL
-* Oracle
-* PostgreSQL
-* SQLite
-* Subversion
-* Zope Object Database (ZODB)
+    * Amazon S3 Web Service
+    * Berkeley Source Database
+    * Filesystem
+    * Firebird
+    * FTP
+    * DBM
+    * Durus
+    * Memory
+    * Microsoft SQL Server
+    * MySQL
+    * Oracle
+    * PostgreSQL
+    * SQLite
+    * Subversion
+    * Zope Object Database (ZODB)
 
 Currently supported caching backends are:
 
-* Memory
-* Filesystem
-* Firebird
-* memcache
-* Microsoft SQL Server
-* MySQL
-* Oracle
-* PostgreSQL
-* SQLite
+    * Filesystem
+    * Firebird
+    * memcached
+    * Memory
+    * Microsoft SQL Server
+    * MySQL
+    * Oracle
+    * PostgreSQL
+    * SQLite
 
 The simplest shove use case is:
 
@@ -80,44 +78,42 @@ store = Shove()
 
 which creates an in-memory store and cache.
 
-The use of other backends for storage and caching involves
-passing an module URI or existing store or cache instance
-to shove following the form:
+To use another backend for storage or caching, a configuration URI or an existing store or cache instance is passed to shove using the form:
 
 from shove import Shove
 
 <storename> = Shove(<store_uri>, <cache_uri>)
 
-The module-specific URI form is documented in its module. The
-URI form follows the URI form used by SQLAlchemy:
+The URI format for a backend is documented in its module. The URI form is the same as SQLAlchemy's:
 
-http://www.sqlalchemy.org/docs/dbengine.myt#dbengine_establishing
+http://www.sqlalchemy.org/docs/04/dbengine.html#dbengine_establishing
 
-shove fully implements the Python dictionary/mapping API:
+shove implements the Python dictionary/mapping API:
 
 http://docs.python.org/lib/typesmapping.html''',
-      author='L. C. Rees',
-      author_email='lcrees@gmail.com',
-      license='BSD',
-      packages = ['shove', 'shove.cache', 'shove.store', 'shove.tests'],
-      test_suite='shove.tests',
-      zip_safe = True,
-      keywords='object storage persistence database shelve',
-      classifiers=['Development Status :: 4 - Beta',
+    author='L. C. Rees',
+    author_email='lcrees@gmail.com',
+    url='http://pypi.python.org/pypi/shove/',
+    license='BSD',
+    packages = ['shove', 'shove.cache', 'shove.store', 'shove.tests'],
+    test_suite='shove.tests',
+    zip_safe = False,
+    keywords='object storage persistence database shelve',
+    classifiers=['Development Status :: 4 - Beta',
           'Environment :: Web Environment',
           'License :: OSI Approved :: BSD License',
           'Operating System :: OS Independent',
           'Programming Language :: Python',
           'Topic :: Database :: Front-Ends'],
-    install_requires = ['SQLAlchemy>=0.3', 'boto'],
+    install_requires = ['SQLAlchemy >=0.3', 'boto'],
     entry_points = '''
-    [shove.stores]   
-    bsddb=shove.store.bsdb:BsdStore    
+    [shove.stores]
+    bsddb=shove.store.bsdb:BsdStore
     dbm=shove.store.dbm:DbmStore
     durus=shove.store.durusdb:DurusStore
     file=shove.store.file:FileStore
     firebird=shove.store.db:DbStore
-    ftp=shove.store.ftp:FtpStore   
+    ftp=shove.store.ftp:FtpStore
     memory=shove.store.memory:MemoryStore
     mssql=shove.store.db:DbStore
     mysql=shove.store.db:DbStore
@@ -129,7 +125,7 @@ http://docs.python.org/lib/typesmapping.html''',
     svn=shove.store.svn:SvnStore
     zodb=shove.store.zodb:ZodbStore
     [shove.caches]
-    bsddb=shove.cache.bsdb:BsdCache    
+    bsddb=shove.cache.bsdb:BsdCache
     file=shove.cache.file:FileCache
     firebird=shove.cache.db:DbCache
     memcache=shove.cache.memcached:MemCached
@@ -140,4 +136,5 @@ http://docs.python.org/lib/typesmapping.html''',
     postgres=shove.cache.db:DbCache
     simple=shove.cache.simple:SimpleCache
     sqlite=shove.cache.db:DbCache
-    ''')
+    '''
+)
