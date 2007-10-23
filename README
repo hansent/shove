@@ -1,5 +1,5 @@
 Common object storage frontend that supports
-dictionary-style access, object serialization 
+dictionary-style access, object serialization
 and compression, and multiple storage and caching
 backends.
 
@@ -57,3 +57,7 @@ http://www.sqlalchemy.org/docs/dbengine.myt#dbengine_establishing
 shove fully implements the Python dictionary/mapping API:
 
 http://docs.python.org/lib/typesmapping.html
+
+Differences between 0.1 and 0.1.1
+
+- updated to work with SQLAlchemy 0.4.x

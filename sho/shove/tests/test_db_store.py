@@ -1,12 +1,14 @@
 import unittest
+
 from shove import Shove
+
 
 class TestDbStore(unittest.TestCase):
 
-    def setUp(self): 
+    def setUp(self):
         self.store = Shove('sqlite://', compressed=True)
 
-    def tearDown(self): 
+    def tearDown(self):
         self.store.close()
 
     def test__getitem__(self):
@@ -23,9 +25,9 @@ class TestDbStore(unittest.TestCase):
         self.assertEqual('max' in self.store, False)
 
     def test_get(self):
-        self.store['max'] = 3        
+        self.store['max'] = 3
         self.assertEqual(self.store.get('min'), None)
-            
+
     def test__cmp__(self):
         tstore = Shove()
         self.store['max'] = 3
@@ -81,7 +83,7 @@ class TestDbStore(unittest.TestCase):
         self.store['min'] = 6
         item = self.store.pop('min')
         self.assertEqual(item, 6)
-        
+
     def test_popitem(self):
         self.store['max'] = 3
         self.store['min'] = 6
@@ -120,6 +122,7 @@ class TestDbStore(unittest.TestCase):
         self.store['pow'] = 7
         slist = self.store.keys()
         self.assertEqual('min' in slist, True)
+
 
 if __name__ == '__main__':
     unittest.main()

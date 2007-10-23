@@ -31,7 +31,7 @@
 
 The shove psuedo-URL used for database object stores is the format used by
 SQLAlchemy:
-    
+
 <driver>://<username>:<password>@<host>:<port>/<database>
 
 <driver> is the database engine. The engines currently supported SQLAlchemy are
@@ -47,23 +47,30 @@ For more information on specific databases see:
 http://www.sqlalchemy.org/docs/dbengine.myt#dbengine_supported
 '''
 
+from datetime import datetime
+
+from sqlalchemy import (
+    Table, Column, String, Binary, DateTime,
+    bindparam, select
+)
 try:
-    from sqlalchemy import *
+    from sqlalchemy import BoundMetaData
 except ImportError:
-    raise ImportError('DbStore requires the SQLAlchemy package.')
+    from sqlalchemy import MetaData as BoundMetaData
+
 from shove import BaseStore, DbBase
 
 __all__ = ['DbStore']
 
 
-class DbStore(BaseStore, DbBase):     
+class DbStore(BaseStore, DbBase):
 
     '''Database cache backend.'''
 
     def __init__(self, engine, **kw):
         super(DbStore, self).__init__(engine, **kw)
         # Get tablename
-        tablename = kw.get('tablename', 'store')        
+        tablename = kw.get('tablename', 'store')
         # Bind metadata
         self._metadata = BoundMetaData(engine)
         # Make store table
@@ -73,21 +80,25 @@ class DbStore(BaseStore, DbBase):
         # Create store table if it does not exist
         if not self._store.exists(): self._store.create()
 
-    def __getitem__(self, k):
-        row = self._store.select().execute(key=k).fetchone()
+    def __getitem__(self, key):
+        row = select(
+            [self._store.c.value],
+            self._store.c.key==key
+        ).execute().fetchone()
         if row is not None: return self.loads(str(row.value))
-        raise KeyError('Key "%s" not found.' % k)
-        
+        raise KeyError('Key "%s" not found.' % key)
+
     def __setitem__(self, k, v):
         v, store = self.dumps(v), self._store
         # Update database if key already present
         if k in self:
             store.update(store.c.key==k).execute(value=v)
         # Insert new key if key not present
-        else:            
+        else:
             store.insert().execute(key=k, value=v)
 
     def keys(self):
         '''Returns a list of keys in the store.'''
-        store = self._store
-        return list(i[0] for i in select([store.c.key]).execute().fetchall())
+        return list(i[0] for i in select(
+            [self._store.c.key]
+        ).execute().fetchall())
