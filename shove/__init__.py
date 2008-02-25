@@ -6,10 +6,10 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #
-#    1. Redistributions of source code must retain the above copyright notice, 
+#    1. Redistributions of source code must retain the above copyright notice,
 #       this list of conditions and the following disclaimer.
-#    
-#    2. Redistributions in binary form must reproduce the above copyright 
+#
+#    2. Redistributions in binary form must reproduce the above copyright
 #       notice, this list of conditions and the following disclaimer in the
 #       documentation and/or other materials provided with the distribution.
 #
@@ -80,7 +80,7 @@ except ImportError:
         bsddb='shove.cache.bsdb:BsdCache')
 
 __all__ = ['Shove', 'storage', 'cache']
-    
+
 def synchronized(func):
     '''Decorator to lock and unlock a method (Phillip J. Eby).
 
@@ -106,7 +106,7 @@ def getbackend(uri, engines, **kw):
     if isinstance(uri, basestring):
         mod = engines[uri.split('://', 1)[0]]
         # Load module if setuptools not present
-        if isinstance(mod, basestring): 
+        if isinstance(mod, basestring):
             # Isolate classname from dot path
             module, klass = mod.split(':')
             # Load module
@@ -123,11 +123,11 @@ def getbackend(uri, engines, **kw):
 class Base(object):
 
     '''Base Mapping class.'''
-    
+
     def __init__(self, engine, **kw):
         super(Base, self).__init__()
         self._compress = kw.get('compress', False)
-    
+
     def __getitem__(self, key):
         raise NotImplementedError()
 
@@ -155,15 +155,15 @@ class Base(object):
             return self[key]
         except KeyError:
             return default
-    
+
     def dumps(self, value):
-        '''Optionally serializes and  compresses an object.'''
+        '''Optionally serializes and compresses an object.'''
         # Serialize everything but ASCII strings
         if not isinstance(value, str): value = pickle.dumps(value)
         # Apply maximum compression
         if self._compress: value = zlib.compress(value, 9)
         return value
-    
+
     def loads(self, value):
         '''Deserializes and optionally decompresses an object.'''
         if self._compress:
@@ -291,13 +291,13 @@ class BaseStore(Base):
 
     def values(self):
         '''Returns a list with all values in a store.'''
-        return list(v for _, v in self.iteritems()) 
-    
-    
+        return list(v for _, v in self.iteritems())
+
+
 class Shove(BaseStore):
 
     '''Common object frontend class.'''
-    
+
     def __init__(self, store='simple://', cache='simple://', **kw):
         super(Shove, self).__init__(store, **kw)
         # Load store
@@ -341,7 +341,7 @@ class Shove(BaseStore):
         '''Writes buffer to store.'''
         for k, v in self._buffer.iteritems(): self._store[k] = v
         self._buffer.clear()
-        
+
     def close(self):
         '''Finalizes and closes shove.'''
         # If close has been called, pass
@@ -353,7 +353,7 @@ class Shove(BaseStore):
 
 class FileBase(Base):
 
-    '''Base class for file based storage.'''    
+    '''Base class for file based storage.'''
 
     def __init__(self, engine, **kw):
         super(FileBase, self).__init__(engine, **kw)
@@ -373,7 +373,7 @@ class FileBase(Base):
         try:
             open(self._key_to_file(key), 'wb').write(self.dumps(value))
         except (IOError, OSError):
-            raise KeyError('%s' % key)        
+            raise KeyError('%s' % key)
 
     def __delitem__(self, key):
         try:
@@ -383,9 +383,9 @@ class FileBase(Base):
 
     def __contains__(self, key):
         return os.path.exists(self._key_to_file(key))
-    
+
     def __len__(self):
-        return len(os.listdir(self._dir))    
+        return len(os.listdir(self._dir))
 
     def _createdir(self):
         '''Creates the store directory.'''
@@ -393,7 +393,7 @@ class FileBase(Base):
             os.makedirs(self._dir)
         except OSError:
             raise EnvironmentError('Cache directory "%s" does not exist and ' \
-                'could not be created' % self._dir)    
+                'could not be created' % self._dir)
 
     def _key_to_file(self, key):
         '''Gives the filesystem path for a key.'''
@@ -401,13 +401,13 @@ class FileBase(Base):
 
     def keys(self):
         '''Returns a list of keys in the store.'''
-        return os.listdir(self._dir)       
+        return os.listdir(self._dir)
 
 
 class SimpleBase(Base):
 
-    '''Single-process in-memory store base class.'''    
-    
+    '''Single-process in-memory store base class.'''
+
     def __init__(self, engine, **kw):
         super(SimpleBase, self).__init__(engine, **kw)
         self._store = dict()
@@ -428,20 +428,20 @@ class SimpleBase(Base):
             raise KeyError('%s' % key)
 
     def __len__(self):
-        return len(self._store)        
+        return len(self._store)
 
     def keys(self):
         '''Returns a list of keys in the store.'''
-        return self._store.keys()        
+        return self._store.keys()
 
 
-class DbBase(Base):     
+class DbBase(Base):
 
     '''Database common base class.'''
 
     def __init__(self, engine, **kw):
         super(DbBase, self).__init__(engine, **kw)
-      
+
     def __delitem__(self, key):
         self._store.delete(self._store.c.key==key).execute()
 

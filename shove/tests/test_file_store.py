@@ -2,12 +2,13 @@ import unittest
 import os
 from shove import Shove
 
+
 class TestFileStore(unittest.TestCase):
 
-    def setUp(self): 
+    def setUp(self):
         self.store = Shove('file://test', compressed=True)
 
-    def tearDown(self): 
+    def tearDown(self):
         self.store.close()
         for x in os.listdir('test'): os.remove(os.path.join('test', x))
         os.rmdir('test')
@@ -31,7 +32,7 @@ class TestFileStore(unittest.TestCase):
         self.store['max'] = 3
         self.store.sync()
         self.assertEqual(self.store.get('min'), None)
-            
+
     def test__cmp__(self):
         tstore = Shove()
         self.store['max'] = 3
@@ -89,7 +90,7 @@ class TestFileStore(unittest.TestCase):
         self.store['min'] = 6
         item = self.store.pop('min')
         self.assertEqual(item, 6)
-        
+
     def test_popitem(self):
         self.store['max'] = 3
         self.store['min'] = 6

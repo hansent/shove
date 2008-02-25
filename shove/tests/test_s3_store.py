@@ -1,19 +1,18 @@
 import unittest
-import os
 from shove import Shove
 
 
 class TestS3Store(unittest.TestCase):
 
-    s3string = 's3 test string here'    
+    s3string = 's3 test string here'
 
     def setUp(self):
         self.store = Shove(self.s3string, compressed=True)
-     
+
     def tearDown(self):
         self.store.clear()
         self.store.close()
-        
+
     def test__getitem__(self):
         self.store['max'] = 3
         self.store.sync()
@@ -33,7 +32,7 @@ class TestS3Store(unittest.TestCase):
         self.store['max'] = 3
         self.store.sync()
         self.assertEqual(self.store.get('min'), None)
-            
+
     def test__cmp__(self):
         tstore = Shove()
         self.store['max'] = 3
@@ -94,7 +93,7 @@ class TestS3Store(unittest.TestCase):
         self.store.sync()
         item = self.store.pop('min')
         self.assertEqual(item, 6)
-        
+
     def test_popitem(self):
         self.store['max'] = 3
         self.store['min'] = 6
@@ -130,7 +129,7 @@ class TestS3Store(unittest.TestCase):
         self.store['min'] = 6
         self.store['pow'] = 7
         self.store.sync()
-        slist = self.store.values()        
+        slist = self.store.values()
         self.assertEqual(6 in slist, True)
 
     def test_keys(self):
