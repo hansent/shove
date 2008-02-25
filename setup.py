@@ -36,7 +36,7 @@ except ImportError:
 
 setup(
     name='shove',
-    version='0.1.1',
+    version='0.1.2',
     description='''Common object storage frontend.''',
     long_description='''Common object storage frontend that supports dictionary-style access, object serialization and compression, and multiple storage and caching backends.
 

@@ -39,18 +39,18 @@ s3://<s3_key>:<s3_secret>@<bucket>
 '''
 
 try:
-    from boto.connection import S3Connection
-    from boto.key import Key
+    from boto.s3.connection import S3Connection
+    from boto.s3.key import Key
 except ImportError:
     raise ImportError('Requires boto library.')
 from shove import BaseStore
 
 
-class S3Store(BaseStore):    
+class S3Store(BaseStore):
 
     def __init__(self, engine=None, **kw):
-        super(S3Store, self).__init__(engine, **kw)       
-        # key = Access Key, secret=Secret Access Key, bucket=bucket name 
+        super(S3Store, self).__init__(engine, **kw)
+        # key = Access Key, secret=Secret Access Key, bucket=bucket name
         key, secret, bucket = kw.get('key'), kw.get('secret'), kw.get('bucket')
         if engine is not None:
             auth, bucket = engine.split('://')[1].split('@')
@@ -60,7 +60,7 @@ class S3Store(BaseStore):
         buckets = self._conn.get_all_buckets()
         # Use bucket if it exists
         for b in buckets:
-            if b.name == bucket: 
+            if b.name == bucket:
                 self._store = b
                 break
         # Create bucket if it doesn't exist
@@ -99,7 +99,7 @@ class S3Store(BaseStore):
     def keys(self):
         '''Returns a list of keys in the store.'''
         return list(i[0] for i in self.items())
-    
+
     def items(self):
         '''Returns a list of items from the store.'''
         if self._updated or self._keys is None:
