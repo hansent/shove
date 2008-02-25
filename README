@@ -61,3 +61,7 @@ http://docs.python.org/lib/typesmapping.html
 Differences between 0.1 and 0.1.1
 
 - updated to work with SQLAlchemy 0.4.x
+
+Differences between 0.1.1 and 0.1.2
+
+- updated to work with boto 1.x
