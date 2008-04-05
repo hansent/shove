@@ -1,6 +1,6 @@
 # Copyright (c) 2001-2006 Python Software Foundation
 # Copyright (c) 2005, the Lawrence Journal-World
-# Copyright (c) 2006 L. C. Rees
+# Copyright (c) 2006-2008 L. C. Rees
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -364,14 +364,21 @@ class FileBase(Base):
         if not os.path.exists(self._dir): self._createdir()
 
     def __getitem__(self, key):
+        # (per Larry Meyn)
         try:
-            return self.loads(open(self._key_to_file(key), 'rb').read())
+            item = open(self._key_to_file(key), 'rb')
+            data = item.read()
+            item.close()
+            return self.loads(data)
         except:
             raise KeyError('%s' % key)
 
     def __setitem__(self, key, value):
+        # (per Larry Meyn)
         try:
-            open(self._key_to_file(key), 'wb').write(self.dumps(value))
+            item = open(self._key_to_file(key), 'wb')
+            item.write(self.dumps(value))
+            item.close()
         except (IOError, OSError):
             raise KeyError('%s' % key)
 
