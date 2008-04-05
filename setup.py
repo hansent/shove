@@ -1,4 +1,4 @@
-# Copyright (c) 2006 L. C. Rees.  All rights reserved.
+# Copyright (c) 2006-2008 L. C. Rees.  All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -36,7 +36,7 @@ except ImportError:
 
 setup(
     name='shove',
-    version='0.1.2',
+    version='0.1.3',
     description='''Common object storage frontend.''',
     long_description='''Common object storage frontend that supports dictionary-style access, object serialization and compression, and multiple storage and caching backends.
 
@@ -105,7 +105,7 @@ http://docs.python.org/lib/typesmapping.html''',
           'Operating System :: OS Independent',
           'Programming Language :: Python',
           'Topic :: Database :: Front-Ends'],
-    install_requires = ['SQLAlchemy >=0.3', 'boto'],
+    install_requires = ['SQLAlchemy >=0.4', 'boto'],
     entry_points = '''
     [shove.stores]
     bsddb=shove.store.bsdb:BsdStore
