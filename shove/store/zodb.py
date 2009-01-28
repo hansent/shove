@@ -39,6 +39,7 @@ native pathname to a ZODB database can be passed as the 'engine' argument.
 
 from ZODB import FileStorage, DB
 import transaction
+
 from shove.store import SyncStore
 
 __all__ = ['ZodbStore']

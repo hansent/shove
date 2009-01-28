@@ -40,6 +40,7 @@ try:
 except ImportError:
     from cStringIO import StringIO
 from ftplib import FTP, error_perm
+
 from shove import BaseStore
 
 __all__ = ['FtpStore']

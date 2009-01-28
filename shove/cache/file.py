@@ -39,7 +39,7 @@ argument.
 '''
 
 import time
-import random
+
 from shove import FileBase
 from shove.cache.simple import SimpleCache
 
@@ -66,4 +66,7 @@ class FileCache(FileBase, SimpleCache):
 
     def __setitem__(self, key, value):
         if len(self) >= self._max_entries: self._cull()
-        super(FileCache, self).__setitem__(key, (time.time() + self.timeout, value))
+        super(FileCache, self).__setitem__(
+            key, 
+            (time.time() + self.timeout, value)
+        )

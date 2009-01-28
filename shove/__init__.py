@@ -79,7 +79,7 @@ except ImportError:
         memcache='shove.cache.memcached:MemCached',
         bsddb='shove.cache.bsdb:BsdCache')
 
-__all__ = ['Shove', 'storage', 'cache']
+__all__ = ['Shove']
 
 def synchronized(func):
     '''Decorator to lock and unlock a method (Phillip J. Eby).
@@ -125,7 +125,6 @@ class Base(object):
     '''Base Mapping class.'''
 
     def __init__(self, engine, **kw):
-        super(Base, self).__init__()
         self._compress = kw.get('compress', False)
 
     def __getitem__(self, key):
@@ -159,7 +158,7 @@ class Base(object):
     def dumps(self, value):
         '''Optionally serializes and compresses an object.'''
         # Serialize everything but ASCII strings
-        if not isinstance(value, str): value = pickle.dumps(value)
+        value = pickle.dumps(value)
         # Apply maximum compression
         if self._compress: value = zlib.compress(value, 9)
         return value
@@ -170,12 +169,7 @@ class Base(object):
             try:
                 value = zlib.decompress(value)
             except zlib.error: pass
-        # Load serialized objects
-        try:
-            value = pickle.loads(value)
-        # Skip non strings
-        except (pickle.UnpicklingError, IndexError, ValueError):
-            if isinstance(value, str): pass
+        value = pickle.loads(value)
         return value
 
 
@@ -408,7 +402,7 @@ class FileBase(Base):
 
     def keys(self):
         '''Returns a list of keys in the store.'''
-        return os.listdir(self._dir)
+        return list(urllib.unquote_plus(name) for name in os.listdir(self._dir))
 
 
 class SimpleBase(Base):

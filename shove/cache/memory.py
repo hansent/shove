@@ -36,10 +36,12 @@ memory://
 
 import copy
 import threading
+
 from shove import synchronized
 from shove.cache.simple import SimpleCache
 
 __all__ = ['MemoryCache']
+
 
 class MemoryCache(SimpleCache):
 

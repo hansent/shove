@@ -38,6 +38,7 @@ try:
     import memcache
 except ImportError:
     raise ImportError("Memcache cache requires the 'memcache' library")
+
 from shove import Base
 
 __all__ = ['MemCached']

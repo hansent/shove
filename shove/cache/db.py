@@ -53,15 +53,11 @@ import random
 from datetime import datetime
 
 from sqlalchemy import (
-        Table, Column, String, Binary, DateTime,
-        bindparam, select, update, insert, delete,
-    )
-try:
-    from sqlalchemy import BoundMetaData
-except ImportError:
-    from sqlalchemy import MetaData as BoundMetaData
+    MetaData, Table, Column, String, Binary, DateTime, bindparam, select, 
+    update, insert, delete,
+)
 
-from shove import DbBase
+from shove import DbBase 
 
 __all__ = ['DbCache']
 
@@ -75,7 +71,7 @@ class DbCache(DbBase):
         # Get table name
         tablename = kw.get('tablename', 'cache')
         # Bind metadata
-        self._metadata = BoundMetaData(engine)
+        self._metadata = MetaData(engine)
         # Make cache table
         self._store = Table(tablename, self._metadata,
             Column('key', String(60), primary_key=True, nullable=False),

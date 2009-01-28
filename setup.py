@@ -36,7 +36,7 @@ except ImportError:
 
 setup(
     name='shove',
-    version='0.1.4',
+    version='0.1.5',
     description='''Common object storage frontend.''',
     long_description='''Common object storage frontend that supports dictionary-style access, object serialization and compression, and multiple storage and caching backends.
 
@@ -97,7 +97,7 @@ http://docs.python.org/lib/typesmapping.html''',
     license='BSD',
     packages = ['shove', 'shove.cache', 'shove.store', 'shove.tests'],
     py_modules=['ez_setup'],
-    data_files=[('', 'README')],
+    data_files=['README'],
     test_suite='shove.tests',
     zip_safe = False,
     keywords='object storage persistence database shelve',
