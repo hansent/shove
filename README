@@ -70,3 +70,7 @@ Differences between 0.1.2 and 0.1.3
 
 - better clean up of file handlers for filesystem based storage
   and caching (per Larry Meyn)
+  
+What's new with 0.1.5
+ - Cleanup
+ - Bunch of suggestions from Kevin Dangoor
