@@ -47,16 +47,7 @@ For more information on specific databases see:
 http://www.sqlalchemy.org/docs/dbengine.myt#dbengine_supported
 '''
 
-from datetime import datetime
-
-from sqlalchemy import (
-    Table, Column, String, Binary, DateTime,
-    bindparam, select
-)
-try:
-    from sqlalchemy import BoundMetaData
-except ImportError:
-    from sqlalchemy import MetaData as BoundMetaData
+from sqlalchemy import MetaData, Table, Column, String, Binary, select
 
 from shove import BaseStore, DbBase
 
@@ -72,7 +63,7 @@ class DbStore(BaseStore, DbBase):
         # Get tablename
         tablename = kw.get('tablename', 'store')
         # Bind metadata
-        self._metadata = BoundMetaData(engine)
+        self._metadata = MetaData(engine)
         # Make store table
         self._store = Table(tablename, self._metadata,
             Column('key', String(256), primary_key=True, nullable=False),

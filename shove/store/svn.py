@@ -44,10 +44,12 @@ svn://<path>?url=<url>
 import os
 import urllib
 import threading
+
 try:
     import pysvn
 except ImportError:
     raise ImportError('Requires Python Subversion library')
+
 from shove import BaseStore, synchronized
 
 __all__ = ['SvnStore']
@@ -71,8 +73,6 @@ class SvnStore(BaseStore):
             if '@' in path:
                 auth, path = path.split('@')
                 user, password = auth.split(':')
-            # Ensure matching URL and path ends
-            epath, eurl = path.split('/')[-1], url.split('/')[-1]
             path = urllib.url2pathname(path)
         # Create subversion client
         self._client = pysvn.Client()
@@ -120,14 +120,14 @@ class SvnStore(BaseStore):
             # Remove deleted value from repository
             self._client.checkin([fname], 'Removing %s' % fname)
         except:
-            raise KeyError('%s' % key)
+            raise KeyError('%s' % key)    
+    
+    def _key_to_file(self, key):
+        '''Gives the filesystem path for a key.'''
+        return os.path.join(self._path, urllib.quote_plus(key))
 
     @synchronized
     def keys(self):
         '''Returns a list of keys in the subversion repository.'''
         return list(str(i.name.split('/')[-1]) for i
             in self._client.ls(self._path))
-
-    def _key_to_file(self, key):
-        '''Gives the filesystem path for a key.'''
-        return os.path.join(self._path, urllib.quote_plus(key))

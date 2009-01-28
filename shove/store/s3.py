@@ -43,6 +43,7 @@ try:
     from boto.s3.key import Key
 except ImportError:
     raise ImportError('Requires boto library.')
+
 from shove import BaseStore
 
 

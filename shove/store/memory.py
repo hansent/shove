@@ -36,6 +36,7 @@ memory://
 
 import copy
 import threading
+
 from shove import synchronized
 from shove.store.simple import SimpleStore
 

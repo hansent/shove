@@ -37,8 +37,9 @@ Where the path is a URL path to a durus FileStorage database. Alternatively, a
 native pathname to a durus database can be passed as the 'engine' parameter.
 '''
 
-from durus.file_storage import FileStorage
 from durus.connection import Connection
+from durus.file_storage import FileStorage
+
 from shove.store import SyncStore
 
 __all__ = ['DurusStore']
@@ -55,7 +56,7 @@ class DurusStore(SyncStore):
         self._db = FileStorage(self._engine)
         self._connection = Connection(self._db)
         self.sync = self._connection.commit
-        self._store = self._connection.get_root() 
+        self._store = self._connection.get_root()
 
     def close(self):
         '''Closes all open storage and connections.'''

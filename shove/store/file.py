@@ -38,7 +38,6 @@ Alternatively, a native pathname to the directory can be passed as the 'engine'
 argument.
 '''
 
-import os
 from shove import BaseStore, FileBase
 
 __all__ = ['FileStore']

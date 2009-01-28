@@ -38,6 +38,7 @@ pathname to a Berkeley database can be passed as the 'engine' parameter.
 
 import bsddb
 import threading
+
 from shove import synchronized
 from shove.store import SyncStore
 
