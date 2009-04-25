@@ -37,6 +37,7 @@ try:
     import cPickle as pickle
 except ImportError:
     import pickle
+from collections import deque
 try:
     # Import store and cache entry points if setuptools installed
     import pkg_resources
@@ -434,6 +435,50 @@ class SimpleBase(Base):
     def keys(self):
         '''Returns a list of keys in the store.'''
         return self._store.keys()
+    
+
+class LRUBase(SimpleBase):
+    
+    def __init__(self, engine, **kw):
+        super(LRUBase, self).__init__(engine, **kw)
+        self._max_entries = kw.get('max_entries', 300)
+        self._hits = 0
+        self._misses = 0
+        self._queue = deque()
+        self._refcount = dict()
+
+    def __getitem__(self, key):
+        try:
+            value = super(LRUBase, self).__getitem__(key)
+            self._hits += 1
+        except KeyError:
+            self._misses +=1
+            raise
+        self._housekeep(key)
+            
+    def __setitem__(self, key, value):
+        super(LRUBase, self).__setitem__(key, value)
+        self._housekeep(key)
+        if len(self._store) > self._max_entries:
+            while len(self._store) > self._max_entries:
+                k = self._queue.popleft()
+                self._refcount[k] -= 1
+                if not self._refcount[k]:
+                    super(LRUBase, self).__delitem__(k)
+                    del self._refcount[k]
+
+    def _housekeep(self,key):
+        self._queue.append(key)
+        self._refcount[key] = self._refcount.get(key, 0) + 1
+        if len(self._queue) > self._max_entries * 4: self._purge_queue()
+
+    def _purge_queue(self):
+        for i in [None] * len(self._queue):
+            k = self._queue.popleft()
+            if self._refcount[k] == 1:
+                self._queue.append(k)
+            else:
+                self._refcount[k] -= 1  
 
 
 class DbBase(Base):
