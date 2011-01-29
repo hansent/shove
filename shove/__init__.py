@@ -71,6 +71,9 @@ except ImportError:
         simple='shove.cache.simple:SimpleCache',
         memory='shove.cache.memory:MemoryCache',
         file='shove.cache.file:FileCache',
+        simplelru='shove.cache.simplelru:SimpleLRUCache',
+        memlru='shove.cache.memlru:MemoryLRUCache',
+        filelru='shove.cache.filelru:FileLRUCache',
         mssql='shove.cache.db:DbCache',
         sqlite='shove.cache.db:DbCache',
         postgres='shove.cache.db:DbCache',
@@ -455,6 +458,7 @@ class LRUBase(SimpleBase):
             self._misses +=1
             raise
         self._housekeep(key)
+        return value
             
     def __setitem__(self, key, value):
         super(LRUBase, self).__setitem__(key, value)

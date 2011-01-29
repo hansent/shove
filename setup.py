@@ -36,7 +36,7 @@ except ImportError:
 
 setup(
     name='shove',
-    version='0.1.5',
+    version='0.2.1',
     description='''Common object storage frontend.''',
     long_description='''Common object storage frontend that supports dictionary-style access, object serialization and compression, and multiple storage and caching backends.
 
@@ -107,7 +107,7 @@ http://docs.python.org/lib/typesmapping.html''',
           'Operating System :: OS Independent',
           'Programming Language :: Python',
           'Topic :: Database :: Front-Ends'],
-    install_requires = ['SQLAlchemy >=0.4', 'boto'],
+    install_requires = ['SQLAlchemy==0.4', 'boto'],
     entry_points = '''
     [shove.stores]
     bsddb=shove.store.bsdb:BsdStore
@@ -129,14 +129,17 @@ http://docs.python.org/lib/typesmapping.html''',
     [shove.caches]
     bsddb=shove.cache.bsdb:BsdCache
     file=shove.cache.file:FileCache
+    filelru=shove.cache.filelru:FileLRUCache
     firebird=shove.cache.db:DbCache
     memcache=shove.cache.memcached:MemCached
+    memlru=shove.cache.memlru:MemoryLRUCache
     memory=shove.cache.memory:MemoryCache
     mssql=shove.cache.db:DbCache
     mysql=shove.cache.db:DbCache
     oracle=shove.cache.db:DbCache
     postgres=shove.cache.db:DbCache
     simple=shove.cache.simple:SimpleCache
+    simplelru=shove.cache.simplelru:SimpleLRUCache
     sqlite=shove.cache.db:DbCache
     '''
 )
