@@ -37,8 +37,11 @@ Where the path is a URL path to a ZODB FileStorage database. Alternatively, a
 native pathname to a ZODB database can be passed as the 'engine' argument.
 '''
 
-from ZODB import FileStorage, DB
-import transaction
+try:
+    import transaction
+    from ZODB import FileStorage, DB
+except ImportError:
+    raise ImportError('Requires ZODB library')
 
 from shove.store import SyncStore
 

@@ -37,8 +37,11 @@ Where the path is a URL path to a durus FileStorage database. Alternatively, a
 native pathname to a durus database can be passed as the 'engine' parameter.
 '''
 
-from durus.connection import Connection
-from durus.file_storage import FileStorage
+try:
+    from durus.connection import Connection
+    from durus.file_storage import FileStorage
+except ImportError:
+    raise ImportError('Requires Durus library')
 
 from shove.store import SyncStore
 

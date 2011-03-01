@@ -36,7 +36,7 @@ except ImportError:
 
 setup(
     name='shove',
-    version='0.2.1',
+    version='0.2.2',
     description='''Common object storage frontend.''',
     long_description='''Common object storage frontend that supports dictionary-style access, object serialization and compression, and multiple storage and caching backends.
 
@@ -101,13 +101,14 @@ http://docs.python.org/lib/typesmapping.html''',
     test_suite='shove.tests',
     zip_safe = False,
     keywords='object storage persistence database shelve',
-    classifiers=['Development Status :: 4 - Beta',
-          'Environment :: Web Environment',
-          'License :: OSI Approved :: BSD License',
-          'Operating System :: OS Independent',
-          'Programming Language :: Python',
-          'Topic :: Database :: Front-Ends'],
-    install_requires = ['SQLAlchemy==0.4', 'boto'],
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Environment :: Web Environment',
+        'License :: OSI Approved :: BSD License',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python',
+        'Topic :: Database :: Front-Ends',
+    ],
     entry_points = '''
     [shove.stores]
     bsddb=shove.store.bsdb:BsdStore
