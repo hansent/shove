@@ -1,5 +1,5 @@
 # Copyright (c) 2005, the Lawrence Journal-World
-# Copyright (c) 2006 L. C. Rees
+# Copyright (c) 2006-2011 L. C. Rees
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -47,9 +47,12 @@ For more information on specific databases see:
 http://www.sqlalchemy.org/docs/dbengine.myt#dbengine_supported
 '''
 
-from sqlalchemy import MetaData, Table, Column, String, Binary, select
+try:
+    from sqlalchemy import MetaData, Table, Column, String, Binary, select
 
-from shove import BaseStore, DbBase
+    from shove import BaseStore, DbBase
+except ImportError:
+    raise ImportError('Requires SQLAlchemy >= 0.4')
 
 __all__ = ['DbStore']
 
@@ -67,7 +70,8 @@ class DbStore(BaseStore, DbBase):
         # Make store table
         self._store = Table(tablename, self._metadata,
             Column('key', String(256), primary_key=True, nullable=False),
-            Column('value', Binary, nullable=False))
+            Column('value', Binary, nullable=False),
+        )
         # Create store table if it does not exist
         if not self._store.exists(): self._store.create()
 

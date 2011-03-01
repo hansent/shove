@@ -51,13 +51,14 @@ http://www.sqlalchemy.org/docs/dbengine.myt#dbengine_supported
 import time
 import random
 from datetime import datetime
-
-from sqlalchemy import (
-    MetaData, Table, Column, String, Binary, DateTime, bindparam, select, 
-    update, insert, delete,
-)
-
-from shove import DbBase 
+try:
+    from sqlalchemy import (
+        MetaData, Table, Column, String, Binary, DateTime, bindparam, select, 
+        update, insert, delete,
+    )
+    from shove import DbBase
+except ImportError:
+    raise ImportError('Requires SQLAlchemy >= 0.4')
 
 __all__ = ['DbCache']
 
@@ -76,7 +77,8 @@ class DbCache(DbBase):
         self._store = Table(tablename, self._metadata,
             Column('key', String(60), primary_key=True, nullable=False),
             Column('value', Binary, nullable=False),
-            Column('expires', DateTime, nullable=False))
+            Column('expires', DateTime, nullable=False),
+        )
         # Create cache table if it does not exist
         if not self._store.exists(): self._store.create()
         # Set maximum entries
@@ -112,7 +114,7 @@ class DbCache(DbBase):
             update(
                 cache,
                 cache.c.key==key,
-                dict(value=value, expires=expires)
+                dict(value=value, expires=expires),
             ).execute()
         # Insert new key if key not present
         else:

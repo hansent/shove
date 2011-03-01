@@ -1,6 +1,6 @@
 # Copyright (c) 2001-2006 Python Software Foundation
 # Copyright (c) 2005, the Lawrence Journal-World
-# Copyright (c) 2006-2008 L. C. Rees
+# Copyright (c) 2006-2011 L. C. Rees
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -65,7 +65,8 @@ except ImportError:
         s3='shove.store.s3:S3Store',
         ftp='shove.store.ftp:FtpStore',
         zodb='shove.store.zodb:ZodbStore',
-        durus='shove.store.durusdb:DurusStore')
+        durus='shove.store.durusdb:DurusStore',
+    )
     # Static cache backend registry
     caches = dict(
         simple='shove.cache.simple:SimpleCache',
@@ -81,7 +82,8 @@ except ImportError:
         mysql='shove.cache.db:DbCache',
         oracle='shove.cache.db:DbCache',
         memcache='shove.cache.memcached:MemCached',
-        bsddb='shove.cache.bsdb:BsdCache')
+        bsddb='shove.cache.bsdb:BsdCache',
+    )
 
 __all__ = ['Shove']
 
