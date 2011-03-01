@@ -1,4 +1,4 @@
-# Copyright (c) 2006-2008 L. C. Rees.  All rights reserved.
+# Copyright (c) 2006-2011 L. C. Rees.  All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
@@ -26,8 +26,11 @@
 
 '''setup - setuptools based setup for shove.'''
 
-import ez_setup
-ez_setup.use_setuptools()
+try:
+    import ez_setup
+    ez_setup.use_setuptools()
+except ImportError: 
+    pass
 
 try:
     from setuptools import setup
@@ -37,7 +40,7 @@ except ImportError:
 setup(
     name='shove',
     version='0.2.2',
-    description='''Common object storage frontend.''',
+    description='''Common object storage frontend''',
     long_description='''Common object storage frontend that supports dictionary-style access, object serialization and compression, and multiple storage and caching backends.
 
 Currently supported storage backends are:
@@ -99,7 +102,7 @@ http://docs.python.org/lib/typesmapping.html''',
     py_modules=['ez_setup'],
     data_files=['README'],
     test_suite='shove.tests',
-    zip_safe = False,
+    zip_safe=False,
     keywords='object storage persistence database shelve',
     classifiers=[
         'Development Status :: 4 - Beta',
