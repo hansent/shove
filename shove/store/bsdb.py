@@ -35,8 +35,11 @@ bsddb://<path>
 Where the path is a URL path to a Berkeley database. Alternatively, the native
 pathname to a Berkeley database can be passed as the 'engine' parameter.
 '''
+try:
+    import bsddb
+except ImportError:
+    raise ImportError('requires bsddb library')
 
-import bsddb
 import threading
 
 from shove import synchronized
