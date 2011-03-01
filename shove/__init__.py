@@ -132,6 +132,7 @@ class Base(object):
 
     def __init__(self, engine, **kw):
         self._compress = kw.get('compress', False)
+        self._protocol = kw.get('protocol', None)
 
     def __getitem__(self, key):
         raise NotImplementedError()
@@ -164,7 +165,7 @@ class Base(object):
     def dumps(self, value):
         '''Optionally serializes and compresses an object.'''
         # Serialize everything but ASCII strings
-        value = pickle.dumps(value)
+        value = pickle.dumps(value, protocol=self._protocol)
         # Apply maximum compression
         if self._compress: value = zlib.compress(value, 9)
         return value
