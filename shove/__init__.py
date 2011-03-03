@@ -132,7 +132,7 @@ class Base(object):
 
     def __init__(self, engine, **kw):
         self._compress = kw.get('compress', False)
-        self._protocol = kw.get('protocol', None)
+        self._protocol = kw.get('protocol', pickle.HIGHEST_PROTOCOL)
 
     def __getitem__(self, key):
         raise NotImplementedError()
