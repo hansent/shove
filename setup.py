@@ -41,66 +41,13 @@ setup(
     name='shove',
     version='0.2.2',
     description='''Common object storage frontend''',
-    long_description='''Common object storage frontend that supports dictionary-style access, object serialization and compression, and multiple storage and caching backends.
-
-Currently supported storage backends are:
-
-    * Amazon S3 Web Service
-    * Berkeley Source Database
-    * Filesystem
-    * Firebird
-    * FTP
-    * DBM
-    * Durus
-    * Memory
-    * Microsoft SQL Server
-    * MySQL
-    * Oracle
-    * PostgreSQL
-    * SQLite
-    * Subversion
-    * Zope Object Database (ZODB)
-
-Currently supported caching backends are:
-
-    * Filesystem
-    * Firebird
-    * memcached
-    * Memory
-    * Microsoft SQL Server
-    * MySQL
-    * Oracle
-    * PostgreSQL
-    * SQLite
-
-The simplest shove use case is:
-
-from shove import Shove
-
-store = Shove()
-
-which creates an in-memory store and cache.
-
-To use another backend for storage or caching, a configuration URI or an existing store or cache instance is passed to shove using the form:
-
-from shove import Shove
-
-<storename> = Shove(<store_uri>, <cache_uri>)
-
-The URI format for a backend is documented in its module. The URI form is the same as SQLAlchemy's:
-
-http://www.sqlalchemy.org/docs/04/dbengine.html#dbengine_establishing
-
-shove implements the Python dictionary/mapping API:
-
-http://docs.python.org/lib/typesmapping.html''',
+    long_description=open('README').read(),
     author='L. C. Rees',
     author_email='lcrees@gmail.com',
     url='http://pypi.python.org/pypi/shove/',
     license='BSD',
     packages = ['shove', 'shove.cache', 'shove.store', 'shove.tests'],
     py_modules=['ez_setup'],
-    data_files=['README'],
     test_suite='shove.tests',
     zip_safe=False,
     keywords='object storage persistence database shelve',
