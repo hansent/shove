@@ -67,6 +67,7 @@ except ImportError:
         ftp='shove.store.ftp:FtpStore',
         zodb='shove.store.zodb:ZodbStore',
         durus='shove.store.durusdb:DurusStore',
+        redis='shove.store.redis_store:RedisStore',
     )
     # Static cache backend registry
     caches = dict(
@@ -442,10 +443,10 @@ class SimpleBase(Base):
     def keys(self):
         '''Returns a list of keys in the store.'''
         return self._store.keys()
-    
+
 
 class LRUBase(SimpleBase):
-    
+
     def __init__(self, engine, **kw):
         super(LRUBase, self).__init__(engine, **kw)
         self._max_entries = kw.get('max_entries', 300)
@@ -463,7 +464,7 @@ class LRUBase(SimpleBase):
             raise
         self._housekeep(key)
         return value
-            
+
     def __setitem__(self, key, value):
         super(LRUBase, self).__setitem__(key, value)
         self._housekeep(key)
@@ -486,7 +487,7 @@ class LRUBase(SimpleBase):
             if self._refcount[k] == 1:
                 self._queue.append(k)
             else:
-                self._refcount[k] -= 1  
+                self._refcount[k] -= 1
 
 
 class DbBase(Base):

@@ -1,7 +1,8 @@
 syntax: glob
 
+dist
 build
-.egg*
+*egg*
 *.pyc
 *~
 .DS_Store
