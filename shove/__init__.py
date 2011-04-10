@@ -38,6 +38,7 @@ try:
 except ImportError:
     import pickle
 from collections import deque
+
 try:
     # Import store and cache entry points if setuptools installed
     import pkg_resources
