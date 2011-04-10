@@ -38,7 +38,7 @@ import urlparse
 try:
     from cStringIO import StringIO
 except ImportError:
-    from cStringIO import StringIO
+    from StringIO import StringIO
 from ftplib import FTP, error_perm
 
 from shove import BaseStore
@@ -49,7 +49,7 @@ __all__ = ['FtpStore']
 class FtpStore(BaseStore):
 
     def __init__(self, engine, **kw):
-        super(FtpStore, self).__init__(engine, **kw)        
+        super(FtpStore, self).__init__(engine, **kw)
         user = kw.get('user', 'anonymous')
         password = kw.get('password', '')
         spliturl = urlparse.urlsplit(engine)
@@ -99,15 +99,15 @@ class FtpStore(BaseStore):
             self._store.mkd(tpath)
             self._store.cwd(tpath)
 
-    def keys(self):        
+    def keys(self):
         '''Returns a list of keys in a store.'''
         if self._updated or self._keys is None:
             rlist, nlist = list(), list()
             # Remote directory listing
-            self._store.retrlines('LIST -a', rlist.append)           
+            self._store.retrlines('LIST -a', rlist.append)
             for rlisting in rlist:
                 # Split remote file based on whitespace
-                rfile = rlisting.split()  
+                rfile = rlisting.split()
                 # Append tuple of remote item type & name
                 if rfile[-1] not in ('.', '..') and rfile[0].startswith('-'):
                     nlist.append(rfile[-1])

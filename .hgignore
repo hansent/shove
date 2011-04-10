@@ -1,5 +1,7 @@
 syntax: glob
 
+build
+.egg*
 *.pyc
 *~
 .DS_Store
