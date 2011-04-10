@@ -39,7 +39,7 @@ except ImportError:
 
 setup(
     name='shove',
-    version='0.2.4',
+    version='0.2.5',
     description='''Common object storage frontend''',
     long_description=open('README').read(),
     author='L. C. Rees',
@@ -77,6 +77,7 @@ setup(
     s3=shove.store.s3:S3Store
     svn=shove.store.svn:SvnStore
     zodb=shove.store.zodb:ZodbStore
+    redis=shove.store.redis_store:RedisStore
     [shove.caches]
     bsddb=shove.cache.bsdb:BsdCache
     file=shove.cache.file:FileCache

@@ -31,7 +31,7 @@
 shove's URL for FTP accessed stores follows the standard form for FTP URLs
 defined in RFC-1738:
 
-ftp//<user>:<password>@<host>:<port>/<url-path>
+ftp://<user>:<password>@<host>:<port>/<url-path>
 '''
 
 import urlparse
