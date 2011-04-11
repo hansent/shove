@@ -77,7 +77,8 @@ setup(
     s3=shove.store.s3:S3Store
     svn=shove.store.svn:SvnStore
     zodb=shove.store.zodb:ZodbStore
-    redis=shove.store.redis_store:RedisStore
+    redis=shove.store.redisdb:RedisStore
+    cassandra=shove.store.cassandra:Cassandra
     [shove.caches]
     bsddb=shove.cache.bsdb:BsdCache
     file=shove.cache.file:FileCache

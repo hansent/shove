@@ -4,10 +4,10 @@
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions are met:
 #
-#    1. Redistributions of source code must retain the above copyright notice, 
+#    1. Redistributions of source code must retain the above copyright notice,
 #       this list of conditions and the following disclaimer.
-#    
-#    2. Redistributions in binary form must reproduce the above copyright 
+#
+#    2. Redistributions in binary form must reproduce the above copyright
 #       notice, this list of conditions and the following disclaimer in the
 #       documentation and/or other materials provided with the distribution.
 #
@@ -29,23 +29,23 @@
 from urllib import url2pathname
 from shove.store.simple import SimpleStore
 
-__all__ = ['bsdb', 'db', 'dbm', 'durus', 'file', 'ftp', 'memory', 's3',
-    'simple', 'svn', 'zodb']
+__all__ = ['bsdb', 'db', 'dbm', 'durusdb', 'file', 'ftp', 'memory', 's3',
+    'simple', 'svn', 'zodb', 'redisdb']
 
 
 class SyncStore(SimpleStore):
 
-    '''Base class for stores where updates have to be committed.'''    
+    '''Base class for stores where updates have to be committed.'''
 
     def __init__(self, engine, **kw):
         super(SyncStore, self).__init__(engine, **kw)
         if engine.startswith(self.init):
             self._engine = url2pathname(engine.split('://')[1])
-        
+
     def __getitem__(self, key):
         return self.loads(super(SyncStore, self).__getitem__(key))
 
-    def __setitem__(self, key, value):        
+    def __setitem__(self, key, value):
         super(SyncStore, self).__setitem__(key, self.dumps(value))
         self.sync()
 
