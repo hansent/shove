@@ -1,5 +1,5 @@
 # Copyright (c) 2005, the Lawrence Journal-World
-# Copyright (c) 2006 L. C. Rees
+# Copyright (c) 2011 L. C. Rees
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
@@ -41,18 +41,25 @@ try:
 except ImportError:
     raise ImportError('This store requires the redis library')
 
-from shove import BaseStore
+from shove.store.simple import SimpleStore
 
 __all__ = ['RedisStore']
 
 
-class RedisStore(BaseStore):
+class RedisStore(SimpleStore):
 
-    '''Redis based store.'''
+    '''Redis based store'''
+
+    init = 'redis://'
 
     def __init__(self, engine, **kw):
         super(RedisStore, self).__init__(engine, **kw)
         spliturl = urlparse.urlsplit(engine)
         host, port = spliturl[1].split(':')
         db = spliturl[2].replace('/', '')
-        self._store = redis.Redis(host, port, db)
+        self._store = redis.Redis(host, int(port), db)
+
+    def __getitem__(self, key):
+        item = super(RedisStore, self).__getitem__(key)
+        if item is not None: return item
+        raise KeyError('%s' % key)

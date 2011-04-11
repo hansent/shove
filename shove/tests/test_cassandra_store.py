@@ -1,15 +1,22 @@
 import unittest
-from shove import Shove
 
 
-class TestRedisStore(unittest.TestCase):
+
+class TestCassandraStore(unittest.TestCase):
 
     def setUp(self):
-        self.store = Shove('redis://localhost:6379/0')
+        from shove import Shove
+#        from pycassa.system_manager import SystemManager
+#        system_manager = SystemManager('localhost:9160')
+#        system_manager.create_column_family('Foo', 'shove')
+        self.store = Shove('cassandra://localhost:9160/Foo/shove')
 
     def tearDown(self):
         self.store.clear()
         self.store.close()
+#        from pycassa.system_manager import SystemManager
+#        system_manager = SystemManager('localhost:9160')
+#        system_manager.drop_column_family('Foo', 'shove')
 
     def test__getitem__(self):
         self.store['max'] = 3
@@ -29,6 +36,7 @@ class TestRedisStore(unittest.TestCase):
         self.assertEqual(self.store.get('min'), None)
 
     def test__cmp__(self):
+        from shove import Shove
         tstore = Shove()
         self.store['max'] = 3
         tstore['max'] = 3
@@ -96,6 +104,7 @@ class TestRedisStore(unittest.TestCase):
         self.assertEqual(self.store['pow'], 8)
 
     def test_update(self):
+        from shove import Shove
         tstore = Shove()
         tstore['max'] = 3
         tstore['min'] = 6

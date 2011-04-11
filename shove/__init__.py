@@ -67,7 +67,8 @@ except ImportError:
         ftp='shove.store.ftp:FtpStore',
         zodb='shove.store.zodb:ZodbStore',
         durus='shove.store.durusdb:DurusStore',
-        redis='shove.store.redis_store:RedisStore',
+        redis='shove.store.redisdb:RedisStore',
+        cassandra='shove.store.cassandra:CassandraStore',
     )
     # Static cache backend registry
     caches = dict(
