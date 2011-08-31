@@ -81,12 +81,14 @@ class CassandraStore(BaseStore):
         self._store.insert(key, dict(key=self.dumps(value)))
 
     def __delitem__(self, key):
+        # beware eventual consistency
         try:
             self._store.remove(key)
         except pycassa.NotFoundException:
             raise KeyError('%s'%key)
 
     def clear(self):
+        # beware eventual consistency
         self._store.truncate()
 
     def keys(self):

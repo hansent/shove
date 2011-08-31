@@ -27,19 +27,13 @@
 '''setup - setuptools based setup for shove.'''
 
 try:
-    import ez_setup
-    ez_setup.use_setuptools()
-except ImportError:
-    pass
-
-try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
 
 setup(
     name='shove',
-    version='0.2.5',
+    version='0.3.0',
     description='''Common object storage frontend''',
     long_description=open('README').read(),
     author='L. C. Rees',
