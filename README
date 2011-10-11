@@ -87,3 +87,7 @@ What's new with 0.3.0
 
 - Redis support for store
 - Apache Cassandra support for store (alpha)
+
+What's new with 0.3.1
+
+- fix wrong keyword in store tests (per Ling Li)
