@@ -7,7 +7,7 @@ class TestSvnStore(unittest.TestCase):
     svnstring = 'SVN test string here'
 
     def setUp(self):
-        self.store = Shove(self.svnstring, compressed=True)
+        self.store = Shove(self.svnstring, compress=True)
 
     def tearDown(self):
         self.store.clear()

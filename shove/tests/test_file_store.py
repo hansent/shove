@@ -6,7 +6,7 @@ from shove import Shove
 class TestFileStore(unittest.TestCase):
 
     def setUp(self):
-        self.store = Shove('file://test', compressed=True)
+        self.store = Shove('file://test', compress=True)
 
     def tearDown(self):
         self.store.close()

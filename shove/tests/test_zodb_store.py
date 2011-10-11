@@ -10,7 +10,7 @@ class TestZodbStore(unittest.TestCase):
     init = 'zodb://test.db'
 
     def setUp(self):
-        self.store = Shove(self.init, compressed=True)
+        self.store = Shove(self.init, compress=True)
 
     def tearDown(self):
         self.store.close()

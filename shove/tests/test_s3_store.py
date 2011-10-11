@@ -7,7 +7,7 @@ class TestS3Store(unittest.TestCase):
     s3string = 's3 test string here'
 
     def setUp(self):
-        self.store = Shove(self.s3string, compressed=True)
+        self.store = Shove(self.s3string, compress=True)
 
     def tearDown(self):
         self.store.clear()

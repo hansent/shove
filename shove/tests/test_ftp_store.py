@@ -7,7 +7,7 @@ class TestFtpStore(unittest.TestCase):
     ftpstring = 'put ftp string here'
 
     def setUp(self):
-        self.store = Shove(self.ftpstring, compressed=True)
+        self.store = Shove(self.ftpstring, compress=True)
 
     def tearDown(self):
         self.store.clear()

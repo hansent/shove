@@ -5,7 +5,7 @@ from shove import Shove
 class TestMemoryStore(unittest.TestCase):
 
     def setUp(self):
-        self.store = Shove('memory://', compressed=True)
+        self.store = Shove('memory://', compress=True)
 
     def tearDown(self):
         self.store.close()

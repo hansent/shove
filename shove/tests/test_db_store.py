@@ -6,7 +6,7 @@ from shove import Shove
 class TestDbStore(unittest.TestCase):
 
     def setUp(self):
-        self.store = Shove('sqlite://', compressed=True)
+        self.store = Shove('sqlite://', compress=True)
 
     def tearDown(self):
         self.store.close()
