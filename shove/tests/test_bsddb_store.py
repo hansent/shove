@@ -5,7 +5,7 @@ from shove import Shove
 class TestBsdbStore(unittest.TestCase):
 
     def setUp(self): 
-        self.store = Shove('bsddb://test.db', compressed=True)
+        self.store = Shove('bsddb://test.db', compress=True)
 
     def tearDown(self): 
         self.store.close()

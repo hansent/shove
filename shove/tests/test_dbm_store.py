@@ -5,7 +5,7 @@ from shove import Shove
 class TestDbmStore(unittest.TestCase):
 
     def setUp(self): 
-        self.store = Shove('dbm://test.dbm', compressed=True)
+        self.store = Shove('dbm://test.dbm', compress=True)
 
     def tearDown(self): 
         self.store.close()

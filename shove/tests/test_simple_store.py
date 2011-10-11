@@ -5,7 +5,7 @@ from shove import Shove
 class TestSimpleStore(unittest.TestCase):
 
     def setUp(self):
-        self.store = Shove('simple://', compressed=True)
+        self.store = Shove('simple://', compress=True)
 
     def tearDown(self):
         self.store.close()
