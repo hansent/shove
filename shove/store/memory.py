@@ -51,9 +51,9 @@ class MemoryStore(SimpleStore):
         super(MemoryStore, self).__init__(engine, **kw)
         self._lock = threading.Condition()
 
-    @synchronized        
+    @synchronized
     def __getitem__(self, key):
-        return copy.deepcopy(super(MemoryStore, self).__getitem__(key))            
+        return copy.deepcopy(super(MemoryStore, self).__getitem__(key))
 
     @synchronized
     def __setitem__(self, key, value):

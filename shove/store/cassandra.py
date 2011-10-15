@@ -73,9 +73,9 @@ class CassandraStore(BaseStore):
         try:
             item = self._store.get(key).get(key)
             if item is not None: return self.loads(item)
-            raise KeyError('%s'%key)
+            raise KeyError(key)
         except pycassa.NotFoundException:
-            raise KeyError('%s'%key)
+            raise KeyError(key)
 
     def __setitem__(self, key, value):
         self._store.insert(key, dict(key=self.dumps(value)))
@@ -85,7 +85,7 @@ class CassandraStore(BaseStore):
         try:
             self._store.remove(key)
         except pycassa.NotFoundException:
-            raise KeyError('%s'%key)
+            raise KeyError(key)
 
     def clear(self):
         # beware eventual consistency

@@ -62,7 +62,7 @@ class SimpleCache(SimpleBase):
         # Delete if item timed out.
         if exp < time.time():
             super(SimpleCache, self).__delitem__(key)
-            raise KeyError('%s' % key)
+            raise KeyError(key)
         return value
 
     def __setitem__(self, key, value):
@@ -89,4 +89,4 @@ class SimpleCache(SimpleBase):
         while len(self) >= self._max_entries and num <= maxcull:
             # Cull remainder of allowed quota at random
             del self[random.choice(self.keys())]
-            num += 1            
+            num += 1

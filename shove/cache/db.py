@@ -97,9 +97,9 @@ class DbCache(DbBase):
             # Remove if item expired
             if row.expires < datetime.now().replace(microsecond=0):
                 del self[key]
-                raise KeyError('%s' % key)
+                raise KeyError(key)
             return self.loads(str(row.value))
-        raise KeyError('%s' % key)
+        raise KeyError(key)
 
     def __setitem__(self, key, value):
         timeout, value, cache = self.timeout, self.dumps(value), self._store

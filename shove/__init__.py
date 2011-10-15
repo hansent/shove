@@ -375,7 +375,7 @@ class FileBase(Base):
             item.close()
             return self.loads(data)
         except:
-            raise KeyError('%s' % key)
+            raise KeyError(key)
 
     def __setitem__(self, key, value):
         # (per Larry Meyn)
@@ -384,13 +384,13 @@ class FileBase(Base):
             item.write(self.dumps(value))
             item.close()
         except (IOError, OSError):
-            raise KeyError('%s' % key)
+            raise KeyError(key)
 
     def __delitem__(self, key):
         try:
             os.remove(self._key_to_file(key))
         except (IOError, OSError):
-            raise KeyError('%s' % key)
+            raise KeyError(key)
 
     def __contains__(self, key):
         return os.path.exists(self._key_to_file(key))
@@ -427,7 +427,7 @@ class SimpleBase(Base):
         try:
             return self._store[key]
         except:
-            raise KeyError('%s' % key)
+            raise KeyError(key)
 
     def __setitem__(self, key, value):
         self._store[key] = value
@@ -436,7 +436,7 @@ class SimpleBase(Base):
         try:
             del self._store[key]
         except:
-            raise KeyError('%s' % key)
+            raise KeyError(key)
 
     def __len__(self):
         return len(self._store)

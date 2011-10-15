@@ -62,4 +62,4 @@ class RedisStore(SimpleStore):
     def __getitem__(self, key):
         item = super(RedisStore, self).__getitem__(key)
         if item is not None: return item
-        raise KeyError('%s' % key)
+        raise KeyError(key)

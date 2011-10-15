@@ -81,7 +81,7 @@ class DbStore(BaseStore, DbBase):
             self._store.c.key==key
         ).execute().fetchone()
         if row is not None: return self.loads(str(row.value))
-        raise KeyError('Key "%s" not found.' % key)
+        raise KeyError(key)
 
     def __setitem__(self, k, v):
         v, store = self.dumps(v), self._store
