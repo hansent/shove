@@ -77,7 +77,7 @@ class FtpStore(BaseStore):
             self._updated = False
             return self.loads(local.getvalue())
         except:
-            raise KeyError('%s' % key)
+            raise KeyError(key)
 
     def __setitem__(self, key, value):
         local = StringIO(self.dumps(value))
@@ -89,7 +89,7 @@ class FtpStore(BaseStore):
             self._store.delete(key)
             self._updated = True
         except:
-            raise KeyError('%s' % key)
+            raise KeyError(key)
 
     def _makedir(self, path):
         '''Makes remote paths on an FTP server.'''

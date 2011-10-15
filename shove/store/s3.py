@@ -75,7 +75,7 @@ class S3Store(BaseStore):
 
     def __getitem__(self, key):
         rkey = self._store.lookup(key)
-        if rkey is None: raise KeyError('%s' % key)
+        if rkey is None: raise KeyError(key)
         # Fetch string
         value = self.loads(rkey.get_contents_as_string())
         # Flag that the store has not been updated
@@ -95,7 +95,7 @@ class S3Store(BaseStore):
             # Flag that the store has been updated
             self._updated = True
         except:
-            raise KeyError('%s' % key)
+            raise KeyError(key)
 
     def keys(self):
         '''Returns a list of keys in the store.'''

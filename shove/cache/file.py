@@ -59,10 +59,10 @@ class FileCache(FileBase, SimpleCache):
             # Remove item if time has expired.
             if exp < time.time():
                 del self[key]
-                raise KeyError('%s' % key)  
+                raise KeyError(key)
             return value
         except:
-            raise KeyError('%s' % key)                
+            raise KeyError(key)
 
     def __setitem__(self, key, value):
         if len(self) >= self._max_entries: self._cull()

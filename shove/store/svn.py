@@ -101,7 +101,7 @@ class SvnStore(BaseStore):
         try:
             return self.loads(self._client.cat(self._key_to_file(key)))
         except:
-            raise KeyError('%s' % key)
+            raise KeyError(key)
 
     @synchronized
     def __setitem__(self, key, value):
@@ -120,7 +120,7 @@ class SvnStore(BaseStore):
             # Remove deleted value from repository
             self._client.checkin([fname], 'Removing %s' % fname)
         except:
-            raise KeyError('%s' % key)    
+            raise KeyError(key)
     
     def _key_to_file(self, key):
         '''Gives the filesystem path for a key.'''
