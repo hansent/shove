@@ -91,3 +91,7 @@ What's new with 0.3.0
 What's new with 0.3.1
 
 - fix wrong keyword in store tests (per Ling Li)
+
+What's new with 0.3.2
+
+- make key exceptions work with tuples (per Ling Li)
