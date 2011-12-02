@@ -52,8 +52,8 @@ to *shove* following the form:
 Each module-specific URI form is documented in its module. The
 URI form follows the URI form used by SQLAlchemy:
 
-    <http://www.sqlalchemy.org/docs/core/engines.html>`_.
+    http://www.sqlalchemy.org/docs/core/engines.html
 
 *shove* fully implements the Python dictionary/mapping API:
 
-    <http://docs.python.org/lib/typesmapping.html>`_.
+    http://docs.python.org/lib/typesmapping.html
