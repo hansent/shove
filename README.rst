@@ -46,8 +46,8 @@ The use of other backends for storage and caching involves
 passing an module URI or existing store or cache instance
 to *shove* following the form:
 
->> from shove import Shove
->> <storename> = Shove(<store_uri>, <cache_uri>)
+>>> from shove import Shove
+>>> <storename> = Shove(<store_uri>, <cache_uri>)
 
 Each module-specific URI form is documented in its module. The
 URI form follows the URI form used by SQLAlchemy:
