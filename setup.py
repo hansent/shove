@@ -33,7 +33,7 @@ except ImportError:
 
 setup(
     name='shove',
-    version='0.3.2',
+    version='0.3.3',
     description='''Common object storage frontend''',
     long_description=open('README').read(),
     author='L. C. Rees',
