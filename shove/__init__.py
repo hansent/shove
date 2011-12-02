@@ -1,33 +1,4 @@
-# Copyright (c) 2001-2006 Python Software Foundation
-# Copyright (c) 2005, the Lawrence Journal-World
-# Copyright (c) 2006-2011 L. C. Rees
-# All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are met:
-#
-#    1. Redistributions of source code must retain the above copyright notice,
-#       this list of conditions and the following disclaimer.
-#
-#    2. Redistributions in binary form must reproduce the above copyright
-#       notice, this list of conditions and the following disclaimer in the
-#       documentation and/or other materials provided with the distribution.
-#
-#    3. Neither the name of Django nor the names of its contributors may be used
-#       to endorse or promote products derived from this software without
-#       specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
-# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
+# -*- coding: utf-8 -*-
 '''Common object storage frontend.'''
 
 import os
@@ -91,7 +62,8 @@ except ImportError:
 __all__ = ['Shove']
 
 def synchronized(func):
-    '''Decorator to lock and unlock a method (Phillip J. Eby).
+    '''
+    Decorator to lock and unlock a method (Phillip J. Eby).
 
     @param func Method to decorate
     '''
@@ -107,7 +79,8 @@ def synchronized(func):
     return wrapper
 
 def getbackend(uri, engines, **kw):
-    '''Loads the right backend based on a URI.
+    '''
+    Loads the right backend based on a URI.
 
     @param uri Instance or name string
     @param engines A dictionary of scheme/class pairs
@@ -154,7 +127,8 @@ class Base(object):
         return True
 
     def get(self, key, default=None):
-        '''Fetch a given key from the mapping. If the key does not exist,
+        '''
+        Fetch a given key from the mapping. If the key does not exist,
         return the default.
 
         @param key Keyword of item in mapping.
@@ -170,7 +144,8 @@ class Base(object):
         # Serialize everything but ASCII strings
         value = pickle.dumps(value, protocol=self._protocol)
         # Apply maximum compression
-        if self._compress: value = zlib.compress(value, 9)
+        if self._compress:
+            value = zlib.compress(value, 9)
         return value
 
     def loads(self, value):
@@ -178,7 +153,8 @@ class Base(object):
         if self._compress:
             try:
                 value = zlib.decompress(value)
-            except zlib.error: pass
+            except zlib.error:
+                pass
         value = pickle.loads(value)
         return value
 
@@ -192,17 +168,20 @@ class BaseStore(Base):
         self._store = None
 
     def __cmp__(self, other):
-        if other is None: return False
+        if other is None:
+            return False
         if isinstance(other, BaseStore):
             return cmp(dict(self.iteritems()), dict(other.iteritems()))
 
     def __del__(self):
         # __init__ didn't succeed, so don't bother closing
-        if not hasattr(self, '_store'): return
+        if not hasattr(self, '_store'):
+            return
         self.close()
 
     def __iter__(self):
-        for k in self.keys(): yield k
+        for k in self.keys():
+            yield k
 
     def __len__(self):
         return len(self.keys())
@@ -219,7 +198,8 @@ class BaseStore(Base):
 
     def clear(self):
         '''Removes all keys and values from a store.'''
-        for key in self.keys(): del self[key]
+        for key in self.keys():
+            del self[key]
 
     def items(self):
         '''Returns a list with all key/value pairs in the store.'''
@@ -227,7 +207,8 @@ class BaseStore(Base):
 
     def iteritems(self):
         '''Lazily returns all key/value pairs in a store.'''
-        for k in self: yield (k, self[k])
+        for k in self:
+            yield (k, self[k])
 
     def iterkeys(self):
         '''Lazy returns all keys in a store.'''
@@ -235,24 +216,29 @@ class BaseStore(Base):
 
     def itervalues(self):
         '''Lazily returns all values in a store.'''
-        for _, v in self.iteritems(): yield v
+        for _, v in self.iteritems():
+            yield v
 
     def keys(self):
         '''Returns a list with all keys in a store.'''
         raise NotImplementedError()
 
     def pop(self, key, *args):
-        '''Removes and returns a value from a store.
+        '''
+        Removes and returns a value from a store.
 
-        @param args Default to return if key not present.'''
+        @param args Default to return if key not present.
+        '''
         if len(args) > 1:
-            raise TypeError('pop expected at most 2 arguments, got '\
-                + repr(1 + len(args)))
+            raise TypeError('pop expected at most 2 arguments, got ' + repr(
+                1 + len(args))
+            )
         try:
             value = self[key]
         # Return default if key not in store
         except KeyError:
-            if args: return args[0]
+            if args:
+                return args[0]
         del self[key]
         return value
 
@@ -266,7 +252,8 @@ class BaseStore(Base):
         return (k, v)
 
     def setdefault(self, key, default=None):
-        '''Returns the value corresponding to an existing key or sets the
+        '''
+        Returns the value corresponding to an existing key or sets the
         to key to the default and returns the default.
 
         @param default Default value (default: None)
@@ -278,7 +265,8 @@ class BaseStore(Base):
         return default
 
     def update(self, other=None, **kw):
-        '''Adds to or overwrites the values in this store with values from
+        '''
+        Adds to or overwrites the values in this store with values from
         another store.
 
         other Another store
@@ -286,12 +274,16 @@ class BaseStore(Base):
         '''
         if other is None: pass
         elif hasattr(other, 'iteritems'):
-            for k, v in other.iteritems(): self[k] = v
+            for k, v in other.iteritems():
+                self[k] = v
         elif hasattr(other, 'keys'):
-            for k in other.keys(): self[k] = other[k]
+            for k in other.keys():
+                self[k] = other[k]
         else:
-            for k, v in other: self[k] = v
-        if kw: self.update(kw)
+            for k, v in other:
+                self[k] = v
+        if kw:
+            self.update(kw)
 
     def values(self):
         '''Returns a list with all values in a store.'''
@@ -326,13 +318,15 @@ class Shove(BaseStore):
         '''Sets an item in shove.'''
         self._cache[key] = self._buffer[key] = value
         # When the buffer reaches self._limit, writes the buffer to the store
-        if len(self._buffer) >= self._sync: self.sync()
+        if len(self._buffer) >= self._sync:
+            self.sync()
 
     def __delitem__(self, key):
         '''Deletes an item from shove.'''
         try:
             del self._cache[key]
-        except KeyError: pass
+        except KeyError:
+            pass
         self.sync()
         del self._store[key]
 
@@ -343,7 +337,8 @@ class Shove(BaseStore):
 
     def sync(self):
         '''Writes buffer to store.'''
-        for k, v in self._buffer.iteritems(): self._store[k] = v
+        for k, v in self._buffer.iteritems():
+            self._store[k] = v
         self._buffer.clear()
 
     def close(self):
@@ -365,7 +360,8 @@ class FileBase(Base):
             engine = urllib.url2pathname(engine.split('://')[1])
         self._dir = engine
         # Create directory
-        if not os.path.exists(self._dir): self._createdir()
+        if not os.path.exists(self._dir):
+            self._createdir()
 
     def __getitem__(self, key):
         # (per Larry Meyn)
@@ -403,8 +399,10 @@ class FileBase(Base):
         try:
             os.makedirs(self._dir)
         except OSError:
-            raise EnvironmentError('Cache directory "%s" does not exist and ' \
-                'could not be created' % self._dir)
+            raise EnvironmentError(
+                'Cache directory "%s" does not exist and ' \
+                'could not be created' % self._dir
+            )
 
     def _key_to_file(self, key):
         '''Gives the filesystem path for a key.'''
@@ -412,7 +410,7 @@ class FileBase(Base):
 
     def keys(self):
         '''Returns a list of keys in the store.'''
-        return list(urllib.unquote_plus(name) for name in os.listdir(self._dir))
+        return [urllib.unquote_plus(name) for name in os.listdir(self._dir)]
 
 
 class SimpleBase(Base):
@@ -461,7 +459,7 @@ class LRUBase(SimpleBase):
             value = super(LRUBase, self).__getitem__(key)
             self._hits += 1
         except KeyError:
-            self._misses +=1
+            self._misses += 1
             raise
         self._housekeep(key)
         return value
@@ -477,10 +475,11 @@ class LRUBase(SimpleBase):
                     super(LRUBase, self).__delitem__(k)
                     del self._refcount[k]
 
-    def _housekeep(self,key):
+    def _housekeep(self, key):
         self._queue.append(key)
         self._refcount[key] = self._refcount.get(key, 0) + 1
-        if len(self._queue) > self._max_entries * 4: self._purge_queue()
+        if len(self._queue) > self._max_entries * 4:
+            self._purge_queue()
 
     def _purge_queue(self):
         for i in [None] * len(self._queue):
@@ -499,7 +498,7 @@ class DbBase(Base):
         super(DbBase, self).__init__(engine, **kw)
 
     def __delitem__(self, key):
-        self._store.delete(self._store.c.key==key).execute()
+        self._store.delete(self._store.c.key == key).execute()
 
     def __len__(self):
         return self._store.count().execute().fetchone()[0]

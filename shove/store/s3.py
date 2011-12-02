@@ -1,32 +1,6 @@
-# Copyright (c) 2006 L. C. Rees
-# All rights reserved.
-#
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions are met:
-#
-#    1. Redistributions of source code must retain the above copyright notice,
-#       this list of conditions and the following disclaimer.
-#
-#    2. Redistributions in binary form must reproduce the above copyright
-#       notice, this list of conditions and the following disclaimer in the
-#       documentation and/or other materials provided with the distribution.
-#
-#    3. Neither the name of the Portable Site Information project nor the
-#       names of its contributors may be used to endorse or promote products
-#       derived from this software without specific prior written permission.
-#
-# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
-# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-
-'''S3-accessed stores
+# -*- coding: utf-8 -*-
+'''
+S3-accessed stores
 
 shove's psuedo-URL for stores found on Amazon.com's S3 web service follows this
 form:
@@ -75,7 +49,8 @@ class S3Store(BaseStore):
 
     def __getitem__(self, key):
         rkey = self._store.lookup(key)
-        if rkey is None: raise KeyError(key)
+        if rkey is None: 
+            raise KeyError(key)
         # Fetch string
         value = self.loads(rkey.get_contents_as_string())
         # Flag that the store has not been updated
@@ -109,4 +84,5 @@ class S3Store(BaseStore):
 
     def iteritems(self):
         '''Lazily returns items from the store.'''
-        for k in self.items(): yield (k.key, k)
+        for k in self.items(): 
+            yield (k.key, k)
