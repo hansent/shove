@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import time
 import unittest
 
@@ -35,7 +37,9 @@ class TestDbCache(unittest.TestCase):
         cache = self.cacheclass(self.initstring, timeout=1)
         cache['test'] = 'test'
         time.sleep(2)
-        def tmp(): cache['test']
+
+        def tmp():
+            cache['test']
         self.assertRaises(KeyError, tmp)
 
     def test_cull(self):

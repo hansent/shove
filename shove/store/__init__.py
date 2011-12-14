@@ -4,7 +4,7 @@ from urllib import url2pathname
 from shove.store.simple import SimpleStore
 
 __all__ = [
-    'bsdb', 'db', 'dbm', 'durusdb', 'file', 'ftp', 'memory', 's3', 'simple', 
+    'bsdb', 'db', 'dbm', 'durusdb', 'file', 'ftp', 'memory', 's3', 'simple',
     'svn', 'zodb', 'redisdb'
 ]
 

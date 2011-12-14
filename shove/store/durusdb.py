@@ -23,10 +23,10 @@ __all__ = ['DurusStore']
 
 
 class DurusStore(SyncStore):
-    
+
     '''Class for Durus object database frontend.'''
 
-    init = 'durus://'    
+    init = 'durus://'
 
     def __init__(self, engine, **kw):
         super(DurusStore, self).__init__(engine, **kw)

@@ -18,7 +18,7 @@ __all__ = ['MemoryCache']
 
 class MemoryCache(SimpleCache):
 
-    '''Thread-safe in-memory cache backend.'''    
+    '''Thread-safe in-memory cache backend.'''
 
     def __init__(self, engine, **kw):
         super(MemoryCache, self).__init__(engine, **kw)
@@ -28,7 +28,7 @@ class MemoryCache(SimpleCache):
     def __setitem__(self, key, value):
         super(MemoryCache, self).__setitem__(key, value)
 
-    @synchronized        
+    @synchronized
     def __getitem__(self, key):
         return copy.deepcopy(super(MemoryCache, self).__getitem__(key))
 

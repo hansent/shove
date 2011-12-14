@@ -49,7 +49,7 @@ class S3Store(BaseStore):
 
     def __getitem__(self, key):
         rkey = self._store.lookup(key)
-        if rkey is None: 
+        if rkey is None:
             raise KeyError(key)
         # Fetch string
         value = self.loads(rkey.get_contents_as_string())
@@ -84,5 +84,5 @@ class S3Store(BaseStore):
 
     def iteritems(self):
         '''Lazily returns items from the store.'''
-        for k in self.items(): 
+        for k in self.items():
             yield (k.key, k)

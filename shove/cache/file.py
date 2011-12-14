@@ -21,8 +21,8 @@ __all__ = ['FileCache']
 
 class FileCache(FileBase, SimpleCache):
 
-    '''File-based cache backend'''    
-    
+    '''File-based cache backend'''
+
     def __init__(self, engine, **kw):
         super(FileCache, self).__init__(engine, **kw)
 

@@ -23,10 +23,10 @@ __all__ = ['BsdStore']
 
 
 class BsdStore(SyncStore):
-    
+
     '''Class for Berkeley Source Database Store.'''
 
-    init = 'bsddb://'   
+    init = 'bsddb://'
 
     def __init__(self, engine, **kw):
         super(BsdStore, self).__init__(engine, **kw)

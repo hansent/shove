@@ -1,5 +1,8 @@
-import unittest
+# -*- coding: utf-8 -*-
+
 import time
+import unittest
+
 from shove.cache.simple import SimpleCache
 
 
@@ -34,7 +37,9 @@ class TestSimpleCache(unittest.TestCase):
         cache = self.cacheclass(self.initstring, timeout=1)
         cache['test'] = 'test'
         time.sleep(1)
-        def tmp(): cache['test']
+
+        def tmp():
+            cache['test']
         self.assertRaises(KeyError, tmp)
 
     def test_cull(self):

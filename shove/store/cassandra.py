@@ -45,7 +45,7 @@ class CassandraStore(BaseStore):
     def __getitem__(self, key):
         try:
             item = self._store.get(key).get(key)
-            if item is not None: 
+            if item is not None:
                 return self.loads(item)
             raise KeyError(key)
         except pycassa.NotFoundException:
