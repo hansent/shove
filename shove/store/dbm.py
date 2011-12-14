@@ -18,7 +18,7 @@ __all__ = ['DbmStore']
 
 
 class DbmStore(SyncStore):
-    
+
     '''Class for variants of the DBM database.'''
 
     init = 'dbm://'

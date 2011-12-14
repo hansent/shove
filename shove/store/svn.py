@@ -3,7 +3,7 @@
 subversion managed store.
 
 The shove psuedo-URL used for a subversion store that is password protected is:
-    
+
 svn:<username><password>:<path>?url=<url>
 
 or for non-password protected repositories:
@@ -31,7 +31,7 @@ __all__ = ['SvnStore']
 class SvnStore(BaseStore):
 
     '''Class for subversion store.'''
-    
+
     def __init__(self, engine=None, **kw):
         super(SvnStore, self).__init__(engine, **kw)
         # Get path, url from keywords if used
@@ -50,9 +50,9 @@ class SvnStore(BaseStore):
         # Create subversion client
         self._client = pysvn.Client()
         # Assign username, password
-        if user is not None: 
+        if user is not None:
             self._client.set_username(user)
-        if password is not None: 
+        if password is not None:
             self._client.set_password(password)
         # Verify that store exists in repository
         try:
@@ -61,9 +61,9 @@ class SvnStore(BaseStore):
         except pysvn.ClientError:
             self._client.mkdir(url, 'Adding directory')
         # Verify that local copy exists
-        try:			
-            if self._client.info(path) is None: 
-                self._client.checkout(url, path)            
+        try:
+            if self._client.info(path) is None:
+                self._client.checkout(url, path)
         # Check it out if it doesn't exist
         except pysvn.ClientError:
             self._client.checkout(url, path)
@@ -84,10 +84,10 @@ class SvnStore(BaseStore):
         # Write value to file
         open(fname, 'wb').write(self.dumps(value))
         # Add to repository
-        if key not in self: 
+        if key not in self:
             self._client.add(fname)
         self._client.checkin([fname], 'Adding %s' % fname)
-        
+
     @synchronized
     def __delitem__(self, key):
         try:
@@ -97,7 +97,7 @@ class SvnStore(BaseStore):
             self._client.checkin([fname], 'Removing %s' % fname)
         except:
             raise KeyError(key)
-    
+
     def _key_to_file(self, key):
         '''Gives the filesystem path for a key.'''
         return os.path.join(self._path, urllib.quote_plus(key))

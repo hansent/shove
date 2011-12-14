@@ -18,7 +18,7 @@ __all__ = ['MemoryLRUCache']
 
 class MemoryLRUCache(SimpleLRUCache):
 
-    '''Thread-safe in-memory cache backend using LRU.'''    
+    '''Thread-safe in-memory cache backend using LRU.'''
 
     def __init__(self, engine, **kw):
         super(MemoryLRUCache, self).__init__(engine, **kw)
@@ -28,7 +28,7 @@ class MemoryLRUCache(SimpleLRUCache):
     def __setitem__(self, key, value):
         super(MemoryLRUCache, self).__setitem__(key, value)
 
-    @synchronized        
+    @synchronized
     def __getitem__(self, key):
         return copy.deepcopy(super(MemoryLRUCache, self).__getitem__(key))
 

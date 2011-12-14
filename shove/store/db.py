@@ -45,13 +45,12 @@ class DbStore(BaseStore, DbBase):
             Column('value', Binary, nullable=False),
         )
         # Create store table if it does not exist
-        if not self._store.exists(): 
+        if not self._store.exists():
             self._store.create()
 
     def __getitem__(self, key):
         row = select(
-            [self._store.c.value],
-            self._store.c.key==key
+            [self._store.c.value], self._store.c.key==key
         ).execute().fetchone()
         if row is not None: return self.loads(str(row.value))
         raise KeyError(key)

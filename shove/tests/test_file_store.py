@@ -1,5 +1,8 @@
-import unittest
+# -*- coding: utf-8 -*-
+
 import os
+import unittest
+
 from shove import Shove
 
 

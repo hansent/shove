@@ -40,7 +40,7 @@ setup(
     author_email='lcrees@gmail.com',
     url='http://pypi.python.org/pypi/shove/',
     license='BSD',
-    packages = ['shove', 'shove.cache', 'shove.store', 'shove.tests'],
+    packages=['shove', 'shove.cache', 'shove.store', 'shove.tests'],
     py_modules=['ez_setup'],
     test_suite='shove.tests',
     zip_safe=False,
@@ -53,7 +53,7 @@ setup(
         'Programming Language :: Python',
         'Topic :: Database :: Front-Ends',
     ],
-    entry_points = '''
+    entry_points='''
     [shove.stores]
     bsddb=shove.store.bsdb:BsdStore
     dbm=shove.store.dbm:DbmStore

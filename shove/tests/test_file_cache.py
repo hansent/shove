@@ -1,6 +1,9 @@
-import unittest
-import time
+# -*- coding: utf-8 -*-
+
 import os
+import time
+import unittest
+
 from shove.cache.file import FileCache
 
 
@@ -9,10 +12,10 @@ class TestFileCache(unittest.TestCase):
     initstring = 'file://test'
     cacheclass = FileCache
 
-    def setUp(self): 
+    def setUp(self):
         self.cache = self.cacheclass(self.initstring)
 
-    def tearDown(self): 
+    def tearDown(self):
         self.cache = None
         for x in os.listdir('test'): os.remove(os.path.join('test', x))
         os.rmdir('test')
@@ -37,7 +40,9 @@ class TestFileCache(unittest.TestCase):
         cache = self.cacheclass(self.initstring, timeout=1)
         cache['test'] = 'test'
         time.sleep(2)
-        def tmp(): cache['test']            
+        
+        def tmp(): 
+            cache['test']            
         self.assertRaises(KeyError, tmp)
 
     def test_cull(self):      

@@ -3,7 +3,7 @@
 "memcached" cache.
 
 The shove psuedo-URL for a memcache cache is:
-    
+
 memcache://<memcache_server>
 '''
 
@@ -19,11 +19,11 @@ __all__ = ['MemCached']
 
 class MemCached(Base):
 
-    '''Memcached cache backend'''    
-    
+    '''Memcached cache backend'''
+
     def __init__(self, engine, **kw):
         super(MemCached, self).__init__(engine, **kw)
-        if engine.startswith('memcache://'): 
+        if engine.startswith('memcache://'):
             engine = engine.split('://')[1]
         self._store = memcache.Client(engine.split(';'))
         # Set timeout
@@ -31,10 +31,10 @@ class MemCached(Base):
 
     def __getitem__(self, key):
         value = self._store.get(key)
-        if value is None: 
+        if value is None:
             raise KeyError(key)
         return self.loads(value)
-        
+
     def __setitem__(self, key, value):
         self._store.set(key, self.dumps(value), self.timeout)
 

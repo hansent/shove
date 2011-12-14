@@ -23,14 +23,14 @@ __all__ = ['ZodbStore']
 
 
 class ZodbStore(SyncStore):
-    
+
     '''ZODB store front end.'''
 
-    init = 'zodb://'    
+    init = 'zodb://'
 
     def __init__(self, engine, **kw):
         super(ZodbStore, self).__init__(engine, **kw)
-        # Handle psuedo-URL        
+        # Handle psuedo-URL
         self._storage = FileStorage.FileStorage(self._engine)
         self._db = DB(self._storage)
         self._connection = self._db.open()

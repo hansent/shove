@@ -14,4 +14,4 @@ __all__ = ['SimpleLRUCache']
 
 class SimpleLRUCache(LRUBase):
 
-    '''In-memory cache that purges based on least recently used item.'''  
+    '''In-memory cache that purges based on least recently used item.'''

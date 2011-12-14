@@ -18,7 +18,7 @@ __all__ = ['FileStore']
 
 class FileStore(FileBase, BaseStore):
 
-    '''File-based store.'''    
-    
+    '''File-based store.'''
+
     def __init__(self, engine, **kw):
         super(FileStore, self).__init__(engine, **kw)

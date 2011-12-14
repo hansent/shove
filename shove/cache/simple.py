@@ -17,8 +17,8 @@ __all__ = ['SimpleCache']
 
 class SimpleCache(SimpleBase):
 
-    '''Single-process in-memory cache.'''    
-    
+    '''Single-process in-memory cache.'''
+
     def __init__(self, engine, **kw):
         super(SimpleCache, self).__init__(engine, **kw)
         # Get random seed
@@ -31,7 +31,7 @@ class SimpleCache(SimpleBase):
         self.timeout = kw.get('timeout', 300)
 
     def __getitem__(self, key):
-        exp, value = super(SimpleCache, self).__getitem__(key) 
+        exp, value = super(SimpleCache, self).__getitem__(key)
         # Delete if item timed out.
         if exp < time.time():
             super(SimpleCache, self).__delitem__(key)
@@ -40,14 +40,14 @@ class SimpleCache(SimpleBase):
 
     def __setitem__(self, key, value):
         # Cull values if over max # of entries
-        if len(self) >= self._max_entries: 
+        if len(self) >= self._max_entries:
             self._cull()
         # Set expiration time and value
         exp = time.time() + self.timeout
-        super(SimpleCache, self).__setitem__(key, (exp, value)) 
+        super(SimpleCache, self).__setitem__(key, (exp, value))
 
     def _cull(self):
-        '''Remove items in cache to make room.'''        
+        '''Remove items in cache to make room.'''
         num, maxcull = 0, self._maxcull
         # Cull number of items allowed (set by self._maxcull)
         for key in self.keys():
