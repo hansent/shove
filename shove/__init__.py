@@ -107,6 +107,9 @@ class Base(object):
     '''Base Mapping class.'''
 
     def __init__(self, engine, **kw):
+        '''
+        @keyword compress True, False, or an integer compression level (1-9).
+        '''
         self._compress = kw.get('compress', False)
         self._protocol = kw.get('protocol', pickle.HIGHEST_PROTOCOL)
 
@@ -143,9 +146,9 @@ class Base(object):
         '''Optionally serializes and compresses an object.'''
         # Serialize everything but ASCII strings
         value = pickle.dumps(value, protocol=self._protocol)
-        # Apply maximum compression
         if self._compress:
-            value = zlib.compress(value, 9)
+            level = 9 if self._compress is True else self._compress
+            value = zlib.compress(value, level)
         return value
 
     def loads(self, value):
