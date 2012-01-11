@@ -16,8 +16,6 @@ import time
 from shove import FileBase
 from shove.cache.simple import SimpleCache
 
-__all__ = ['FileCache']
-
 
 class FileCache(FileBase, SimpleCache):
 
@@ -42,3 +40,6 @@ class FileCache(FileBase, SimpleCache):
         super(FileCache, self).__setitem__(
             key, (time.time() + self.timeout, value)
         )
+
+
+__all__ = ['FileCache']

@@ -133,5 +133,6 @@ class TestFileStore(unittest.TestCase):
         slist = self.store.keys()
         self.assertEqual('min' in slist, True)
 
+
 if __name__ == '__main__':
     unittest.main()

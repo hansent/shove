@@ -13,8 +13,6 @@ import threading
 from shove import synchronized
 from shove.cache.simple import SimpleCache
 
-__all__ = ['MemoryCache']
-
 
 class MemoryCache(SimpleCache):
 
@@ -35,3 +33,6 @@ class MemoryCache(SimpleCache):
     @synchronized
     def __delitem__(self, key):
         super(MemoryCache, self).__delitem__(key)
+
+
+__all__ = ['MemoryCache']

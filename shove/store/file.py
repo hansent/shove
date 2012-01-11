@@ -13,8 +13,6 @@ argument.
 
 from shove import BaseStore, FileBase
 
-__all__ = ['FileStore']
-
 
 class FileStore(FileBase, BaseStore):
 
@@ -22,3 +20,6 @@ class FileStore(FileBase, BaseStore):
 
     def __init__(self, engine, **kw):
         super(FileStore, self).__init__(engine, **kw)
+
+
+__all__ = ['FileStore']

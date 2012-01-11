@@ -16,8 +16,6 @@ except ImportError:
 
 from shove.store.simple import SimpleStore
 
-__all__ = ['RedisStore']
-
 
 class RedisStore(SimpleStore):
 
@@ -37,3 +35,6 @@ class RedisStore(SimpleStore):
         if item is not None:
             return item
         raise KeyError(key)
+
+
+__all__ = ['RedisStore']

@@ -19,8 +19,6 @@ except ImportError:
 
 from shove.store import SyncStore
 
-__all__ = ['DurusStore']
-
 
 class DurusStore(SyncStore):
 
@@ -40,3 +38,6 @@ class DurusStore(SyncStore):
         self.sync()
         self._db.close()
         super(DurusStore, self).close()
+
+
+__all__ = ['DurusStore']

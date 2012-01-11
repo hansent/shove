@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
-import unittest
 import os
+import unittest
+
 from shove import Shove
 
 
@@ -12,7 +13,10 @@ class TestDbmStore(unittest.TestCase):
 
     def tearDown(self):
         self.store.close()
-        os.remove('test.dbm')
+        try:
+            os.remove('test.dbm')
+        except OSError:
+            pass
 
     def test__getitem__(self):
         self.store['max'] = 3
@@ -97,7 +101,7 @@ class TestDbmStore(unittest.TestCase):
     def test_setdefault(self):
         self.store['max'] = 3
         self.store['min'] = 6
-        self.store['powl'] = 7
+        self.store['pow'] = 7
         self.store.setdefault('pow', 8)
         self.assertEqual(self.store['pow'], 8)
 

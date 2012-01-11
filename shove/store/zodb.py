@@ -19,8 +19,6 @@ except ImportError:
 
 from shove.store import SyncStore
 
-__all__ = ['ZodbStore']
-
 
 class ZodbStore(SyncStore):
 
@@ -45,3 +43,6 @@ class ZodbStore(SyncStore):
         self._connection.close()
         self._db.close()
         self._storage.close()
+
+
+__all__ = ['ZodbStore']

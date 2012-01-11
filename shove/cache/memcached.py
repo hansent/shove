@@ -14,8 +14,6 @@ except ImportError:
 
 from shove import Base
 
-__all__ = ['MemCached']
-
 
 class MemCached(Base):
 
@@ -40,3 +38,6 @@ class MemCached(Base):
 
     def __delitem__(self, key):
         self._store.delete(key)
+
+
+__all__ = ['MemCached']

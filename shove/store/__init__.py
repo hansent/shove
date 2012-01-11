@@ -3,11 +3,6 @@
 from urllib import url2pathname
 from shove.store.simple import SimpleStore
 
-__all__ = [
-    'bsdb', 'db', 'dbm', 'durusdb', 'file', 'ftp', 'memory', 's3', 'simple',
-    'svn', 'zodb', 'redisdb'
-]
-
 
 class SyncStore(SimpleStore):
 
@@ -23,8 +18,20 @@ class SyncStore(SimpleStore):
 
     def __setitem__(self, key, value):
         super(SyncStore, self).__setitem__(key, self.dumps(value))
-        self.sync()
+        try:
+            self.sync()
+        except AttributeError:
+            pass
 
     def __delitem__(self, key):
         super(SyncStore, self).__delitem__(key)
-        self.sync()
+        try:
+            self.sync()
+        except AttributeError:
+            pass
+
+
+__all__ = [
+    'bsdb', 'db', 'dbm', 'durusdb', 'file', 'ftp', 'memory', 's3', 'simple',
+    'svn', 'zodb', 'redisdb'
+]

@@ -13,8 +13,6 @@ import threading
 from shove import synchronized
 from shove.cache.simplelru import SimpleLRUCache
 
-__all__ = ['MemoryLRUCache']
-
 
 class MemoryLRUCache(SimpleLRUCache):
 
@@ -35,3 +33,6 @@ class MemoryLRUCache(SimpleLRUCache):
     @synchronized
     def __delitem__(self, key):
         super(MemoryLRUCache, self).__delitem__(key)
+
+
+__all__ = ['MemoryLRUCache']

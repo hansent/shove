@@ -12,8 +12,6 @@ import random
 
 from shove import SimpleBase
 
-__all__ = ['SimpleCache']
-
 
 class SimpleCache(SimpleBase):
 
@@ -64,3 +62,6 @@ class SimpleCache(SimpleBase):
             # Cull remainder of allowed quota at random
             del self[random.choice(self.keys())]
             num += 1
+
+
+__all__ = ['SimpleCache']

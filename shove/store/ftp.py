@@ -17,8 +17,6 @@ from ftplib import FTP, error_perm
 
 from shove import BaseStore
 
-__all__ = ['FtpStore']
-
 
 class FtpStore(BaseStore):
 
@@ -40,8 +38,6 @@ class FtpStore(BaseStore):
             self._makedir(path)
         self._base, self._user, self._password = base, user, password
         self._updated, self ._keys = True, None
-        # Flags if compression should be used
-        self._compress = kw.get('compress', False)
 
     def __getitem__(self, key):
         try:
@@ -87,3 +83,6 @@ class FtpStore(BaseStore):
                     nlist.append(rfile[-1])
             self._keys = nlist
         return self._keys
+
+
+__all__ = ['FtpStore']

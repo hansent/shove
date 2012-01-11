@@ -14,8 +14,6 @@ import anydbm
 
 from shove.store import SyncStore
 
-__all__ = ['DbmStore']
-
 
 class DbmStore(SyncStore):
 
@@ -26,4 +24,10 @@ class DbmStore(SyncStore):
     def __init__(self, engine, **kw):
         super(DbmStore, self).__init__(engine, **kw)
         self._store = anydbm.open(self._engine, 'c')
-        self.sync = self._store.sync
+        try:
+            self.sync = self._store.sync
+        except AttributeError:
+            pass
+
+
+__all__ = ['DbmStore']

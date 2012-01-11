@@ -25,8 +25,6 @@ except ImportError:
 
 from shove import BaseStore, synchronized
 
-__all__ = ['SvnStore']
-
 
 class SvnStore(BaseStore):
 
@@ -107,3 +105,6 @@ class SvnStore(BaseStore):
         '''Returns a list of keys in the subversion repository.'''
         return list(str(i.name.split('/')[-1]) for i
             in self._client.ls(self._path))
+
+
+__all__ = ['SvnStore']
