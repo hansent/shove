@@ -41,7 +41,7 @@ class FtpStore(BaseStore):
         self._base, self._user, self._password = base, user, password
         self._updated, self ._keys = True, None
         # Flags if compression should be used
-        self._compressed = kw.get('compressed', False)
+        self._compress = kw.get('compress', False)
 
     def __getitem__(self, key):
         try:
