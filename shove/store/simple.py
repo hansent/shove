@@ -9,8 +9,6 @@ simple://
 
 from shove import BaseStore, SimpleBase
 
-__all__ = ['SimpleStore']
-
 
 class SimpleStore(SimpleBase, BaseStore):
 
@@ -18,3 +16,6 @@ class SimpleStore(SimpleBase, BaseStore):
 
     def __init__(self, engine, **kw):
         super(SimpleStore, self).__init__(engine, **kw)
+
+
+__all__ = ['SimpleStore']

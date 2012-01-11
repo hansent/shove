@@ -9,9 +9,10 @@ simplelru://
 
 from shove import LRUBase
 
-__all__ = ['SimpleLRUCache']
-
 
 class SimpleLRUCache(LRUBase):
 
     '''In-memory cache that purges based on least recently used item.'''
+
+
+__all__ = ['SimpleLRUCache']

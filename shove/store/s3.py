@@ -86,3 +86,6 @@ class S3Store(BaseStore):
         '''Lazily returns items from the store.'''
         for k in self.items():
             yield (k.key, k)
+
+
+__all__ = ['S3Store']

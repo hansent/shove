@@ -33,3 +33,8 @@ What's new with 0.3.1
 What's new with 0.3.2
 
 - make key exceptions work with tuples (per Ling Li)
+
+What's new with 0.3.3
+
+- make compression variable according to keywords (per Ling Li)
+- pep 8 compliance

@@ -2,7 +2,6 @@
 '''
 Database object cache.
 
-
 The shove psuedo-URL used for database object caches is the format used by
 SQLAlchemy:
 
@@ -38,7 +37,7 @@ __all__ = ['DbCache']
 
 class DbCache(DbBase):
 
-    '''Database cache backend.'''
+    '''database cache backend'''
 
     def __init__(self, engine, **kw):
         super(DbCache, self).__init__(engine, **kw)

@@ -16,8 +16,6 @@ except ImportError:
 
 from shove import BaseStore
 
-__all__ = ['CassandraStore']
-
 
 class CassandraStore(BaseStore):
 
@@ -67,3 +65,6 @@ class CassandraStore(BaseStore):
 
     def keys(self):
         return list(i[0] for i in self._store.get_range())
+
+
+__all__ = ['CassandraStore']

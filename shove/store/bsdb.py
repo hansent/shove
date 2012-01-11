@@ -19,8 +19,6 @@ import threading
 from shove import synchronized
 from shove.store import SyncStore
 
-__all__ = ['BsdStore']
-
 
 class BsdStore(SyncStore):
 
@@ -45,3 +43,6 @@ class BsdStore(SyncStore):
     @synchronized
     def __delitem__(self, key):
         super(BsdStore, self).__delitem__(key)
+
+
+__all__ = ['BsdStore']

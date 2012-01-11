@@ -26,8 +26,6 @@ try:
 except ImportError:
     raise ImportError('Requires SQLAlchemy >= 0.4')
 
-__all__ = ['DbStore']
-
 
 class DbStore(BaseStore, DbBase):
 
@@ -50,7 +48,7 @@ class DbStore(BaseStore, DbBase):
 
     def __getitem__(self, key):
         row = select(
-            [self._store.c.value], self._store.c.key==key
+            [self._store.c.value], self._store.c.key == key,
         ).execute().fetchone()
         if row is not None: return self.loads(str(row.value))
         raise KeyError(key)
@@ -69,3 +67,6 @@ class DbStore(BaseStore, DbBase):
         return list(i[0] for i in select(
             [self._store.c.key]
         ).execute().fetchall())
+
+
+__all__ = ['DbStore']

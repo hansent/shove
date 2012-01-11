@@ -59,24 +59,6 @@ except ImportError:
         bsddb='shove.cache.bsdb:BsdCache',
     )
 
-__all__ = ['Shove']
-
-def synchronized(func):
-    '''
-    Decorator to lock and unlock a method (Phillip J. Eby).
-
-    @param func Method to decorate
-    '''
-    def wrapper(self, *__args, **__kw):
-        self._lock.acquire()
-        try:
-            return func(self, *__args, **__kw)
-        finally:
-            self._lock.release()
-    wrapper.__name__ = func.__name__
-    wrapper.__dict__ = func.__dict__
-    wrapper.__doc__ = func.__doc__
-    return wrapper
 
 def getbackend(uri, engines, **kw):
     '''
@@ -100,6 +82,24 @@ def getbackend(uri, engines, **kw):
         return mod(uri, **kw)
     # No-op for existing instances
     return uri
+
+
+def synchronized(func):
+    '''
+    Decorator to lock and unlock a method (Phillip J. Eby).
+
+    @param func Method to decorate
+    '''
+    def wrapper(self, *__args, **__kw):
+        self._lock.acquire()
+        try:
+            return func(self, *__args, **__kw)
+        finally:
+            self._lock.release()
+    wrapper.__name__ = func.__name__
+    wrapper.__dict__ = func.__dict__
+    wrapper.__doc__ = func.__doc__
+    return wrapper
 
 
 class Base(object):
@@ -348,7 +348,10 @@ class Shove(BaseStore):
         '''Finalizes and closes shove.'''
         # If close has been called, pass
         if self._store is not None:
-            self.sync()
+            try:
+                self.sync()
+            except AttributeError:
+                pass
             self._store.close()
             self._store = self._cache = self._buffer = None
 
@@ -505,3 +508,6 @@ class DbBase(Base):
 
     def __len__(self):
         return self._store.count().execute().fetchone()[0]
+
+
+__all__ = ['Shove']

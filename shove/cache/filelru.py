@@ -14,9 +14,10 @@ argument.
 from shove import FileBase
 from shove.cache.simplelru import SimpleLRUCache
 
-__all__ = ['FileCache']
-
 
 class FileCache(FileBase, SimpleLRUCache):
 
     '''File-based LRU cache backend'''
+
+
+__all__ = ['FileCache']

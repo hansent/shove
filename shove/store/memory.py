@@ -13,8 +13,6 @@ import threading
 from shove import synchronized
 from shove.store.simple import SimpleStore
 
-__all__ = ['MemoryStore']
-
 
 class MemoryStore(SimpleStore):
 
@@ -35,3 +33,6 @@ class MemoryStore(SimpleStore):
     @synchronized
     def __delitem__(self, key):
         super(MemoryStore, self).__delitem__(key)
+
+
+__all__ = ['MemoryStore']
