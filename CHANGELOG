@@ -36,5 +36,8 @@ What's new with 0.3.2
 
 What's new with 0.3.3
 
-- make compression variable according to keywords (per Ling Li)
 - pep 8 compliance
+
+What's new with 0.3.4
+
+- make compression variable according to keywords (per Ling Li)

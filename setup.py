@@ -8,12 +8,12 @@ except ImportError:
 
 setup(
     name='shove',
-    version='0.3.3',
+    version='0.3.4',
     description='''Common object storage frontend''',
     long_description=open('README.rst').read(),
     author='L. C. Rees',
     author_email='lcrees@gmail.com',
-    url='http://pypi.python.org/pypi/shove/',
+    url='https://bitbucket.org/lcrees/shove/',
     license='BSD',
     packages=['shove', 'shove.cache', 'shove.store', 'shove.tests'],
     py_modules=['ez_setup'],
