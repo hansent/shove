@@ -51,7 +51,7 @@ setup(
     svn=shove.store.svn:SvnStore
     zodb=shove.store.zodb:ZodbStore
     redis=shove.store.redisdb:RedisStore
-    cassandra=shove.store.cassandra:Cassandra
+    cassandra=shove.store.cassandra:CassandraStore
     [shove.caches]
     bsddb=shove.cache.bsdb:BsdCache
     file=shove.cache.file:FileCache
