@@ -41,3 +41,7 @@ What's new with 0.3.3
 What's new with 0.3.4
 
 - make compression variable according to keywords (per Ling Li)
+
+What's new with 0.3.5
+
+- miscellaneous fixes for Cassandra (per Bayle Shanks)
