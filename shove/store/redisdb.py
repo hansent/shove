@@ -14,10 +14,10 @@ try:
 except ImportError:
     raise ImportError('This store requires the redis library')
 
-from shove.store.simple import SimpleStore
+from shove.store import SyncStore
 
 
-class RedisStore(SimpleStore):
+class RedisStore(SyncStore):
 
     '''Redis based store'''
 
