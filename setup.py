@@ -35,23 +35,24 @@ setup(
     entry_points='''
     [shove.stores]
     bsddb=shove.store.bsdb:BsdStore
+    cassandra=shove.store.cassandra:CassandraStore
     dbm=shove.store.dbm:DbmStore
     durus=shove.store.durusdb:DurusStore
     file=shove.store.file:FileStore
     firebird=shove.store.db:DbStore
     ftp=shove.store.ftp:FtpStore
+    leveldb=shove.store.leveldbstore:LevelDBStore
     memory=shove.store.memory:MemoryStore
     mssql=shove.store.db:DbStore
     mysql=shove.store.db:DbStore
     oracle=shove.store.db:DbStore
     postgres=shove.store.db:DbStore
+    redis=shove.store.redisdb:RedisStore
+    s3=shove.store.s3:S3Store
     simple=shove.store.simple:SimpleStore
     sqlite=shove.store.db:DbStore
-    s3=shove.store.s3:S3Store
     svn=shove.store.svn:SvnStore
     zodb=shove.store.zodb:ZodbStore
-    redis=shove.store.redisdb:RedisStore
-    cassandra=shove.store.cassandra:CassandraStore
     [shove.caches]
     bsddb=shove.cache.bsdb:BsdCache
     file=shove.cache.file:FileCache

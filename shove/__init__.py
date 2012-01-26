@@ -18,45 +18,47 @@ try:
     caches = dict((_cache.name, _cache) for _cache in
         pkg_resources.iter_entry_points('shove.caches'))
     # Pass if nothing loaded
-    if not stores and not caches: raise ImportError()
+    if not stores and not caches:
+        raise ImportError()
 except ImportError:
     # Static store backend registry
     stores = dict(
-        simple='shove.store.simple:SimpleStore',
-        memory='shove.store.memory:MemoryStore',
-        file='shove.store.file:FileStore',
-        dbm='shove.store.dbm:DbmStore',
         bsddb='shove.store.bsdb:BsdStore',
-        sqlite='shove.store.db:DbStore',
-        postgres='shove.store.db:DbStore',
+        cassandra='shove.store.cassandra:CassandraStore',
+        dbm='shove.store.dbm:DbmStore',
+        durus='shove.store.durusdb:DurusStore',
+        file='shove.store.file:FileStore',
+        firebird='shove.store.db:DbStore',
+        ftp='shove.store.ftp:FtpStore',
+        leveldb='shove.store.leveldbstore:LevelDBStore',
+        memory='shove.store.memory:MemoryStore',
+        mssql='shove.store.db:DbStore',
         mysql='shove.store.db:DbStore',
         oracle='shove.store.db:DbStore',
-        firebird='shove.store.db:DbStore',
-        mssql='shove.store.db:DbStore',
-        svn='shove.store.svn:SvnStore',
-        s3='shove.store.s3:S3Store',
-        ftp='shove.store.ftp:FtpStore',
-        zodb='shove.store.zodb:ZodbStore',
-        durus='shove.store.durusdb:DurusStore',
+        postgres='shove.store.db:DbStore',
         redis='shove.store.redisdb:RedisStore',
-        cassandra='shove.store.cassandra:CassandraStore',
+        s3='shove.store.s3:S3Store',
+        simple='shove.store.simple:SimpleStore',
+        sqlite='shove.store.db:DbStore',
+        svn='shove.store.svn:SvnStore',
+        zodb='shove.store.zodb:ZodbStore',
     )
     # Static cache backend registry
     caches = dict(
-        simple='shove.cache.simple:SimpleCache',
-        memory='shove.cache.memory:MemoryCache',
+        bsddb='shove.cache.bsdb:BsdCache',
         file='shove.cache.file:FileCache',
-        simplelru='shove.cache.simplelru:SimpleLRUCache',
-        memlru='shove.cache.memlru:MemoryLRUCache',
         filelru='shove.cache.filelru:FileLRUCache',
-        mssql='shove.cache.db:DbCache',
-        sqlite='shove.cache.db:DbCache',
-        postgres='shove.cache.db:DbCache',
         firebird='shove.cache.db:DbCache',
+        memcache='shove.cache.memcached:MemCached',
+        memlru='shove.cache.memlru:MemoryLRUCache',
+        memory='shove.cache.memory:MemoryCache',
+        mssql='shove.cache.db:DbCache',
         mysql='shove.cache.db:DbCache',
         oracle='shove.cache.db:DbCache',
-        memcache='shove.cache.memcached:MemCached',
-        bsddb='shove.cache.bsdb:BsdCache',
+        postgres='shove.cache.db:DbCache',
+        simple='shove.cache.simple:SimpleCache',
+        simplelru='shove.cache.simplelru:SimpleLRUCache',
+        sqlite='shove.cache.db:DbCache',
     )
 
 
@@ -196,7 +198,8 @@ class BaseStore(Base):
         '''Closes internal store and clears object references.'''
         try:
             self._store.close()
-        except AttributeError: pass
+        except AttributeError:
+            pass
         self._store = None
 
     def clear(self):
@@ -275,7 +278,8 @@ class BaseStore(Base):
         other Another store
         kw Additional keys and values to store
         '''
-        if other is None: pass
+        if other is None:
+            pass
         elif hasattr(other, 'iteritems'):
             for k, v in other.iteritems():
                 self[k] = v
