@@ -13,6 +13,7 @@ Currently supported storage backends are:
 - FTP
 - Filesystem
 - Firebird
+- LevelDB
 - Memory
 - Microsoft SQL Server
 - MySQL
