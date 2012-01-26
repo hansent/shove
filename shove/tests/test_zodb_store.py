@@ -18,6 +18,7 @@ class TestZodbStore(unittest.TestCase):
         os.remove('test.db')
         os.remove('test.db.index')
         os.remove('test.db.tmp')
+        os.remove('test.db.lock')
 
     def test__getitem__(self):
         self.store['max'] = 3
