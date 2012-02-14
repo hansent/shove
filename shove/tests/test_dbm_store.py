@@ -14,7 +14,7 @@ class TestDbmStore(unittest.TestCase):
     def tearDown(self):
         self.store.close()
         try:
-            os.remove('test.dbm')
+            os.remove('test.dbm.db')
         except OSError:
             pass
 
@@ -102,8 +102,8 @@ class TestDbmStore(unittest.TestCase):
         self.store['max'] = 3
         self.store['min'] = 6
         self.store['pow'] = 7
-        self.store.setdefault('pow', 8)
-        self.assertEqual(self.store['pow'], 8)
+        self.store.setdefault('how', 8)
+        self.assertEqual(self.store['how'], 8)
 
     def test_update(self):
         tstore = Shove()

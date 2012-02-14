@@ -17,7 +17,8 @@ class TestFileCache(unittest.TestCase):
 
     def tearDown(self):
         self.cache = None
-        for x in os.listdir('test'): os.remove(os.path.join('test', x))
+        for x in os.listdir('test'):
+            os.remove(os.path.join('test', x))
         os.rmdir('test')
 
     def test_getitem(self):

@@ -13,7 +13,8 @@ class TestFileStore(unittest.TestCase):
 
     def tearDown(self):
         self.store.close()
-        for x in os.listdir('test'): os.remove(os.path.join('test', x))
+        for x in os.listdir('test'):
+            os.remove(os.path.join('test', x))
         os.rmdir('test')
 
     def test__getitem__(self):

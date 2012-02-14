@@ -41,7 +41,7 @@ class LevelDBStore(SyncStore):
         self._store.Delete(key)
 
     def keys(self):
-        return list(k for k, _ in self._store.RangeIter())
+        return list(k for k in self._store.RangeIter(include_value=False))
 
 
 __all__ = ['LevelDBStore']

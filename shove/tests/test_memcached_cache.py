@@ -8,7 +8,7 @@ from shove.cache.memcached import MemCached
 
 class TestMemcached(unittest.TestCase):
 
-    initstring = 'memcache://localhost'
+    initstring = 'memcache://localhost:11211'
     cacheclass = MemCached
 
     def setUp(self):

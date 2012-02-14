@@ -68,7 +68,7 @@ def getbackend(uri, engines, **kw):
 
     @param uri Instance or name string
     @param engines A dictionary of scheme/class pairs
-    @param kw Keywords'''
+    '''
     if isinstance(uri, basestring):
         mod = engines[uri.split('://', 1)[0]]
         # Load module if setuptools not present
