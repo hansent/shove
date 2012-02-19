@@ -33,5 +33,5 @@ class SyncStore(SimpleStore):
 
 __all__ = [
     'bsdb', 'db', 'dbm', 'durusdb', 'file', 'ftp', 'memory', 's3', 'simple',
-    'svn', 'zodb', 'redisdb'
+    'svn', 'zodb', 'redisdb', 'hdf5db', 'leveldbstore', 'cassandra',
 ]

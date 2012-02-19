@@ -30,6 +30,7 @@ except ImportError:
         file='shove.store.file:FileStore',
         firebird='shove.store.db:DbStore',
         ftp='shove.store.ftp:FtpStore',
+        hdf5='shove.store.hdf5:HDF5Store',
         leveldb='shove.store.leveldbstore:LevelDBStore',
         memory='shove.store.memory:MemoryStore',
         mssql='shove.store.db:DbStore',

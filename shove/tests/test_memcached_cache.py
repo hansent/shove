@@ -1,18 +1,15 @@
 # -*- coding: utf-8 -*-
 
-import time
 import unittest
-
-from shove.cache.memcached import MemCached
 
 
 class TestMemcached(unittest.TestCase):
 
     initstring = 'memcache://localhost:11211'
-    cacheclass = MemCached
 
     def setUp(self):
-        self.cache = self.cacheclass(self.initstring)
+        from shove.cache.memcached import MemCached
+        self.cache = MemCached(self.initstring)
 
     def tearDown(self):
         self.cache = None
@@ -34,7 +31,9 @@ class TestMemcached(unittest.TestCase):
         self.assertEqual(self.cache.get('min'), None)
 
     def test_timeout(self):
-        cache = self.cacheclass(self.initstring, timeout=1)
+        import time
+        from shove.cache.memcached import MemCached
+        cache = MemCached(self.initstring, timeout=1)
         cache['test'] = 'test'
         time.sleep(1)
 

@@ -34,8 +34,8 @@ class CassandraStore(BaseStore):
             from pycassa.system_manager import SystemManager
             system_manager = SystemManager(spliturl[1])
             system_manager.create_keyspace(
-                keyspace, 
-                pycassa.system_manager.SIMPLE_STRATEGY, 
+                keyspace,
+                pycassa.system_manager.SIMPLE_STRATEGY,
                 {'replication_factor': str(kw.get('replication', 1))}
             )
             system_manager.create_column_family(keyspace, column_family)

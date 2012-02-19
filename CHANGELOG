@@ -55,3 +55,7 @@ What's new with 0.4.1
 
 - fix LevelDB key iteration (per bwhite)
 - fix RDMS caching
+
+What's new with 0.4.2
+
+- HDF5 support for store
