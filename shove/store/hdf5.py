@@ -16,10 +16,10 @@ try:
 except ImportError:
     raise ImportError('This store requires h5py library')
 
-from shove.store import SyncStore
+from shove.store import ClientStore
 
 
-class HDF5Store(SyncStore):
+class HDF5Store(ClientStore):
 
     '''LevelDB based store'''
 

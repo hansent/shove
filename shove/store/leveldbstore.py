@@ -15,10 +15,10 @@ try:
 except ImportError:
     raise ImportError('This store requires py-leveldb library')
 
-from shove.store import SyncStore
+from shove.store import ClientStore
 
 
-class LevelDBStore(SyncStore):
+class LevelDBStore(ClientStore):
 
     '''LevelDB based store'''
 
