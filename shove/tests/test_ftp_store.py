@@ -2,14 +2,13 @@
 
 import unittest
 
-from shove import Shove
-
 
 class TestFtpStore(unittest.TestCase):
 
     ftpstring = 'put ftp string here'
 
     def setUp(self):
+        from shove import Shove
         self.store = Shove(self.ftpstring, compress=True)
 
     def tearDown(self):
@@ -37,6 +36,7 @@ class TestFtpStore(unittest.TestCase):
         self.assertEqual(self.store.get('min'), None)
 
     def test__cmp__(self):
+        from shove import Shove
         tstore = Shove()
         self.store['max'] = 3
         tstore['max'] = 3
@@ -115,6 +115,7 @@ class TestFtpStore(unittest.TestCase):
         self.assertEqual(self.store['pow'], 8)
 
     def test_update(self):
+        from shove import Shove
         tstore = Shove()
         tstore['max'] = 3
         tstore['min'] = 6

@@ -50,14 +50,15 @@ class DbStore(BaseStore, DbBase):
         row = select(
             [self._store.c.value], self._store.c.key == key,
         ).execute().fetchone()
-        if row is not None: return self.loads(str(row.value))
+        if row is not None:
+            return self.loads(str(row.value))
         raise KeyError(key)
 
     def __setitem__(self, k, v):
         v, store = self.dumps(v), self._store
         # Update database if key already present
         if k in self:
-            store.update(store.c.key==k).execute(value=v)
+            store.update(store.c.key == k).execute(value=v)
         # Insert new key if key not present
         else:
             store.insert().execute(key=k, value=v)

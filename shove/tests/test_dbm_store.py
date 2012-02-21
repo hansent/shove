@@ -1,20 +1,19 @@
 # -*- coding: utf-8 -*-
 
-import os
 import unittest
-
-from shove import Shove
 
 
 class TestDbmStore(unittest.TestCase):
 
     def setUp(self):
+        from shove import Shove
         self.store = Shove('dbm://test.dbm', compress=True)
 
     def tearDown(self):
+        import os
         self.store.close()
         try:
-            os.remove('test.dbm')
+            os.remove('test.dbm.db')
         except OSError:
             pass
 
@@ -36,6 +35,7 @@ class TestDbmStore(unittest.TestCase):
         self.assertEqual(self.store.get('min'), None)
 
     def test__cmp__(self):
+        from shove import Shove
         tstore = Shove()
         self.store['max'] = 3
         tstore['max'] = 3
@@ -102,10 +102,11 @@ class TestDbmStore(unittest.TestCase):
         self.store['max'] = 3
         self.store['min'] = 6
         self.store['pow'] = 7
-        self.store.setdefault('pow', 8)
-        self.assertEqual(self.store['pow'], 8)
+        self.store.setdefault('how', 8)
+        self.assertEqual(self.store['how'], 8)
 
     def test_update(self):
+        from shove import Shove
         tstore = Shove()
         tstore['max'] = 3
         tstore['min'] = 6

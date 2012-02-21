@@ -56,7 +56,8 @@ class SimpleCache(SimpleBase):
                     self[key]
                 except KeyError:
                     num += 1
-            else: break
+            else:
+                break
         # Remove any additional items up to max # of items allowed by maxcull
         while len(self) >= self._max_entries and num <= maxcull:
             # Cull remainder of allowed quota at random
