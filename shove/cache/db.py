@@ -25,8 +25,8 @@ import random
 from datetime import datetime
 try:
     from sqlalchemy import (
-        MetaData, Table, Column, String, Binary, DateTime, bindparam, select,
-        update, insert, delete,
+        MetaData, Table, Column, String, Binary, DateTime, select, update,
+        insert, delete,
     )
     from shove import DbBase
 except ImportError:
@@ -52,7 +52,8 @@ class DbCache(DbBase):
             Column('expires', DateTime, nullable=False),
         )
         # Create cache table if it does not exist
-        if not self._store.exists(): self._store.create()
+        if not self._store.exists():
+            self._store.create()
         # Set maximum entries
         self._max_entries = kw.get('max_entries', 300)
         # Maximum number of entries to cull per call if cache is full
@@ -91,7 +92,9 @@ class DbCache(DbBase):
             ).execute()
         # Insert new key if key not present
         else:
-            insert(cache, dict(key=key, value=value, expires=expires)).execute()
+            insert(
+                cache, dict(key=key, value=value, expires=expires)
+            ).execute()
 
     def _cull(self):
         '''Remove items in cache to make more room.'''
@@ -111,6 +114,4 @@ class DbCache(DbBase):
             ]
             # Get some keys at random
             delkeys = list(random.choice(keys) for i in xrange(maxcull))
-            # Delete keys
-            fkeys = tuple({'key':k} for k in delkeys)
-            delete(cache, cache.c.key.in_(bindparam('key'))).execute(*fkeys)
+            delete(cache, cache.c.key.in_(delkeys)).execute()

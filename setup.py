@@ -8,7 +8,7 @@ except ImportError:
 
 setup(
     name='shove',
-    version='0.4.0',
+    version='0.4.2',
     description='''Common object storage frontend''',
     long_description=open('README.rst').read(),
     author='L. C. Rees',
@@ -41,6 +41,7 @@ setup(
     file=shove.store.file:FileStore
     firebird=shove.store.db:DbStore
     ftp=shove.store.ftp:FtpStore
+    hdf5=shove.store.hdf5:HDF5Store
     leveldb=shove.store.leveldbstore:LevelDBStore
     memory=shove.store.memory:MemoryStore
     mssql=shove.store.db:DbStore

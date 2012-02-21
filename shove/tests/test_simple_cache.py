@@ -1,18 +1,15 @@
 # -*- coding: utf-8 -*-
 
-import time
 import unittest
-
-from shove.cache.simple import SimpleCache
 
 
 class TestSimpleCache(unittest.TestCase):
 
     initstring = 'simple://'
-    cacheclass = SimpleCache
 
     def setUp(self):
-        self.cache = self.cacheclass(self.initstring)
+        from shove.cache.simple import SimpleCache
+        self.cache = SimpleCache(self.initstring)
 
     def tearDown(self):
         self.cache = None
@@ -34,7 +31,9 @@ class TestSimpleCache(unittest.TestCase):
         self.assertEqual(self.cache.get('min'), None)
 
     def test_timeout(self):
-        cache = self.cacheclass(self.initstring, timeout=1)
+        import time
+        from shove.cache.simple import SimpleCache
+        cache = SimpleCache(self.initstring, timeout=1)
         cache['test'] = 'test'
         time.sleep(1)
 
@@ -43,7 +42,8 @@ class TestSimpleCache(unittest.TestCase):
         self.assertRaises(KeyError, tmp)
 
     def test_cull(self):
-        cache = self.cacheclass(self.initstring, max_entries=1)
+        from shove.cache.simple import SimpleCache
+        cache = SimpleCache(self.initstring, max_entries=1)
         cache['test'] = 'test'
         cache['test2'] = 'test'
         cache['test2'] = 'test'

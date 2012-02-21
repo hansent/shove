@@ -15,10 +15,10 @@ try:
 except ImportError:
     raise ImportError('This store requires py-leveldb library')
 
-from shove.store import SyncStore
+from shove.store import ClientStore
 
 
-class LevelDBStore(SyncStore):
+class LevelDBStore(ClientStore):
 
     '''LevelDB based store'''
 
@@ -41,7 +41,7 @@ class LevelDBStore(SyncStore):
         self._store.Delete(key)
 
     def keys(self):
-        return list(k for k, _ in self._store.RangeIter())
+        return list(k for k in self._store.RangeIter(include_value=False))
 
 
 __all__ = ['LevelDBStore']

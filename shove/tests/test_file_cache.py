@@ -1,23 +1,21 @@
 # -*- coding: utf-8 -*-
 
-import os
-import time
 import unittest
-
-from shove.cache.file import FileCache
 
 
 class TestFileCache(unittest.TestCase):
 
     initstring = 'file://test'
-    cacheclass = FileCache
 
     def setUp(self):
-        self.cache = self.cacheclass(self.initstring)
+        from shove.cache.file import FileCache
+        self.cache = FileCache(self.initstring)
 
     def tearDown(self):
+        import os
         self.cache = None
-        for x in os.listdir('test'): os.remove(os.path.join('test', x))
+        for x in os.listdir('test'):
+            os.remove(os.path.join('test', x))
         os.rmdir('test')
 
     def test_getitem(self):
@@ -37,7 +35,9 @@ class TestFileCache(unittest.TestCase):
         self.assertEqual(self.cache.get('min'), None)
 
     def test_timeout(self):
-        cache = self.cacheclass(self.initstring, timeout=1)
+        import time
+        from shove.cache.file import FileCache
+        cache = FileCache(self.initstring, timeout=1)
         cache['test'] = 'test'
         time.sleep(2)
 
@@ -46,7 +46,8 @@ class TestFileCache(unittest.TestCase):
         self.assertRaises(KeyError, tmp)
 
     def test_cull(self):
-        cache = self.cacheclass(self.initstring, max_entries=1)
+        from shove.cache.file import FileCache
+        cache = FileCache(self.initstring, max_entries=1)
         cache['test'] = 'test'
         cache['test2'] = 'test'
         num = len(cache)
