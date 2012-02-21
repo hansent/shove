@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import os
 import unittest
-
-from shove import Shove
 
 
 class TestZodbStore(unittest.TestCase):
@@ -11,10 +8,12 @@ class TestZodbStore(unittest.TestCase):
     init = 'zodb://test.db'
 
     def setUp(self):
+        from shove import Shove
         self.store = Shove(self.init, compress=True)
 
     def tearDown(self):
         self.store.close()
+        import os
         os.remove('test.db')
         os.remove('test.db.index')
         os.remove('test.db.tmp')
@@ -38,6 +37,7 @@ class TestZodbStore(unittest.TestCase):
         self.assertEqual(self.store.get('min'), None)
 
     def test__cmp__(self):
+        from shove import Shove
         tstore = Shove()
         self.store['max'] = 3
         tstore['max'] = 3
@@ -108,6 +108,7 @@ class TestZodbStore(unittest.TestCase):
         self.assertEqual(self.store['pow'], 8)
 
     def test_update(self):
+        from shove import Shove
         tstore = Shove()
         tstore['max'] = 3
         tstore['min'] = 6

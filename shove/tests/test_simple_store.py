@@ -2,12 +2,11 @@
 
 import unittest
 
-from shove import Shove
-
 
 class TestSimpleStore(unittest.TestCase):
 
     def setUp(self):
+        from shove import Shove
         self.store = Shove('simple://', compress=True)
 
     def tearDown(self):
@@ -34,6 +33,7 @@ class TestSimpleStore(unittest.TestCase):
         self.assertEqual(self.store.get('min'), None)
 
     def test__cmp__(self):
+        from shove import Shove
         tstore = Shove()
         self.store['max'] = 3
         tstore['max'] = 3
@@ -106,6 +106,7 @@ class TestSimpleStore(unittest.TestCase):
         self.assertEqual(self.store['pow'], 8)
 
     def test_update(self):
+        from shove import Shove
         tstore = Shove()
         tstore['max'] = 3
         tstore['min'] = 6

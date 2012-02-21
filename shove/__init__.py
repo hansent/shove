@@ -30,6 +30,7 @@ except ImportError:
         file='shove.store.file:FileStore',
         firebird='shove.store.db:DbStore',
         ftp='shove.store.ftp:FtpStore',
+        hdf5='shove.store.hdf5:HDF5Store',
         leveldb='shove.store.leveldbstore:LevelDBStore',
         memory='shove.store.memory:MemoryStore',
         mssql='shove.store.db:DbStore',
@@ -68,7 +69,7 @@ def getbackend(uri, engines, **kw):
 
     @param uri Instance or name string
     @param engines A dictionary of scheme/class pairs
-    @param kw Keywords'''
+    '''
     if isinstance(uri, basestring):
         mod = engines[uri.split('://', 1)[0]]
         # Load module if setuptools not present

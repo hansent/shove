@@ -36,7 +36,8 @@ class FileCache(FileBase, SimpleCache):
             raise KeyError(key)
 
     def __setitem__(self, key, value):
-        if len(self) >= self._max_entries: self._cull()
+        if len(self) >= self._max_entries:
+            self._cull()
         super(FileCache, self).__setitem__(
             key, (time.time() + self.timeout, value)
         )
