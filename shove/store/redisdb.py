@@ -30,11 +30,21 @@ class RedisStore(ClientStore):
         db = spliturl[2].replace('/', '')
         self._store = redis.Redis(host, int(port), db)
 
-    def __getitem__(self, key):
-        item = super(RedisStore, self).__getitem__(key)
-        if item is not None:
-            return item
-        raise KeyError(key)
+    def __contains__(self, key):
+        return self._store.exists(key)
+
+    def clear(self):
+        self._store.flushdb()
+
+    def keys(self):
+        return self._store.keys()
+
+    def setdefault(self, key, default=None):
+        return self._store.getset(key, default)
+
+    def update(self, other=None, **kw):
+        args = kw if other is not None else other
+        self._store.mset(args)
 
 
 __all__ = ['RedisStore']

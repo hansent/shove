@@ -39,7 +39,7 @@ class DbStore(BaseStore, DbBase):
         self._metadata = MetaData(engine)
         # Make store table
         self._store = Table(tablename, self._metadata,
-            Column('key', String(256), primary_key=True, nullable=False),
+            Column('key', String(255), primary_key=True, nullable=False),
             Column('value', Binary, nullable=False),
         )
         # Create store table if it does not exist
