@@ -412,7 +412,7 @@ class FileBase(Base):
             os.makedirs(self._dir)
         except OSError:
             raise EnvironmentError(
-                'Cache directory "%s" does not exist and ' \
+                'Cache directory "%s" does not exist and '
                 'could not be created' % self._dir
             )
 

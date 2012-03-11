@@ -66,7 +66,7 @@ setup(
     mysql=shove.cache.db:DbCache
     oracle=shove.cache.db:DbCache
     postgres=shove.cache.db:DbCache
-    redis='shove.cache.redisdb:RedisCache',
+    redis=shove.cache.redisdb:RedisCache
     simple=shove.cache.simple:SimpleCache
     simplelru=shove.cache.simplelru:SimpleLRUCache
     sqlite=shove.cache.db:DbCache
