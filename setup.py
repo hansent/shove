@@ -8,7 +8,7 @@ except ImportError:
 
 setup(
     name='shove',
-    version='0.4.2',
+    version='0.4.3',
     description='''Common object storage frontend''',
     long_description=open('README.rst').read(),
     author='L. C. Rees',

@@ -34,6 +34,7 @@ Currently supported caching backends are:
 - MySQL
 - Oracle
 - PostgreSQL
+- Redis
 - SQLite
 - memcache
 
