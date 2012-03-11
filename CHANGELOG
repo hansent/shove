@@ -59,3 +59,9 @@ What's new with 0.4.1
 What's new with 0.4.2
 
 - HDF5 support for store
+
+What's new with 0.4.3
+
+- Redis support for cache (per k4ml)
+- fix for InnoDB whining (per k4ml)
+- enhance Redis store

@@ -8,7 +8,7 @@ except ImportError:
 
 setup(
     name='shove',
-    version='0.4.2',
+    version='0.4.3',
     description='''Common object storage frontend''',
     long_description=open('README.rst').read(),
     author='L. C. Rees',
@@ -66,6 +66,7 @@ setup(
     mysql=shove.cache.db:DbCache
     oracle=shove.cache.db:DbCache
     postgres=shove.cache.db:DbCache
+    redis='shove.cache.redisdb:RedisCache',
     simple=shove.cache.simple:SimpleCache
     simplelru=shove.cache.simplelru:SimpleLRUCache
     sqlite=shove.cache.db:DbCache
