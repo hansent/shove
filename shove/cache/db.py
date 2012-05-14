@@ -24,6 +24,7 @@ import time
 import random
 from datetime import datetime
 
+from stuf.six import native
 try:
     from sqlalchemy import (
         MetaData, Table, Column, String, Binary, DateTime, select, update,
@@ -32,35 +33,37 @@ try:
 except ImportError:
     raise ImportError('Requires SQLAlchemy >= 0.4')
 
-from shove.core import DBBase
+from shove.backends import Base
 
 __all__ = ['DBCache']
 
 
-class DBCache(DBBase):
+class DBCache(Base):
 
-    '''database cache backend'''
+    '''
+    Database cache backend.
+    '''
 
     def __init__(self, engine, **kw):
         super(DBCache, self).__init__(engine, **kw)
-        # Get table name
-        tablename = kw.get('tablename', 'cache')
-        # Bind metadata
-        self._metadata = MetaData(engine)
-        # Make cache table
-        self._store = Table(tablename, self._metadata,
+        # make cache table
+        self._store = Table(
+            # get table name
+            kw.get('tablename', 'cache'),
+            # bind metadata
+            MetaData(engine),
             Column('key', String(60), primary_key=True, nullable=False),
             Column('value', Binary, nullable=False),
             Column('expires', DateTime, nullable=False),
         )
-        # Create cache table if it does not exist
+        # create cache table if it does not exist
         if not self._store.exists():
             self._store.create()
-        # Set maximum entries
+        # set maximum entries
         self._max_entries = kw.get('max_entries', 300)
-        # Maximum number of entries to cull per call if cache is full
+        # maximum number of entries to cull per call if cache is full
         self._maxcull = kw.get('maxcull', 10)
-        # Set timeout
+        # set timeout
         self.timeout = kw.get('timeout', 300)
 
     def __getitem__(self, key):
@@ -69,51 +72,61 @@ class DBCache(DBBase):
             self._store.c.key == key
         ).execute().fetchone()
         if row is not None:
-            # Remove if item expired
+            # remove if item expired
             if row.expires < datetime.now().replace(microsecond=0):
                 del self[key]
                 raise KeyError(key)
-            return self.loads(str(row.value))
+            return self.loads(native(row.value))
         raise KeyError(key)
 
     def __setitem__(self, key, value):
-        timeout, value, cache = self.timeout, self.dumps(value), self._store
-        # Cull if too many items
+        value = self.dumps(value)
+        # cull if too many items
         if len(self) >= self._max_entries:
             self._cull()
-        # Generate expiration time
+        # generate expiration time
         expires = datetime.fromtimestamp(
-            time.time() + timeout
+            time.time() + self.timeout
         ).replace(microsecond=0)
-        # Update database if key already present
+        # update database if key already present
         if key in self:
+            cache = self._store
             update(
                 cache,
                 cache.c.key == key,
                 dict(value=value, expires=expires),
             ).execute()
-        # Insert new key if key not present
+        # insert new key if key not present
         else:
             insert(
-                cache, dict(key=key, value=value, expires=expires)
+                self._store, dict(key=key, value=value, expires=expires)
             ).execute()
 
+    def __delitem__(self, key):
+        self._store.delete(self._store.c.key == key).execute()
+
+    def __len__(self):
+        return self._store.count().execute().fetchone()[0]
+
     def _cull(self):
-        '''Remove items in cache to make more room.'''
-        cache, maxcull = self._store, self._maxcull
-        # Remove items that have timed out
-        now = datetime.now().replace(microsecond=0)
-        delete(cache, cache.c.expires < now).execute()
-        # Remove any items over the maximum allowed number in the cache
+        # remove items in cache to make more room
+        cache = self._store
+        # remove items that have timed out
+        delete(
+            cache, cache.c.expires < datetime.now().replace(microsecond=0),
+        ).execute()
+        # remove any items over the maximum allowed number in the cache
         if len(self) >= self._max_entries:
-            # Upper limit for key query
-            ul = maxcull * 2
-            # Get list of keys
+            maxcull = self._maxcull
+            # get list of keys
             keys = [
                 i[0] for i in select(
-                    [cache.c.key], limit=ul
+                    [cache.c.key],
+                     # upper limit for key query
+                    limit=maxcull * 2
                 ).execute().fetchall()
             ]
-            # Get some keys at random
-            delkeys = list(random.choice(keys) for i in xrange(maxcull))
-            delete(cache, cache.c.key.in_(delkeys)).execute()
+            # delete keys at random
+            delete(
+                cache, cache.c.key.in_(random.sample(keys, maxcull))
+            ).execute()

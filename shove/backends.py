@@ -156,17 +156,3 @@ class LRUBase(SimpleBase):
                     queue.append(k)
                 else:
                     refcount[k] -= 1
-
-
-class DBBase(Base):
-
-    '''Database common base.'''
-
-    def __init__(self, engine, **kw):
-        super(DBBase, self).__init__(engine, **kw)
-
-    def __delitem__(self, key):
-        self._store.delete(self._store.c.key == key).execute()
-
-    def __len__(self):
-        return self._store.count().execute().fetchone()[0]

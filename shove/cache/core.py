@@ -8,7 +8,8 @@ from time import time
 from copy import deepcopy
 from threading import Condition
 
-from shove.core import FileBase, LRUBase, SimpleBase, synchronized
+from shove._compat import synchronized
+from shove.backends import SimpleBase, LRUBase, FileBase
 
 __all__ = [
     'SimpleLRUCache', 'SimpleCache', 'MemoryCache', 'MemoryLRUCache',

@@ -25,12 +25,12 @@ try:
 except ImportError:
     raise ImportError('Requires SQLAlchemy >= 0.4')
 
-from shove.core import BaseStore, DBBase
+from shove.core import BaseStore
 
 __all__ = ['DBStore']
 
 
-class DBStore(BaseStore, DBBase):
+class DBStore(BaseStore):
 
     '''
     Database cache backend.
@@ -66,6 +66,12 @@ class DBStore(BaseStore, DBBase):
         # insert new key if key not present
         else:
             store.insert().execute(key=k, value=v)
+
+    def __delitem__(self, key):
+        self._store.delete(self._store.c.key == key).execute()
+
+    def __len__(self):
+        return self._store.count().execute().fetchone()[0]
 
     def keys(self):
         '''

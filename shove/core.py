@@ -58,6 +58,19 @@ class Shove(BaseStore):
         self.sync()
         del self._store[key]
 
+    def close(self):
+        '''
+        Finalizes and closes shove.
+        '''
+        # if close has been called, pass
+        if self._store is not None:
+            try:
+                self.sync()
+            except AttributeError:
+                pass
+            self._store.close()
+            self._store = self._cache = self._buffer = None
+
     def keys(self):
         '''
         Returns a list of keys in shove.
@@ -73,19 +86,6 @@ class Shove(BaseStore):
         for k, v in items(self._buffer):
             store[k] = v
         self._buffer.clear()
-
-    def close(self):
-        '''
-        Finalizes and closes shove.
-        '''
-        # if close has been called, pass
-        if self._store is not None:
-            try:
-                self.sync()
-            except AttributeError:
-                pass
-            self._store.close()
-            self._store = self._cache = self._buffer = None
 
 
 class MultiShove(BaseStore):
@@ -138,9 +138,26 @@ class MultiShove(BaseStore):
             del self._cache[key]
         except KeyError:
             pass
-        self.sync()
+        try:
+            self.sync()
+        except AttributeError:
+            pass
         for store in self._stores:
             del store[key]
+
+    def close(self):
+        '''
+        Finalizes and closes shove stores.
+        '''
+        # if close has been called, pass
+        stores = self._stores
+        if self._stores is not None:
+            self.sync()
+            # close stores
+            for idx, store in enumerate(stores):
+                store.close()
+                stores[idx] = None
+            self._cache = self._buffer = self._stores = None
 
     def keys(self):
         '''
@@ -159,17 +176,3 @@ class MultiShove(BaseStore):
             for store in stores:
                 store[k] = v
         self._buffer.clear()
-
-    def close(self):
-        '''
-        Finalizes and closes shove stores.
-        '''
-        # if close has been called, pass
-        stores = self._stores
-        if self._stores is not None:
-            self.sync()
-            # close stores
-            for idx, store in enumerate(stores):
-                store.close()
-                stores[idx] = None
-            self._cache = self._buffer = self._stores = None

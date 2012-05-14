@@ -16,7 +16,7 @@ except ImportError:
     import dbm as anydbm
 
 from stuf.six import PY3
-from stuf.six.moves import StringIO, xrange as range  # @UnresolvedImport
+from stuf.six.moves import StringIO  # @UnresolvedImport
 
 
 def synchronized(func):

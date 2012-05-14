@@ -12,7 +12,7 @@ try:
 except ImportError:
     raise ImportError("Memcache cache requires the 'memcache' library")
 
-from shove.core import Base
+from shove.base import Base
 
 __all__ = ['MemCached']
 

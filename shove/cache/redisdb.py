@@ -7,14 +7,13 @@ The shove psuedo-URL for a redis cache is:
 redis://<host>:<port>/<db>
 '''
 
-import urlparse
-
 try:
     import redis
 except ImportError:
-    raise ImportError('This store requires the redis library')
+    raise ImportError('This cache requires the redis library')
 
-from shove.core import Base
+from shove.base import Base
+from shove._compat import urlsplit
 
 __all__ = ['RedisCache']
 
@@ -27,7 +26,7 @@ class RedisCache(Base):
 
     def __init__(self, engine, **kw):
         super(RedisCache, self).__init__(engine, **kw)
-        spliturl = urlparse.urlsplit(engine)
+        spliturl = urlsplit(engine)
         host, port = spliturl[1].split(':')
         db = spliturl[2].replace('/', '')
         self._store = redis.Redis(host, int(port), db)

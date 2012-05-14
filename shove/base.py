@@ -26,6 +26,18 @@ class Base(object):
         except KeyError:
             return False
 
+    def dumps(self, value):
+        '''
+        Optionally serializes and compresses an object.
+        '''
+        # serialize anything but ASCII strings
+        value = dumps(value, protocol=self._protocol)
+        if self._compress:
+            value = zlib.compress(
+                value, 9 if self._compress is True else self._compress
+            )
+        return value
+
     def get(self, key, default=None):
         '''
         Fetch a given key from the mapping. If the key does not exist, return
@@ -38,18 +50,6 @@ class Base(object):
             return self[key]
         except KeyError:
             return default
-
-    def dumps(self, value):
-        '''
-        Optionally serializes and compresses an object.
-        '''
-        # serialize anything but ASCII strings
-        value = dumps(value, protocol=self._protocol)
-        if self._compress:
-            value = zlib.compress(
-                value, 9 if self._compress is True else self._compress
-            )
-        return value
 
     def loads(self, value):
         '''

@@ -10,7 +10,7 @@ class TestMultiShove(unittest.TestCase):
     )
 
     def setUp(self):
-        from shove.multi import MultiShove
+        from shove.core import MultiShove
         self.store = MultiShove(*self.stores)
 
     def tearDown(self):
@@ -43,7 +43,7 @@ class TestMultiShove(unittest.TestCase):
         self.assertEqual(self.store.get('min'), None)
 
     def test__cmp__(self):
-        from shove.multi import MultiShove
+        from shove.core import MultiShove
         tstore = MultiShove()
         self.store['max'] = 3
         tstore['max'] = 3
@@ -113,7 +113,7 @@ class TestMultiShove(unittest.TestCase):
         self.assertEqual(self.store['pow'], 8)
 
     def test_update(self):
-        from shove.multi import MultiShove
+        from shove.core import MultiShove
         tstore = MultiShove()
         tstore['max'] = 3
         tstore['min'] = 6

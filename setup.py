@@ -36,37 +36,37 @@ setup(
     [shove.stores]
     bsddb=shove.store.bsdb:BsdStore
     cassandra=shove.store.cassandra:CassandraStore
-    dbm=shove.store.dbm:DBMStore
+    dbm=shove.store.core:DBMStore
     durus=shove.store.durusdb:DurusStore
-    file=shove.store.file:FileStore
+    file=shove.store.core:FileStore
     firebird=shove.store.db:DBStore
     ftp=shove.store.ftp:FTPStore
     hdf5=shove.store.hdf5:HDF5Store
     leveldb=shove.store.leveldbstore:LevelDBStore
-    memory=shove.store.memory:MemoryStore
+    memory=shove.store.core:MemoryStore
     mssql=shove.store.db:DBStore
     mysql=shove.store.db:DBStore
     oracle=shove.store.db:DBStore
     postgres=shove.store.db:DBStore
     redis=shove.store.redisdb:RedisStore
     s3=shove.store.s3:S3Store
-    simple=shove.store.simple:SimpleStore
+    simple=shove.store.core:SimpleStore
     sqlite=shove.store.db:DBStore
     zodb=shove.store.zodb:ZODBStore
     [shove.caches]
-    file=shove.cache.file:FileCache
-    filelru=shove.cache.filelru:FileLRUCache
+    file=shove.cache.core:FileCache
+    filelru=shove.cache.core:FileLRUCache
     firebird=shove.cache.db:DBCache
     memcache=shove.cache.memcached:MemCached
-    memlru=shove.cache.memlru:MemoryLRUCache
-    memory=shove.cache.memory:MemoryCache
+    memlru=shove.cache.core:MemoryLRUCache
+    memory=shove.cache.core:MemoryCache
     mssql=shove.cache.db:DBCache
     mysql=shove.cache.db:DBCache
     oracle=shove.cache.db:DBCache
     postgres=shove.cache.db:DBCache
     redis=shove.cache.redisdb:RedisCache
-    simple=shove.cache.simple:SimpleCache
-    simplelru=shove.cache.simplelru:SimpleLRUCache
+    simple=shove.cache.core:SimpleCache
+    simplelru=shove.cache.core:SimpleLRUCache
     sqlite=shove.cache.db:DBCache
     '''
 )

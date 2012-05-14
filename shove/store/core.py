@@ -3,10 +3,11 @@
 from copy import deepcopy
 from threading import Condition
 
-from shove.core import BaseStore, FileBase, SimpleBase
+from shove.core import BaseStore
+from shove.backends import FileBase, SimpleBase
 from shove._compat import anydbm, synchronized, url2pathname
 
-__all__ = ('SimpleStore', 'MemoryStore', 'FileStore', 'DBMStore')
+__all__ = ('DBMStore', 'FileStore', 'MemoryStore', 'SimpleStore')
 
 
 class SimpleStore(SimpleBase, BaseStore):
@@ -23,7 +24,7 @@ class SimpleStore(SimpleBase, BaseStore):
 class ClientStore(SimpleStore):
 
     '''
-    Base for stores where updates have to be committed to disk.
+    Base store where updates must be committed to disk.
     '''
 
     def __init__(self, engine, **kw):
@@ -36,30 +37,6 @@ class ClientStore(SimpleStore):
 
     def __setitem__(self, key, value):
         super(ClientStore, self).__setitem__(key, self.dumps(value))
-
-
-class SyncStore(ClientStore):
-
-    '''
-    Base for stores where updates have to be committed.
-    '''
-
-    def __getitem__(self, key):
-        return self.loads(super(SyncStore, self).__getitem__(key))
-
-    def __setitem__(self, key, value):
-        super(SyncStore, self).__setitem__(key, value)
-        try:
-            self.sync()
-        except AttributeError:
-            pass
-
-    def __delitem__(self, key):
-        super(SyncStore, self).__delitem__(key)
-        try:
-            self.sync()
-        except AttributeError:
-            pass
 
 
 class MemoryStore(SimpleStore):
@@ -97,6 +74,27 @@ class FileStore(FileBase, BaseStore):
     Alternatively, a native pathname to the directory can be passed as the
     'engine' argument.
     '''
+
+
+class SyncStore(ClientStore):
+
+    '''
+    Base store where updates have to be synced to disk.
+    '''
+
+    def __setitem__(self, key, value):
+        super(SyncStore, self).__setitem__(key, value)
+        try:
+            self.sync()
+        except AttributeError:
+            pass
+
+    def __delitem__(self, key):
+        super(SyncStore, self).__delitem__(key)
+        try:
+            self.sync()
+        except AttributeError:
+            pass
 
 
 class DBMStore(SyncStore):
