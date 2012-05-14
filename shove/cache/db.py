@@ -32,17 +32,17 @@ try:
 except ImportError:
     raise ImportError('Requires SQLAlchemy >= 0.4')
 
-from shove.core import DbBase
+from shove.core import DBBase
 
-__all__ = ['DbCache']
+__all__ = ['DBCache']
 
 
-class DbCache(DbBase):
+class DBCache(DBBase):
 
     '''database cache backend'''
 
     def __init__(self, engine, **kw):
-        super(DbCache, self).__init__(engine, **kw)
+        super(DBCache, self).__init__(engine, **kw)
         # Get table name
         tablename = kw.get('tablename', 'cache')
         # Bind metadata

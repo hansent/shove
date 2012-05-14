@@ -15,7 +15,9 @@ try:
 except ImportError:
     raise ImportError('This store requires py-leveldb library')
 
-from shove.store import ClientStore
+from shove.store.core import ClientStore
+
+__all__ = ['LevelDBStore']
 
 
 class LevelDBStore(ClientStore):
@@ -42,6 +44,3 @@ class LevelDBStore(ClientStore):
 
     def keys(self):
         return list(k for k in self._store.RangeIter(include_value=False))
-
-
-__all__ = ['LevelDBStore']

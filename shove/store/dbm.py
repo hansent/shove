@@ -12,7 +12,9 @@ pathname to a DBM database can be passed as the 'engine' parameter.
 
 import anydbm
 
-from shove.store import SyncStore
+from shove.store.core import SyncStore
+
+__all__ = ['DbmStore']
 
 
 class DbmStore(SyncStore):
@@ -28,6 +30,3 @@ class DbmStore(SyncStore):
             self.sync = self._store.sync
         except AttributeError:
             pass
-
-
-__all__ = ['DbmStore']

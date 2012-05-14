@@ -1,25 +1,23 @@
 # -*- coding: utf-8 -*-
 
-import unittest
+from shove._compat import unittest
 
 
-class TestSimpleStore(unittest.TestCase):
+class TestDbStore(unittest.TestCase):
 
     def setUp(self):
         from shove import Shove
-        self.store = Shove('simple://', compress=True)
+        self.store = Shove('sqlite://', compress=True)
 
     def tearDown(self):
         self.store.close()
 
     def test__getitem__(self):
         self.store['max'] = 3
-        self.store.sync()
         self.assertEqual(self.store['max'], 3)
 
     def test__setitem__(self):
         self.store['max'] = 3
-        self.store.sync()
         self.assertEqual(self.store['max'], 3)
 
     def test__delitem__(self):
@@ -29,7 +27,6 @@ class TestSimpleStore(unittest.TestCase):
 
     def test_get(self):
         self.store['max'] = 3
-        self.store.sync()
         self.assertEqual(self.store.get('min'), None)
 
     def test__cmp__(self):
@@ -37,8 +34,6 @@ class TestSimpleStore(unittest.TestCase):
         tstore = Shove()
         self.store['max'] = 3
         tstore['max'] = 3
-        self.store.sync()
-        tstore.sync()
         self.assertEqual(self.store, tstore)
 
     def test__len__(self):
@@ -130,6 +125,7 @@ class TestSimpleStore(unittest.TestCase):
         self.store['pow'] = 7
         slist = self.store.keys()
         self.assertEqual('min' in slist, True)
+
 
 if __name__ == '__main__':
     unittest.main()

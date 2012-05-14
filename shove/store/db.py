@@ -22,17 +22,21 @@ http://www.sqlalchemy.org/docs/dbengine.myt#dbengine_supported
 
 try:
     from sqlalchemy import MetaData, Table, Column, String, Binary, select
-    from shove import BaseStore, DbBase
+
 except ImportError:
     raise ImportError('Requires SQLAlchemy >= 0.4')
 
+from shove.core import BaseStore, DBBase
 
-class DbStore(BaseStore, DbBase):
+__all__ = ['DBStore']
+
+
+class DBStore(BaseStore, DBBase):
 
     '''Database cache backend.'''
 
     def __init__(self, engine, **kw):
-        super(DbStore, self).__init__(engine, **kw)
+        super(DBStore, self).__init__(engine, **kw)
         # Get tablename
         tablename = kw.get('tablename', 'store')
         # Bind metadata
@@ -68,6 +72,3 @@ class DbStore(BaseStore, DbBase):
         return list(i[0] for i in select(
             [self._store.c.key]
         ).execute().fetchall())
-
-
-__all__ = ['DbStore']

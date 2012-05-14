@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import unittest
+from shove._compat import unittest
 
 
 class TestFileStore(unittest.TestCase):

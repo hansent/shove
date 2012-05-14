@@ -19,8 +19,26 @@ try:
 except:
     import dbm as anydbm
 
-from stuf.six import strings, items, keys, PY3
-from stuf.six.moves import StringIO, xrange as range, cPickle as pickle
+from stuf.six import PY3, strings, items, keys
+from stuf.six.moves import StringIO, xrange as range, cPickle as pickle  # @UnresolvedImport
+
+
+def synchronized(func):
+    '''
+    Decorator to lock and unlock a method (Phillip J. Eby).
+
+    @param func Method to decorate
+    '''
+    def wrapper(self, *__args, **__kw):
+        self._lock.acquire()
+        try:
+            return func(self, *__args, **__kw)
+        finally:
+            self._lock.release()
+    wrapper.__name__ = func.__name__
+    wrapper.__dict__ = func.__dict__
+    wrapper.__doc__ = func.__doc__
+    return wrapper
 
 
 def openit(path, mode, encoding='utf-8'):

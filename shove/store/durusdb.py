@@ -6,9 +6,8 @@ shove's psuedo-URL for Durus stores follows the form:
 
 durus://<path>
 
-
-Where the path is a URL path to a durus FileStorage database. Alternatively, a
-native pathname to a durus database can be passed as the 'engine' parameter.
+Where the path is a URL path to a Durus FileStorage database. Alternatively, a
+native pathname to a Durus database can be passed as the 'engine' parameter.
 '''
 
 try:
@@ -17,12 +16,16 @@ try:
 except ImportError:
     raise ImportError('Requires Durus library')
 
-from shove.store import SyncStore
+from shove.store.core import SyncStore
+
+__all__ = ['DurusStore']
 
 
 class DurusStore(SyncStore):
 
-    '''Class for Durus object database frontend.'''
+    '''
+    Durus object database frontend.
+    '''
 
     init = 'durus://'
 
@@ -38,6 +41,3 @@ class DurusStore(SyncStore):
         self.sync()
         self._db.close()
         super(DurusStore, self).close()
-
-
-__all__ = ['DurusStore']

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import unittest
+from shove._compat import unittest
 
 
 class TestRedisStore(unittest.TestCase):
@@ -123,6 +123,7 @@ class TestRedisStore(unittest.TestCase):
         self.store['pow'] = 7
         slist = self.store.keys()
         self.assertEqual('min' in slist, True)
+
 
 if __name__ == '__main__':
     unittest.main()

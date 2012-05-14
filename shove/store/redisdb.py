@@ -14,7 +14,9 @@ try:
 except ImportError:
     raise ImportError('This store requires the redis library')
 
-from shove.store import ClientStore
+from shove.store.core import ClientStore
+
+__all__ = ['RedisStore']
 
 
 class RedisStore(ClientStore):
@@ -43,8 +45,4 @@ class RedisStore(ClientStore):
         return self._store.getset(key, default)
 
     def update(self, other=None, **kw):
-        args = kw if other is not None else other
-        self._store.mset(args)
-
-
-__all__ = ['RedisStore']
+        self._store.mset(kw if other is not None else other)

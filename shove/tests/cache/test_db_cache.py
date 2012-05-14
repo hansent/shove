@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
-import unittest
+from shove._compat import unittest
 
 
-class TestSimpleCache(unittest.TestCase):
+class TestDbCache(unittest.TestCase):
 
-    initstring = 'simple://'
+    initstring = 'sqlite:///'
 
     def setUp(self):
-        from shove.cache.simple import SimpleCache
-        self.cache = SimpleCache(self.initstring)
+        from shove.cache.db import DBCache
+        self.cache = DBCache(self.initstring)
 
     def tearDown(self):
         self.cache = None
@@ -32,18 +32,18 @@ class TestSimpleCache(unittest.TestCase):
 
     def test_timeout(self):
         import time
-        from shove.cache.simple import SimpleCache
-        cache = SimpleCache(self.initstring, timeout=1)
+        from shove.cache.db import DBCache
+        cache = DBCache(self.initstring, timeout=1)
         cache['test'] = 'test'
-        time.sleep(1)
+        time.sleep(2)
 
         def tmp():
             cache['test']
         self.assertRaises(KeyError, tmp)
 
     def test_cull(self):
-        from shove.cache.simple import SimpleCache
-        cache = SimpleCache(self.initstring, max_entries=1)
+        from shove.cache.db import DBCache
+        cache = DBCache(self.initstring, max_entries=1)
         cache['test'] = 'test'
         cache['test2'] = 'test'
         cache['test2'] = 'test'

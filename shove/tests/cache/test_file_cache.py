@@ -1,18 +1,22 @@
 # -*- coding: utf-8 -*-
 
-import unittest
+from shove._compat import unittest
 
 
-class TestDbCache(unittest.TestCase):
+class TestFileCache(unittest.TestCase):
 
-    initstring = 'sqlite:///'
+    initstring = 'file://test'
 
     def setUp(self):
-        from shove.cache.db import DbCache
-        self.cache = DbCache(self.initstring)
+        from shove.cache.core import FileCache
+        self.cache = FileCache(self.initstring)
 
     def tearDown(self):
+        import os
         self.cache = None
+        for x in os.listdir('test'):
+            os.remove(os.path.join('test', x))
+        os.rmdir('test')
 
     def test_getitem(self):
         self.cache['test'] = 'test'
@@ -32,8 +36,8 @@ class TestDbCache(unittest.TestCase):
 
     def test_timeout(self):
         import time
-        from shove.cache.db import DbCache
-        cache = DbCache(self.initstring, timeout=1)
+        from shove.cache.core import FileCache
+        cache = FileCache(self.initstring, timeout=1)
         cache['test'] = 'test'
         time.sleep(2)
 
@@ -42,12 +46,12 @@ class TestDbCache(unittest.TestCase):
         self.assertRaises(KeyError, tmp)
 
     def test_cull(self):
-        from shove.cache.db import DbCache
-        cache = DbCache(self.initstring, max_entries=1)
+        from shove.cache.core import FileCache
+        cache = FileCache(self.initstring, max_entries=1)
         cache['test'] = 'test'
         cache['test2'] = 'test'
-        cache['test2'] = 'test'
-        self.assertEquals(len(cache), 1)
+        num = len(cache)
+        self.assertEquals(num, 1)
 
 
 if __name__ == '__main__':

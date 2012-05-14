@@ -1,25 +1,28 @@
 # -*- coding: utf-8 -*-
 
-import unittest
+from shove._compat import unittest
 
 
-class TestMemoryStore(unittest.TestCase):
+class TestDbmStore(unittest.TestCase):
 
     def setUp(self):
         from shove import Shove
-        self.store = Shove('memory://', compress=True)
+        self.store = Shove('dbm://test.dbm', compress=True)
 
     def tearDown(self):
+        import os
         self.store.close()
+        try:
+            os.remove('test.dbm.db')
+        except OSError:
+            pass
 
     def test__getitem__(self):
         self.store['max'] = 3
-        self.store.sync()
         self.assertEqual(self.store['max'], 3)
 
     def test__setitem__(self):
         self.store['max'] = 3
-        self.store.sync()
         self.assertEqual(self.store['max'], 3)
 
     def test__delitem__(self):
@@ -29,7 +32,6 @@ class TestMemoryStore(unittest.TestCase):
 
     def test_get(self):
         self.store['max'] = 3
-        self.store.sync()
         self.assertEqual(self.store.get('min'), None)
 
     def test__cmp__(self):
@@ -37,8 +39,6 @@ class TestMemoryStore(unittest.TestCase):
         tstore = Shove()
         self.store['max'] = 3
         tstore['max'] = 3
-        self.store.sync()
-        tstore.sync()
         self.assertEqual(self.store, tstore)
 
     def test__len__(self):
@@ -101,9 +101,9 @@ class TestMemoryStore(unittest.TestCase):
     def test_setdefault(self):
         self.store['max'] = 3
         self.store['min'] = 6
-        self.store['powl'] = 7
-        self.store.setdefault('pow', 8)
-        self.assertEqual(self.store['pow'], 8)
+        self.store['pow'] = 7
+        self.store.setdefault('how', 8)
+        self.assertEqual(self.store['how'], 8)
 
     def test_update(self):
         from shove import Shove
@@ -130,6 +130,7 @@ class TestMemoryStore(unittest.TestCase):
         self.store['pow'] = 7
         slist = self.store.keys()
         self.assertEqual('min' in slist, True)
+
 
 if __name__ == '__main__':
     unittest.main()

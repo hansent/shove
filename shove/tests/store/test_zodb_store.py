@@ -1,18 +1,23 @@
 # -*- coding: utf-8 -*-
 
-import unittest
+from shove._compat import unittest
 
 
-class TestDurusStore(unittest.TestCase):
+class TestZodbStore(unittest.TestCase):
+
+    init = 'zodb://test.db'
 
     def setUp(self):
         from shove import Shove
-        self.store = Shove('durus://test.durus', compress=True)
+        self.store = Shove(self.init, compress=True)
 
     def tearDown(self):
-        import os
         self.store.close()
-        os.remove('test.durus')
+        import os
+        os.remove('test.db')
+        os.remove('test.db.index')
+        os.remove('test.db.tmp')
+        os.remove('test.db.lock')
 
     def test__getitem__(self):
         self.store['max'] = 3

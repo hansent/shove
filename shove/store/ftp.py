@@ -15,7 +15,9 @@ except ImportError:
     from StringIO import StringIO
 from ftplib import FTP, error_perm
 
-from shove import BaseStore
+from shove.core import BaseStore
+
+__all__ = ['FtpStore']
 
 
 class FtpStore(BaseStore):
@@ -83,6 +85,3 @@ class FtpStore(BaseStore):
                     nlist.append(rfile[-1])
             self._keys = nlist
         return self._keys
-
-
-__all__ = ['FtpStore']

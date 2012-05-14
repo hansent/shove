@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
-import unittest
+from shove._compat import unittest
 
 
-class TestMemcached(unittest.TestCase):
+class TestSimpleCache(unittest.TestCase):
 
-    initstring = 'memcache://localhost:11211'
+    initstring = 'simple://'
 
     def setUp(self):
-        from shove.cache.memcached import MemCached
-        self.cache = MemCached(self.initstring)
+        from shove.cache.core import SimpleCache
+        self.cache = SimpleCache(self.initstring)
 
     def tearDown(self):
         self.cache = None
@@ -32,14 +32,22 @@ class TestMemcached(unittest.TestCase):
 
     def test_timeout(self):
         import time
-        from shove.cache.memcached import MemCached
-        cache = MemCached(self.initstring, timeout=1)
+        from shove.cache.core import SimpleCache
+        cache = SimpleCache(self.initstring, timeout=1)
         cache['test'] = 'test'
         time.sleep(1)
 
         def tmp():
             cache['test']
         self.assertRaises(KeyError, tmp)
+
+    def test_cull(self):
+        from shove.cache.core import SimpleCache
+        cache = SimpleCache(self.initstring, max_entries=1)
+        cache['test'] = 'test'
+        cache['test2'] = 'test'
+        cache['test2'] = 'test'
+        self.assertEquals(len(cache), 1)
 
 
 if __name__ == '__main__':

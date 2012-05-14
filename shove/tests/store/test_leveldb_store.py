@@ -1,18 +1,17 @@
 # -*- coding: utf-8 -*-
 
-import unittest
+from shove._compat import unittest
 
 
-class TestBsdbStore(unittest.TestCase):
+class TestLevelDBStore(unittest.TestCase):
 
     def setUp(self):
         from shove import Shove
-        self.store = Shove('bsddb://test.db', compress=True)
+        self.store = Shove('leveldb://test', compress=True)
 
     def tearDown(self):
-        import os
-        self.store.close()
-        os.remove('test.db')
+        import shutil
+        shutil.rmtree('test')
 
     def test__getitem__(self):
         self.store['max'] = 3
@@ -98,9 +97,9 @@ class TestBsdbStore(unittest.TestCase):
     def test_setdefault(self):
         self.store['max'] = 3
         self.store['min'] = 6
-        self.store['powl'] = 7
-        self.store.setdefault('pow', 8)
-        self.assertEqual(self.store['pow'], 8)
+        self.store['pow'] = 7
+        self.store.setdefault('bow', 8)
+        self.assertEqual(self.store['bow'], 8)
 
     def test_update(self):
         from shove import Shove

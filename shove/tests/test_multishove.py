@@ -1,28 +1,35 @@
-# -*- coding: utf-8 -*-
 
-import unittest2
+from shove._compat import unittest
 
 
-class TestHDF5Store(unittest2.TestCase):
+class TestMultiShove(unittest.TestCase):
+
+    stores = (
+        'simple://', 'dbm://one.dbm', 'memory://', 'file://two', 'sqlite://',
+        'bsddb://three.db'
+    )
 
     def setUp(self):
-        from shove import Shove
-        self.store = Shove('hdf5://test.hdf5/test')
+        from shove.multi import MultiShove
+        self.store = MultiShove(*self.stores)
 
     def tearDown(self):
         import os
         self.store.close()
-        try:
-            os.remove('test.hdf5')
-        except OSError:
-            pass
+        for x in os.listdir('two'):
+            os.remove(os.path.join('two', x))
+        os.rmdir('two')
+        os.remove('one.dbm')
+        os.remove('three.db')
 
     def test__getitem__(self):
         self.store['max'] = 3
+        self.store.sync()
         self.assertEqual(self.store['max'], 3)
 
     def test__setitem__(self):
         self.store['max'] = 3
+        self.store.sync()
         self.assertEqual(self.store['max'], 3)
 
     def test__delitem__(self):
@@ -32,23 +39,23 @@ class TestHDF5Store(unittest2.TestCase):
 
     def test_get(self):
         self.store['max'] = 3
+        self.store.sync()
         self.assertEqual(self.store.get('min'), None)
 
     def test__cmp__(self):
-        from shove import Shove
-        tstore = Shove()
+        from shove.multi import MultiShove
+        tstore = MultiShove()
         self.store['max'] = 3
         tstore['max'] = 3
+        self.store.sync()
+        tstore.sync()
         self.assertEqual(self.store, tstore)
 
     def test__len__(self):
         self.store['max'] = 3
         self.store['min'] = 6
-        self.assertEqual(len(self.store), 2)
-
-    def test_close(self):
-        self.store.close()
-        self.assertEqual(self.store, None)
+        self.store['pow'] = 7
+        self.assertEqual(len(self.store), 3)
 
     def test_clear(self):
         self.store['max'] = 3
@@ -101,13 +108,13 @@ class TestHDF5Store(unittest2.TestCase):
     def test_setdefault(self):
         self.store['max'] = 3
         self.store['min'] = 6
-        self.store['pow'] = 7
-        self.store.setdefault('bow', 8)
-        self.assertEqual(self.store['bow'], 8)
+        self.store['powl'] = 7
+        self.store.setdefault('pow', 8)
+        self.assertEqual(self.store['pow'], 8)
 
     def test_update(self):
-        from shove import Shove
-        tstore = Shove()
+        from shove.multi import MultiShove
+        tstore = MultiShove()
         tstore['max'] = 3
         tstore['min'] = 6
         tstore['pow'] = 7
@@ -131,5 +138,6 @@ class TestHDF5Store(unittest2.TestCase):
         slist = self.store.keys()
         self.assertEqual('min' in slist, True)
 
+
 if __name__ == '__main__':
-    unittest2.main()
+    unittest.main()

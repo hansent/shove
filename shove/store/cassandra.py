@@ -14,7 +14,9 @@ try:
 except ImportError:
     raise ImportError('This store requires the pycassa library')
 
-from shove import BaseStore
+from shove.core import BaseStore
+
+__all__ = ['CassandraStore']
 
 
 class CassandraStore(BaseStore):
@@ -31,7 +33,7 @@ class CassandraStore(BaseStore):
             self._pool = pycassa.connect(keyspace, [spliturl[1]])
             self._store = pycassa.ColumnFamily(self._pool, column_family)
         except pycassa.InvalidRequestException:
-            from pycassa.system_manager import SystemManager
+            from pycassa.system_manager import SystemManager  #@UnresolvedImport
             system_manager = SystemManager(spliturl[1])
             system_manager.create_keyspace(
                 keyspace,
@@ -67,6 +69,3 @@ class CassandraStore(BaseStore):
 
     def keys(self):
         return list(i[0] for i in self._store.get_range())
-
-
-__all__ = ['CassandraStore']

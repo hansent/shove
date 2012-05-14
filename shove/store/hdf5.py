@@ -16,7 +16,9 @@ try:
 except ImportError:
     raise ImportError('This store requires h5py library')
 
-from shove.store import ClientStore
+from shove.store.core import ClientStore
+
+__all__ = ['HDF5Store']
 
 
 class HDF5Store(ClientStore):
@@ -29,6 +31,3 @@ class HDF5Store(ClientStore):
         super(HDF5Store, self).__init__(engine, **kw)
         engine, group = self._engine.rsplit('/')
         self._store = h5py.File(engine).require_group(group).attrs
-
-
-__all__ = ['HDF5Store']

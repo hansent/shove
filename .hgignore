@@ -1,8 +1,8 @@
 syntax:glob
-.DS_Store
 *.pyc
 *.egg-info
 *~
+.DS_Store
 .figleaf
 .coverage
 build/
@@ -11,3 +11,14 @@ dist/
 .pydevproject
 .git/
 .settings/
+*.DS_Store
+_FOSSIL_
+unfinished/
+src/
+static/
+media/
+*.orig
+syntax: glob
+.tox/*
+syntax: regexp
+^stuff$

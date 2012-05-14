@@ -18,7 +18,9 @@ try:
 except ImportError:
     raise ImportError('Requires boto library')
 
-from shove import BaseStore
+from shove.core import BaseStore
+
+__all__ = ['S3Store']
 
 
 class S3Store(BaseStore):
@@ -86,6 +88,3 @@ class S3Store(BaseStore):
         '''Lazily returns items from the store.'''
         for k in self.items():
             yield (k.key, k)
-
-
-__all__ = ['S3Store']

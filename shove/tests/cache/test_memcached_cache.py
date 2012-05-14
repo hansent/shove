@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 
-import unittest
+from shove._compat import unittest
 
 
-class TestRedisCache(unittest.TestCase):
+class TestMemcached(unittest.TestCase):
 
-    initstring = 'redis://localhost:6379/0'
+    initstring = 'memcache://localhost:11211'
 
     def setUp(self):
-        from shove.cache.redisdb import RedisCache
-        self.cache = RedisCache(self.initstring)
+        from shove.cache.memcached import MemCached
+        self.cache = MemCached(self.initstring)
 
     def tearDown(self):
         self.cache = None
@@ -32,12 +32,13 @@ class TestRedisCache(unittest.TestCase):
 
     def test_timeout(self):
         import time
-        from shove.cache.redisdb import RedisCache
-        cache = RedisCache(self.initstring, timeout=1)
+        from shove.cache.memcached import MemCached
+        cache = MemCached(self.initstring, timeout=1)
         cache['test'] = 'test'
-        time.sleep(3)
-        def tmp(): #@IgnorePep8
-            return cache['test']
+        time.sleep(1)
+
+        def tmp():
+            cache['test']
         self.assertRaises(KeyError, tmp)
 
 
