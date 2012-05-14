@@ -2,10 +2,6 @@
 '''shove compatibility for different python versions'''
 
 try:
-    import unittest2 as unittest
-except ImportError:
-    import unittest
-try:
     from urlparse import urlsplit
     from urllib import quote_plus, unquote_plus
 except ImportError:
@@ -16,11 +12,11 @@ except ImportError:
     from urllib.request import url2pathname
 try:
     import anydbm
-except:
+except ImportError:
     import dbm as anydbm
 
-from stuf.six import PY3, strings, items, keys
-from stuf.six.moves import StringIO, xrange as range, cPickle as pickle  # @UnresolvedImport
+from stuf.six import PY3
+from stuf.six.moves import StringIO, xrange as range  # @UnresolvedImport
 
 
 def synchronized(func):

@@ -13,7 +13,7 @@ pathname to a Berkeley database can be passed as the 'engine' parameter.
 from threading import Condition
 
 try:
-    import bsddb
+    from bsddb import hashopen
 except ImportError:
     raise ImportError('requires bsddb library')
 
@@ -33,7 +33,7 @@ class BSDBStore(SyncStore):
 
     def __init__(self, engine, **kw):
         super(BSDBStore, self).__init__(engine, **kw)
-        self._store = bsddb.hashopen(self._engine)
+        self._store = hashopen(self._engine)
         self._lock = Condition()
         self.sync = self._store.sync
 

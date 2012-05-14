@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 
 from copy import deepcopy
-from urllib import url2pathname
 from threading import Condition
 
-from shove._compat import anydbm, synchronized
 from shove.core import BaseStore, FileBase, SimpleBase
+from shove._compat import anydbm, synchronized, url2pathname
 
-__all__ = ['SimpleStore', 'MemoryStore', 'FileStore', 'DbmStore']
+__all__ = ('SimpleStore', 'MemoryStore', 'FileStore', 'DBMStore')
 
 
 class SimpleStore(SimpleBase, BaseStore):
@@ -15,19 +14,16 @@ class SimpleStore(SimpleBase, BaseStore):
     '''
     Single-process in-memory store.
 
-    The shove psuedo-URL for a simple store is:
+    The shove URL for a simple store is:
 
     simple://
     '''
-
-    def __init__(self, engine, **kw):
-        super(SimpleStore, self).__init__(engine, **kw)
 
 
 class ClientStore(SimpleStore):
 
     '''
-    Base for stores where updates have to be committed.
+    Base for stores where updates have to be committed to disk.
     '''
 
     def __init__(self, engine, **kw):
@@ -44,7 +40,9 @@ class ClientStore(SimpleStore):
 
 class SyncStore(ClientStore):
 
-    '''Base for stores where updates have to be committed.'''
+    '''
+    Base for stores where updates have to be committed.
+    '''
 
     def __getitem__(self, key):
         return self.loads(super(SyncStore, self).__getitem__(key))
@@ -69,7 +67,7 @@ class MemoryStore(SimpleStore):
     '''
     Thread-safe in-memory store.
 
-    The shove psuedo-URL for a memory store is:
+    The shove URL for a memory store is:
 
     memory://
     '''
@@ -89,9 +87,9 @@ class MemoryStore(SimpleStore):
 class FileStore(FileBase, BaseStore):
 
     '''
-    Filesystem-based object store
+    Filesystem-based object store.
 
-    shove's psuedo-URL for filesystem-based stores follows the form:
+    shove's URL for filesystem-based stores follows the form:
 
     file://<path>
 
@@ -101,12 +99,12 @@ class FileStore(FileBase, BaseStore):
     '''
 
 
-class DbmStore(SyncStore):
+class DBMStore(SyncStore):
 
     '''
     DBM Database Store.
 
-    shove's psuedo-URL for DBM stores follows the form:
+    shove's URL for DBM stores follows the form:
 
     dbm://<path>
 
@@ -117,7 +115,7 @@ class DbmStore(SyncStore):
     init = 'dbm://'
 
     def __init__(self, engine, **kw):
-        super(DbmStore, self).__init__(engine, **kw)
+        super(DBMStore, self).__init__(engine, **kw)
         self._store = anydbm.open(self._engine, 'c')
         try:
             self.sync = self._store.sync

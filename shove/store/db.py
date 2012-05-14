@@ -22,7 +22,6 @@ http://www.sqlalchemy.org/docs/dbengine.myt#dbengine_supported
 
 try:
     from sqlalchemy import MetaData, Table, Column, String, Binary, select
-
 except ImportError:
     raise ImportError('Requires SQLAlchemy >= 0.4')
 
@@ -33,20 +32,21 @@ __all__ = ['DBStore']
 
 class DBStore(BaseStore, DBBase):
 
-    '''Database cache backend.'''
+    '''
+    Database cache backend.
+    '''
 
     def __init__(self, engine, **kw):
         super(DBStore, self).__init__(engine, **kw)
-        # Get tablename
-        tablename = kw.get('tablename', 'store')
-        # Bind metadata
-        self._metadata = MetaData(engine)
-        # Make store table
-        self._store = Table(tablename, self._metadata,
+        # make store table
+        self._store = Table(
+            # get tablename
+            kw.get('tablename', 'store'),
+            MetaData(engine),
             Column('key', String(255), primary_key=True, nullable=False),
             Column('value', Binary, nullable=False),
         )
-        # Create store table if it does not exist
+        # create store table if it does not exist
         if not self._store.exists():
             self._store.create()
 
@@ -60,15 +60,17 @@ class DBStore(BaseStore, DBBase):
 
     def __setitem__(self, k, v):
         v, store = self.dumps(v), self._store
-        # Update database if key already present
+        # update database if key already present
         if k in self:
             store.update(store.c.key == k).execute(value=v)
-        # Insert new key if key not present
+        # insert new key if key not present
         else:
             store.insert().execute(key=k, value=v)
 
     def keys(self):
-        '''Returns a list of keys in the store.'''
+        '''
+        Returns a list of keys in the store.
+        '''
         return list(i[0] for i in select(
             [self._store.c.key]
         ).execute().fetchall())

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from shove._compat import unittest
+from stuf.six import unittest
 
 
 class TestHDF5Store(unittest.TestCase):

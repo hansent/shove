@@ -1,5 +1,5 @@
 
-from shove._compat import unittest
+from stuf.six import unittest
 
 
 class TestMultiShove(unittest.TestCase):

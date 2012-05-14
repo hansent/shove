@@ -7,14 +7,14 @@ The shove psuedo-URL for a cassandra-based store is:
 cassandra://<host>:<port>/<keyspace>/<columnFamily>
 '''
 
-import urlparse
-
+from stuf.six import native
 try:
     import pycassa
 except ImportError:
     raise ImportError('This store requires the pycassa library')
 
 from shove.core import BaseStore
+from shove._compat import urlsplit
 
 __all__ = ['CassandraStore']
 
@@ -27,22 +27,24 @@ class CassandraStore(BaseStore):
 
     def __init__(self, engine, **kw):
         super(CassandraStore, self).__init__(engine, **kw)
-        spliturl = urlparse.urlsplit(engine)
+        spliturl = urlsplit(engine)
         _, keyspace, column_family = spliturl[2].split('/')
         try:
-            self._pool = pycassa.connect(keyspace, [spliturl[1]])
-            self._store = pycassa.ColumnFamily(self._pool, column_family)
+            self._store = pycassa.ColumnFamily(
+                pycassa.connect(keyspace, [spliturl[1]]), column_family,
+            )
         except pycassa.InvalidRequestException:
-            from pycassa.system_manager import SystemManager  #@UnresolvedImport
+            from pycassa.system_manager import SystemManager  # @UnresolvedImport @IgnorePep8
             system_manager = SystemManager(spliturl[1])
             system_manager.create_keyspace(
                 keyspace,
                 pycassa.system_manager.SIMPLE_STRATEGY,
-                {'replication_factor': str(kw.get('replication', 1))}
+                dict(replication_factor=native(kw.get('replication', 1))),
             )
             system_manager.create_column_family(keyspace, column_family)
-            self._pool = pycassa.connect(keyspace, [spliturl[1]])
-            self._store = pycassa.ColumnFamily(self._pool, column_family)
+            self._store = pycassa.ColumnFamily(
+                pycassa.connect(keyspace, [spliturl[1]]), column_family,
+            )
 
     def __getitem__(self, key):
         try:
