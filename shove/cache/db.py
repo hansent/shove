@@ -23,14 +23,16 @@ http://www.sqlalchemy.org/docs/dbengine.myt#dbengine_supported
 import time
 import random
 from datetime import datetime
+
 try:
     from sqlalchemy import (
         MetaData, Table, Column, String, Binary, DateTime, select, update,
         insert, delete,
     )
-    from shove import DbBase
 except ImportError:
     raise ImportError('Requires SQLAlchemy >= 0.4')
+
+from shove.core import DbBase
 
 __all__ = ['DbCache']
 

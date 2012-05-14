@@ -14,7 +14,9 @@ try:
 except ImportError:
     raise ImportError('This store requires the redis library')
 
-from shove import Base
+from shove.core import Base
+
+__all__ = ['RedisCache']
 
 
 class RedisCache(Base):
@@ -40,6 +42,3 @@ class RedisCache(Base):
 
     def __delitem__(self, key):
         self._store.delete(key)
-
-
-__all__ = ['RedisCache']

@@ -12,7 +12,9 @@ try:
 except ImportError:
     raise ImportError("Memcache cache requires the 'memcache' library")
 
-from shove import Base
+from shove.core import Base
+
+__all__ = ['MemCached']
 
 
 class MemCached(Base):
@@ -38,6 +40,3 @@ class MemCached(Base):
 
     def __delitem__(self, key):
         self._store.delete(key)
-
-
-__all__ = ['MemCached']
