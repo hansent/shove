@@ -21,7 +21,9 @@ __all__ = ['RedisStore']
 
 class RedisStore(ClientStore):
 
-    '''Redis based store'''
+    '''
+    Redis based store.
+    '''
 
     init = 'redis://'
 

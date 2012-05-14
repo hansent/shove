@@ -13,8 +13,8 @@ s3://<s3_key>:<s3_secret>@<bucket>
 '''
 
 try:
-    from boto.s3.connection import S3Connection
     from boto.s3.key import Key
+    from boto.s3.connection import S3Connection
 except ImportError:
     raise ImportError('Requires boto library')
 
@@ -24,6 +24,10 @@ __all__ = ['S3Store']
 
 
 class S3Store(BaseStore):
+
+    '''
+    S3 store.
+    '''
 
     def __init__(self, engine=None, **kw):
         super(S3Store, self).__init__(engine, **kw)

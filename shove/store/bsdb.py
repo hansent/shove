@@ -9,39 +9,34 @@ bsddb://<path>
 Where the path is a URL path to a Berkeley database. Alternatively, the native
 pathname to a Berkeley database can be passed as the 'engine' parameter.
 '''
+
+from threading import Condition
+
 try:
     import bsddb
 except ImportError:
     raise ImportError('requires bsddb library')
 
-import threading
-
-from shove.core import synchronized
+from shove._compat import synchronized
 from shove.store.core import SyncStore
 
-__all__ = ['BsdStore']
+__all__ = ['BSDBStore']
 
 
-class BsdStore(SyncStore):
+class BSDBStore(SyncStore):
 
-    '''Class for Berkeley Source Database Store.'''
+    '''
+    Berkeley Source Database store.
+    '''
 
     init = 'bsddb://'
 
     def __init__(self, engine, **kw):
-        super(BsdStore, self).__init__(engine, **kw)
+        super(BSDBStore, self).__init__(engine, **kw)
         self._store = bsddb.hashopen(self._engine)
-        self._lock = threading.Condition()
+        self._lock = Condition()
         self.sync = self._store.sync
 
-    @synchronized
-    def __getitem__(self, key):
-        return super(BsdStore, self).__getitem__(key)
-
-    @synchronized
-    def __setitem__(self, key, value):
-        super(BsdStore, self).__setitem__(key, value)
-
-    @synchronized
-    def __delitem__(self, key):
-        super(BsdStore, self).__delitem__(key)
+    __getitem__ = synchronized(SyncStore.__getitem__)
+    __setitem__ = synchronized(SyncStore.__setitem__)
+    __delitem__ = synchronized(SyncStore.__delitem__)

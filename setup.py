@@ -8,7 +8,7 @@ except ImportError:
 
 setup(
     name='shove',
-    version='0.4.3',
+    version='0.5.0',
     description='''Common object storage frontend''',
     long_description=open('README.rst').read(),
     author='L. C. Rees',
@@ -36,39 +36,37 @@ setup(
     [shove.stores]
     bsddb=shove.store.bsdb:BsdStore
     cassandra=shove.store.cassandra:CassandraStore
-    dbm=shove.store.dbm:DbmStore
+    dbm=shove.store.dbm:DBMStore
     durus=shove.store.durusdb:DurusStore
     file=shove.store.file:FileStore
-    firebird=shove.store.db:DbStore
-    ftp=shove.store.ftp:FtpStore
+    firebird=shove.store.db:DBStore
+    ftp=shove.store.ftp:FTPStore
     hdf5=shove.store.hdf5:HDF5Store
     leveldb=shove.store.leveldbstore:LevelDBStore
     memory=shove.store.memory:MemoryStore
-    mssql=shove.store.db:DbStore
-    mysql=shove.store.db:DbStore
-    oracle=shove.store.db:DbStore
-    postgres=shove.store.db:DbStore
+    mssql=shove.store.db:DBStore
+    mysql=shove.store.db:DBStore
+    oracle=shove.store.db:DBStore
+    postgres=shove.store.db:DBStore
     redis=shove.store.redisdb:RedisStore
     s3=shove.store.s3:S3Store
     simple=shove.store.simple:SimpleStore
-    sqlite=shove.store.db:DbStore
-    svn=shove.store.svn:SvnStore
-    zodb=shove.store.zodb:ZodbStore
+    sqlite=shove.store.db:DBStore
+    zodb=shove.store.zodb:ZODBStore
     [shove.caches]
-    bsddb=shove.cache.bsdb:BsdCache
     file=shove.cache.file:FileCache
     filelru=shove.cache.filelru:FileLRUCache
-    firebird=shove.cache.db:DbCache
+    firebird=shove.cache.db:DBCache
     memcache=shove.cache.memcached:MemCached
     memlru=shove.cache.memlru:MemoryLRUCache
     memory=shove.cache.memory:MemoryCache
-    mssql=shove.cache.db:DbCache
-    mysql=shove.cache.db:DbCache
-    oracle=shove.cache.db:DbCache
-    postgres=shove.cache.db:DbCache
+    mssql=shove.cache.db:DBCache
+    mysql=shove.cache.db:DBCache
+    oracle=shove.cache.db:DBCache
+    postgres=shove.cache.db:DBCache
     redis=shove.cache.redisdb:RedisCache
     simple=shove.cache.simple:SimpleCache
     simplelru=shove.cache.simplelru:SimpleLRUCache
-    sqlite=shove.cache.db:DbCache
+    sqlite=shove.cache.db:DBCache
     '''
 )

@@ -4,9 +4,10 @@ from copy import deepcopy
 from urllib import url2pathname
 from threading import Condition
 
-from shove.core import BaseStore, FileBase, SimpleBase, synchronized
+from shove._compat import anydbm, synchronized
+from shove.core import BaseStore, FileBase, SimpleBase
 
-__all__ = ['SimpleStore', 'MemoryStore', 'FileStore']
+__all__ = ['SimpleStore', 'MemoryStore', 'FileStore', 'DbmStore']
 
 
 class SimpleStore(SimpleBase, BaseStore):
@@ -98,3 +99,27 @@ class FileStore(FileBase, BaseStore):
     Alternatively, a native pathname to the directory can be passed as the
     'engine' argument.
     '''
+
+
+class DbmStore(SyncStore):
+
+    '''
+    DBM Database Store.
+
+    shove's psuedo-URL for DBM stores follows the form:
+
+    dbm://<path>
+
+    Where <path> is a URL path to a DBM database. Alternatively, the native
+    pathname to a DBM database can be passed as the 'engine' parameter.
+    '''
+
+    init = 'dbm://'
+
+    def __init__(self, engine, **kw):
+        super(DbmStore, self).__init__(engine, **kw)
+        self._store = anydbm.open(self._engine, 'c')
+        try:
+            self.sync = self._store.sync
+        except AttributeError:
+            pass
