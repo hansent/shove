@@ -2,7 +2,7 @@
 '''
 HDF5 Database Store.
 
-shove's psuedo-URL for HDF5 stores follows the form:
+shove's URI for HDF5 stores follows the form:
 
 hdf5://<path>/<group>
 
@@ -14,7 +14,7 @@ pathname to a HDF5 database can be passed as the 'engine' parameter.
 try:
     import h5py
 except ImportError:
-    raise ImportError('This store requires h5py library')
+    raise ImportError('requires h5py library')
 
 from shove.store.core import ClientStore
 

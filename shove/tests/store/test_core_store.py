@@ -64,25 +64,18 @@ class TestSimpleStore(unittest.TestCase):
         slist = list(self.store.items())
         self.assertEqual(('min', 6) in slist, True)
 
-    def test_iteritems(self):
+    def test_keys(self):
         self.store['max'] = 3
         self.store['min'] = 6
         self.store['pow'] = 7
-        slist = list(self.store.iteritems())
-        self.assertEqual(('min', 6) in slist, True)
-
-    def test_iterkeys(self):
-        self.store['max'] = 3
-        self.store['min'] = 6
-        self.store['pow'] = 7
-        slist = list(self.store.iterkeys())
+        slist = list(self.store.keys())
         self.assertEqual('min' in slist, True)
 
-    def test_itervalues(self):
+    def test_values(self):
         self.store['max'] = 3
         self.store['min'] = 6
         self.store['pow'] = 7
-        slist = list(self.store.itervalues())
+        slist = list(self.store.values())
         self.assertEqual(6 in slist, True)
 
     def test_pop(self):
@@ -116,20 +109,6 @@ class TestSimpleStore(unittest.TestCase):
         self.store['pow'] = 7
         self.store.update(tstore)
         self.assertEqual(self.store['min'], 6)
-
-    def test_values(self):
-        self.store['max'] = 3
-        self.store['min'] = 6
-        self.store['pow'] = 7
-        slist = self.store.values()
-        self.assertEqual(6 in slist, True)
-
-    def test_keys(self):
-        self.store['max'] = 3
-        self.store['min'] = 6
-        self.store['pow'] = 7
-        slist = self.store.keys()
-        self.assertEqual('min' in slist, True)
 
 
 class TestMemoryStore(unittest.TestCase):
@@ -193,25 +172,18 @@ class TestMemoryStore(unittest.TestCase):
         slist = list(self.store.items())
         self.assertEqual(('min', 6) in slist, True)
 
-    def test_iteritems(self):
+    def test_keys(self):
         self.store['max'] = 3
         self.store['min'] = 6
         self.store['pow'] = 7
-        slist = list(self.store.iteritems())
-        self.assertEqual(('min', 6) in slist, True)
-
-    def test_iterkeys(self):
-        self.store['max'] = 3
-        self.store['min'] = 6
-        self.store['pow'] = 7
-        slist = list(self.store.iterkeys())
+        slist = list(self.store.keys())
         self.assertEqual('min' in slist, True)
 
-    def test_itervalues(self):
+    def test_values(self):
         self.store['max'] = 3
         self.store['min'] = 6
         self.store['pow'] = 7
-        slist = list(self.store.itervalues())
+        slist = list(self.store.values())
         self.assertEqual(6 in slist, True)
 
     def test_pop(self):
@@ -245,20 +217,6 @@ class TestMemoryStore(unittest.TestCase):
         self.store['pow'] = 7
         self.store.update(tstore)
         self.assertEqual(self.store['min'], 6)
-
-    def test_values(self):
-        self.store['max'] = 3
-        self.store['min'] = 6
-        self.store['pow'] = 7
-        slist = self.store.values()
-        self.assertEqual(6 in slist, True)
-
-    def test_keys(self):
-        self.store['max'] = 3
-        self.store['min'] = 6
-        self.store['pow'] = 7
-        slist = self.store.keys()
-        self.assertEqual('min' in slist, True)
 
 
 class TestFileStore(unittest.TestCase):
@@ -326,25 +284,18 @@ class TestFileStore(unittest.TestCase):
         slist = list(self.store.items())
         self.assertEqual(('min', 6) in slist, True)
 
-    def test_iteritems(self):
+    def test_keys(self):
         self.store['max'] = 3
         self.store['min'] = 6
         self.store['pow'] = 7
-        slist = list(self.store.iteritems())
-        self.assertEqual(('min', 6) in slist, True)
-
-    def test_iterkeys(self):
-        self.store['max'] = 3
-        self.store['min'] = 6
-        self.store['pow'] = 7
-        slist = list(self.store.iterkeys())
+        slist = list(self.store.keys())
         self.assertEqual('min' in slist, True)
 
-    def test_itervalues(self):
+    def test_values(self):
         self.store['max'] = 3
         self.store['min'] = 6
         self.store['pow'] = 7
-        slist = list(self.store.itervalues())
+        slist = list(self.store.values())
         self.assertEqual(6 in slist, True)
 
     def test_pop(self):
@@ -379,20 +330,6 @@ class TestFileStore(unittest.TestCase):
         self.store.update(tstore)
         self.assertEqual(self.store['min'], 6)
 
-    def test_values(self):
-        self.store['max'] = 3
-        self.store['min'] = 6
-        self.store['pow'] = 7
-        slist = self.store.values()
-        self.assertEqual(6 in slist, True)
-
-    def test_keys(self):
-        self.store['max'] = 3
-        self.store['min'] = 6
-        self.store['pow'] = 7
-        slist = self.store.keys()
-        self.assertEqual('min' in slist, True)
-
 
 class TestDbmStore(unittest.TestCase):
 
@@ -404,7 +341,7 @@ class TestDbmStore(unittest.TestCase):
         import os
         self.store.close()
         try:
-            os.remove('test.dbm.db')
+            os.remove('test.dbm')
         except OSError:
             pass
 
@@ -455,25 +392,18 @@ class TestDbmStore(unittest.TestCase):
         slist = list(self.store.items())
         self.assertEqual(('min', 6) in slist, True)
 
-    def test_iteritems(self):
+    def test_keys(self):
         self.store['max'] = 3
         self.store['min'] = 6
         self.store['pow'] = 7
-        slist = list(self.store.iteritems())
-        self.assertEqual(('min', 6) in slist, True)
-
-    def test_iterkeys(self):
-        self.store['max'] = 3
-        self.store['min'] = 6
-        self.store['pow'] = 7
-        slist = list(self.store.iterkeys())
+        slist = list(self.store.keys())
         self.assertEqual('min' in slist, True)
 
-    def test_itervalues(self):
+    def test_values(self):
         self.store['max'] = 3
         self.store['min'] = 6
         self.store['pow'] = 7
-        slist = list(self.store.itervalues())
+        slist = list(self.store.values())
         self.assertEqual(6 in slist, True)
 
     def test_pop(self):
@@ -507,20 +437,6 @@ class TestDbmStore(unittest.TestCase):
         self.store['pow'] = 7
         self.store.update(tstore)
         self.assertEqual(self.store['min'], 6)
-
-    def test_values(self):
-        self.store['max'] = 3
-        self.store['min'] = 6
-        self.store['pow'] = 7
-        slist = self.store.values()
-        self.assertEqual(6 in slist, True)
-
-    def test_keys(self):
-        self.store['max'] = 3
-        self.store['min'] = 6
-        self.store['pow'] = 7
-        slist = self.store.keys()
-        self.assertEqual('min' in slist, True)
 
 
 if __name__ == '__main__':

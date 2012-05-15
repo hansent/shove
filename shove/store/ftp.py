@@ -2,7 +2,7 @@
 '''
 FTP-accessed stores
 
-shove's URL for FTP accessed stores follows the standard form for FTP URLs
+shove's URI for FTP accessed stores follows the standard form for FTP URLs
 defined in RFC-1738:
 
 ftp://<user>:<password>@<host>:<port>/<url-path>

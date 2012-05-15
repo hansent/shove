@@ -41,7 +41,7 @@ class SimpleCache(SimpleBase):
     def __getitem__(self, key):
         exp, value = super(SimpleCache, self).__getitem__(key)
         # delete if item timed out.
-        if exp < time.time():
+        if exp < time():
             super(SimpleCache, self).__delitem__(key)
             raise KeyError(key)
         return value
@@ -83,7 +83,7 @@ class MemoryCache(SimpleCache):
     '''
     Thread-safe in-memory cache.
 
-    The shove URL for a memory cache is:
+    The shove URI for a memory cache is:
 
     memory://
     '''
@@ -96,8 +96,8 @@ class MemoryCache(SimpleCache):
     def __getitem__(self, key):
         return deepcopy(super(MemoryCache, self).__getitem__(key))
 
-    __setitem__ = synchronized(MemoryCache.__setitem__)
-    __delitem__ = synchronized(MemoryCache.__delitem__)
+    __setitem__ = synchronized(SimpleCache.__setitem__)
+    __delitem__ = synchronized(SimpleCache.__delitem__)
 
 
 class SimpleLRUCache(LRUBase):
@@ -139,11 +139,11 @@ class FileCache(FileBase, SimpleCache):
     '''
     File-based cache
 
-    shove's psuedo-URL for file caches follows the form:
+    shove's URI for file caches follows the form:
 
     file://<path>
 
-    Where the path is a URL path to a directory on a local filesystem.
+    Where the path is a URI path to a directory on a local filesystem.
     Alternatively, a native pathname to the directory can be passed as the
     'engine' argument.
     '''
@@ -175,11 +175,11 @@ class FileLRUCache(FileBase, SimpleLRUCache):
     '''
     File-based LRU cache
 
-    shove's psuedo-URL for file caches follows the form:
+    shove's URI for file caches follows the form:
 
     filelru://<path>
 
-    Where the path is a URL path to a directory on a local filesystem.
+    Where the path is a URI path to a directory on a local filesystem.
     Alternatively, a native pathname to the directory can be passed as the
     'engine' argument.
     '''

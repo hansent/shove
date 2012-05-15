@@ -3,6 +3,7 @@
 
 import pkg_resources
 from stuf.utils import lazyimport
+from stuf.six import strings
 
 stores = dict(
     (_store.name, _store) for _store in
@@ -20,10 +21,10 @@ def cache_backend(uri, **kw):
 
     :argument uri: instance or name :class:`str`
     '''
-    if isinstance(uri, basestring):
+    if isinstance(uri, strings):
         mod = caches[uri.split('://', 1)[0]]
         # load module if setuptools not present
-        if isinstance(mod, basestring):
+        if isinstance(mod, strings):
             # split classname from dot path
             module, klass = mod.split(':')
             # load module
@@ -43,10 +44,10 @@ def store_backend(uri, **kw):
 
     :argument uri: instance or name :class:`str`
     '''
-    if isinstance(uri, basestring):
+    if isinstance(uri, strings):
         mod = stores[uri.split('://', 1)[0]]
         # load module if setuptools not present
-        if isinstance(mod, basestring):
+        if isinstance(mod, strings):
             # isolate classname from dot path
             module, klass = mod.split(':')
             # load module

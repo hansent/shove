@@ -2,7 +2,7 @@
 '''
 Cassandra-based object store
 
-The shove psuedo-URL for a cassandra-based store is:
+The shove URI for a cassandra-based store is:
 
 cassandra://<host>:<port>/<keyspace>/<columnFamily>
 '''
@@ -11,7 +11,7 @@ from stuf.six import native
 try:
     import pycassa
 except ImportError:
-    raise ImportError('This store requires the pycassa library')
+    raise ImportError('requires pycassa library')
 
 from shove.core import BaseStore
 from shove._compat import urlsplit
@@ -31,7 +31,8 @@ class CassandraStore(BaseStore):
         _, keyspace, column_family = spliturl[2].split('/')
         try:
             self._store = pycassa.ColumnFamily(
-                pycassa.connect(keyspace, [spliturl[1]]), column_family,
+                pycassa.ConnectionPool(keyspace, [spliturl[1]]),
+                column_family,
             )
         except pycassa.InvalidRequestException:
             from pycassa.system_manager import SystemManager  # @UnresolvedImport @IgnorePep8
@@ -43,7 +44,8 @@ class CassandraStore(BaseStore):
             )
             system_manager.create_column_family(keyspace, column_family)
             self._store = pycassa.ColumnFamily(
-                pycassa.connect(keyspace, [spliturl[1]]), column_family,
+                pycassa.ConnectionPool(keyspace, [spliturl[1]]),
+                column_family,
             )
 
     def __getitem__(self, key):

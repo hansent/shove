@@ -138,7 +138,7 @@ class BaseStore(Base):
         Removes and returns a key, value pair from a store.
         '''
         try:
-            k, v = next(self)
+            k, v = next(self.items())
         except StopIteration:
             raise KeyError('store is empty')
         del self[k]

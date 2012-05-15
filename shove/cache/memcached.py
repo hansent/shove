@@ -2,7 +2,7 @@
 '''
 "memcached" cache.
 
-The shove psuedo-URL for a memcache cache is:
+The shove URI for a memcache cache is:
 
 memcache://<memcache_server>
 '''
@@ -10,7 +10,7 @@ memcache://<memcache_server>
 try:
     import memcache
 except ImportError:
-    raise ImportError("Memcache cache requires the 'memcache' library")
+    raise ImportError("requires 'python-memcache' library")
 
 from shove.base import Base
 
@@ -26,7 +26,7 @@ class MemCached(Base):
         if engine.startswith('memcache://'):
             engine = engine.split('://')[1]
         self._store = memcache.Client(engine.split(';'))
-        # Set timeout
+        # set timeout
         self.timeout = kw.get('timeout', 300)
 
     def __getitem__(self, key):

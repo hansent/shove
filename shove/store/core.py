@@ -15,7 +15,7 @@ class SimpleStore(SimpleBase, BaseStore):
     '''
     Single-process in-memory store.
 
-    The shove URL for a simple store is:
+    The shove URI for a simple store is:
 
     simple://
     '''
@@ -44,7 +44,7 @@ class MemoryStore(SimpleStore):
     '''
     Thread-safe in-memory store.
 
-    The shove URL for a memory store is:
+    The shove URI for a memory store is:
 
     memory://
     '''
@@ -66,11 +66,11 @@ class FileStore(FileBase, BaseStore):
     '''
     Filesystem-based object store.
 
-    shove's URL for filesystem-based stores follows the form:
+    shove's URI for filesystem-based stores follows the form:
 
     file://<path>
 
-    Where the path is a URL path to a directory on a local filesystem.
+    Where the path is a URI path to a directory on a local filesystem.
     Alternatively, a native pathname to the directory can be passed as the
     'engine' argument.
     '''
@@ -102,7 +102,7 @@ class DBMStore(SyncStore):
     '''
     DBM Database Store.
 
-    shove's URL for DBM stores follows the form:
+    shove's URI for DBM stores follows the form:
 
     dbm://<path>
 

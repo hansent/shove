@@ -2,7 +2,7 @@
 '''
 Redis-based object cache
 
-The shove psuedo-URL for a redis cache is:
+The shove URI for a redis cache is:
 
 redis://<host>:<port>/<db>
 '''
@@ -10,7 +10,7 @@ redis://<host>:<port>/<db>
 try:
     import redis
 except ImportError:
-    raise ImportError('This cache requires the redis library')
+    raise ImportError('requires redis')
 
 from shove.base import Base
 from shove._compat import urlsplit

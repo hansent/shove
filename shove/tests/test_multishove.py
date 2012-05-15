@@ -6,7 +6,6 @@ class TestMultiShove(unittest.TestCase):
 
     stores = (
         'simple://', 'dbm://one.dbm', 'memory://', 'file://two', 'sqlite://',
-        'bsddb://three.db'
     )
 
     def setUp(self):
@@ -20,7 +19,6 @@ class TestMultiShove(unittest.TestCase):
             os.remove(os.path.join('two', x))
         os.rmdir('two')
         os.remove('one.dbm')
-        os.remove('three.db')
 
     def test__getitem__(self):
         self.store['max'] = 3
@@ -71,25 +69,18 @@ class TestMultiShove(unittest.TestCase):
         slist = list(self.store.items())
         self.assertEqual(('min', 6) in slist, True)
 
-    def test_iteritems(self):
+    def test_keys(self):
         self.store['max'] = 3
         self.store['min'] = 6
         self.store['pow'] = 7
-        slist = list(self.store.iteritems())
-        self.assertEqual(('min', 6) in slist, True)
-
-    def test_iterkeys(self):
-        self.store['max'] = 3
-        self.store['min'] = 6
-        self.store['pow'] = 7
-        slist = list(self.store.iterkeys())
+        slist = list(self.store.keys())
         self.assertEqual('min' in slist, True)
 
-    def test_itervalues(self):
+    def test_values(self):
         self.store['max'] = 3
         self.store['min'] = 6
         self.store['pow'] = 7
-        slist = list(self.store.itervalues())
+        slist = list(self.store.values())
         self.assertEqual(6 in slist, True)
 
     def test_pop(self):
@@ -123,20 +114,6 @@ class TestMultiShove(unittest.TestCase):
         self.store['pow'] = 7
         self.store.update(tstore)
         self.assertEqual(self.store['min'], 6)
-
-    def test_values(self):
-        self.store['max'] = 3
-        self.store['min'] = 6
-        self.store['pow'] = 7
-        slist = self.store.values()
-        self.assertEqual(6 in slist, True)
-
-    def test_keys(self):
-        self.store['max'] = 3
-        self.store['min'] = 6
-        self.store['pow'] = 7
-        slist = self.store.keys()
-        self.assertEqual('min' in slist, True)
 
 
 if __name__ == '__main__':

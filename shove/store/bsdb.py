@@ -2,7 +2,7 @@
 '''
 Berkeley Source Database Store.
 
-shove's psuedo-URL for BSDDB stores follows the form:
+shove's URI for BSDDB stores follows the form:
 
 bsddb://<path>
 
@@ -15,7 +15,10 @@ from threading import Condition
 try:
     from bsddb import hashopen
 except ImportError:
-    raise ImportError('requires bsddb library')
+    try:
+        from bsddb3 import hashopen
+    except ImportError:
+        raise ImportError('requires bsddb library')
 
 from shove._compat import synchronized
 from shove.store.core import SyncStore

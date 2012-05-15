@@ -2,7 +2,7 @@
 '''
 Database object cache.
 
-The shove psuedo-URL used for database object caches is the format used by
+The shove URI used for database object caches is the format used by
 SQLAlchemy:
 
 <driver>://<username>:<password>@<host>:<port>/<database>
@@ -26,12 +26,16 @@ from datetime import datetime
 
 from stuf.six import native
 try:
+    from sqlalchemy import LargeBinary as Binary
+except ImportError:
+    from sqlalchemy import Binary
+try:
     from sqlalchemy import (
-        MetaData, Table, Column, String, Binary, DateTime, select, update,
-        insert, delete,
+        MetaData, Table, Column, String, DateTime, select, update, insert,
+        delete,
     )
 except ImportError:
-    raise ImportError('Requires SQLAlchemy >= 0.4')
+    raise ImportError('requires SQLAlchemy >= 0.4')
 
 from shove.backends import Base
 

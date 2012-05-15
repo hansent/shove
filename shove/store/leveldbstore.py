@@ -2,7 +2,7 @@
 '''
 LevelDB Database Store.
 
-shove's psuedo-URL for LevelDB stores follows the form:
+shove's URI for LevelDB stores follows the form:
 
 leveldb://<path>
 
@@ -13,7 +13,7 @@ pathname to a LevelDB database can be passed as the 'engine' parameter.
 try:
     import leveldb
 except ImportError:
-    raise ImportError('This store requires py-leveldb library')
+    raise ImportError('requires py-leveldb library')
 
 from shove.store.core import ClientStore
 
