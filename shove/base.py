@@ -67,11 +67,13 @@ class BaseStore(Base):
 
     '''Base Store (based on UserDict.DictMixin).'''
 
-    def __cmp__(self, other):
-        if other is None:
-            return False
-        if isinstance(other, BaseStore):
-            return cmp(dict(self.items()), dict(other.items()))
+    def __eq__(self, other):
+        if not isinstance(other, BaseStore):
+            return NotImplemented
+        return dict(self.items()) == dict(other.items())
+
+    def __ne__(self, other):
+        return not self == other
 
     def __del__(self):
         # __init__ didn't succeed, so don't bother closing
@@ -103,7 +105,8 @@ class BaseStore(Base):
         '''
         Removes all keys and values from a store.
         '''
-        for key in self.keys():
+        keys = list(self.keys())
+        for key in keys:
             del self[key]
 
     def items(self):

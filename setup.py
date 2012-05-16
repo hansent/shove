@@ -1,10 +1,18 @@
 # -*- coding: utf-8 -*-
-'''setup - setuptools based setup for shove.'''
+'''
+setup for shove.
+'''
 
+import sys
 try:
     from setuptools import setup
 except ImportError:
     from distutils.core import setup
+
+if sys.version_info[0] < 3:
+    install_requires = ['futures']
+else:
+    install_requires = []
 
 setup(
     name='shove',
@@ -18,6 +26,7 @@ setup(
     packages=['shove', 'shove.cache', 'shove.store', 'shove.tests'],
     py_modules=['ez_setup'],
     test_suite='shove.tests',
+    install_requires=install_requires,
     zip_safe=False,
     keywords='object storage persistence database shelve',
     classifiers=[
@@ -34,7 +43,7 @@ setup(
     ],
     entry_points='''
     [shove.stores]
-    bsddb=shove.store.bsdb:BsdStore
+    bsddb=shove.store.bsdb:BSDBStore
     cassandra=shove.store.cassandra:CassandraStore
     dbm=shove.store.core:DBMStore
     durus=shove.store.durusdb:DurusStore

@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
 '''shove core.'''
 
+from operator import setitem, delitem
+
 from stuf.six import items
+from concurrent.futures import ThreadPoolExecutor
 
 from shove.base import BaseStore
 from shove.loadpoints import cache_backend, store_backend
@@ -176,3 +179,55 @@ class MultiShove(BaseStore):
             for store in stores:
                 store[k] = v
         self._buffer.clear()
+
+
+class ConcurrentShove(MultiShove):
+
+    '''
+    Common frontend that syncs multiple object stores concurrently.
+    '''
+
+    _executor = None
+
+    def __init__(self, *stores, **kw):
+        # init superclass with first store
+        super(ConcurrentShove, self).__init__(*stores, **kw)
+        self._maxworkers = kw.get('max_workers', 2)
+
+
+class ThreadShove(ConcurrentShove):
+
+    '''
+    Common frontend that syncs multiple object stores with multiple threads.
+    '''
+
+    _executor = ThreadPoolExecutor
+
+    def __delitem__(self, key):
+        '''
+        Deletes an item from multiple stores.
+        '''
+        try:
+            del self._cache[key]
+        except KeyError:
+            pass
+        try:
+            self.sync()
+        except AttributeError:
+            pass
+        with self._executor(max_workers=self._maxworkers) as executor:
+            for store in self._stores:
+                executor.submit(delitem, store, key)
+
+    def sync(self):
+        '''
+        Writes buffer to store.
+        '''
+        stores = self._stores
+        with self._executor(max_workers=self._maxworkers) as executor:
+            submit = executor.submit
+            for k, v in items(self._buffer):
+                # sync all stores
+                for store in stores:
+                    submit(setitem, store, k, v)
+            self._buffer.clear()

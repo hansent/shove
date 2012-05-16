@@ -20,6 +20,7 @@ For more information on specific databases see:
 http://www.sqlalchemy.org/docs/dbengine.myt#dbengine_supported
 '''
 
+from stuf.six import native
 try:
     from sqlalchemy import LargeBinary as Binary
 except ImportError:
@@ -59,7 +60,7 @@ class DBStore(BaseStore):
             [self._store.c.value], self._store.c.key == key,
         ).execute().fetchone()
         if row is not None:
-            return self.loads(str(row.value))
+            return self.loads(native(row.value))
         raise KeyError(key)
 
     def __setitem__(self, k, v):

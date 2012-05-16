@@ -69,12 +69,12 @@ class SimpleCache(SimpleBase):
             else:
                 break
         choice = random.choice
-        keys = self.keys
+        keys = list(self.keys())
         max_entries = self._max_entries
         # remove any additional items up to max # of items allowed by maxcull
         while len(self) >= max_entries and num <= maxcull:
             # cull remainder of allowed quota at random
-            del self[choice(keys())]
+            del self[choice(keys)]
             num += 1
 
 

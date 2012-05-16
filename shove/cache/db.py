@@ -21,7 +21,7 @@ http://www.sqlalchemy.org/docs/dbengine.myt#dbengine_supported
 '''
 
 import time
-import random
+from random import sample
 from datetime import datetime
 
 from stuf.six import native
@@ -120,17 +120,12 @@ class DBCache(Base):
             cache, cache.c.expires < datetime.now().replace(microsecond=0),
         ).execute()
         # remove any items over the maximum allowed number in the cache
-        if len(self) >= self._max_entries:
-            maxcull = self._maxcull
+        length = len(self)
+        if length >= self._max_entries:
+            cull = length if length < self._maxcull else self._maxcull
             # get list of keys
-            keys = [
-                i[0] for i in select(
-                    [cache.c.key],
-                     # upper limit for key query
-                    limit=maxcull * 2
-                ).execute().fetchall()
-            ]
+            keys = list(i[0] for i in select(
+                [cache.c.key], limit=cull * 2
+            ).execute().fetchall())
             # delete keys at random
-            delete(
-                cache, cache.c.key.in_(random.sample(keys, maxcull))
-            ).execute()
+            delete(cache, cache.c.key.in_(sample(keys, cull))).execute()

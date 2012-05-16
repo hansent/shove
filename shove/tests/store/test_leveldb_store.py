@@ -3,6 +3,7 @@
 #from stuf.six import unittest
 #
 #
+#@unittest.skipIf(PY3, 'Python 3')
 #class TestLevelDBStore(unittest.TestCase):
 #
 #    def setUp(self):

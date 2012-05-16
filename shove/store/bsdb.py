@@ -12,6 +12,7 @@ pathname to a Berkeley database can be passed as the 'engine' parameter.
 
 from threading import Condition
 
+from stuf.six import b
 try:
     from bsddb import hashopen
 except ImportError:
@@ -40,6 +41,16 @@ class BSDBStore(SyncStore):
         self._lock = Condition()
         self.sync = self._store.sync
 
-    __getitem__ = synchronized(SyncStore.__getitem__)
-    __setitem__ = synchronized(SyncStore.__setitem__)
-    __delitem__ = synchronized(SyncStore.__delitem__)
+    @synchronized
+    def __getitem__(self, key):
+        return self.loads(self._store[key])
+
+    @synchronized
+    def __setitem__(self, key, value):
+        self._store[b(key)] = self.dumps(value)
+        self.sync()
+
+    @synchronized
+    def __delitem__(self, key):
+        del self._store[b(key)]
+        self.sync()

@@ -1,6 +1,18 @@
 '''shove fabfile'''
 
-from fabric.api import prompt, local, settings, env
+from fabric.api import prompt, local, settings, env  # , lcd
+
+regup = './setup.py register sdist --format=bztar,gztar,zip upload'
+nodist = 'rm -rf ./dist'
+sphinxup = './setup.py upload_sphinx'
+
+
+def _promptup():
+    prompt('Enter tag: ', 'tag')
+    with settings(warn_only=True):
+        local('hg tag "%(tag)s"' % env)
+        local('hg push ssh://hg@bitbucket.org/lcrees/shove')
+        local('hg push github')
 
 
 def _test(val):
@@ -15,10 +27,27 @@ def tox():
     local('tox')
 
 
+#def docs():
+#    with lcd('docs/'):
+#        local('make clean')
+#        local('make html')
+#        local('make linkcheck')
+#        local('make doctest')
+
+
+def update_docs():
+#    docs()
+    with settings(warn_only=True):
+        local('hg ci -m docmerge')
+        local('hg push ssh://hg@bitbucket.org/lcrees/shove')
+        local('hg push github')
+    local(sphinxup)
+
+
 def tox_recreate():
     '''recreate shove test env'''
     prompt(
-        'Enter testenv: [py26, py27, py32]',
+        'Enter testenv: [py26, py27]',
         'testenv',
         validate=_test,
     )
@@ -36,12 +65,30 @@ def release():
     local('hg merge next; hg ci -m automerge')
     local('hg update pu')
     local('hg merge default; hg ci -m automerge')
-    prompt('Enter tag: ', 'tag')
+    _promptup()
+    local(regup)
+    local(sphinxup)
+    local(nodist)
+
+
+def releaser():
+    '''shove releaser'''
+#    docs()
+    _promptup()
+    local(regup)
+    local(sphinxup)
+    local(nodist)
+
+
+def inplace():
+    '''in-place shove'''
+#    docs()
     with settings(warn_only=True):
-        local('hg tag "%(tag)s"' % env)
         local('hg push ssh://hg@bitbucket.org/lcrees/shove')
-        local('hg push git+ssh://git@github.com:kwarterthieves/shove.git')
-    local('./setup.py register sdist --format=bztar,gztar,zip upload')
+        local('hg push github')
+    local('./setup.py sdist --format=bztar,gztar,zip upload')
+    local(sphinxup)
+    local(nodist)
 
 
 def release_next():
@@ -52,9 +99,7 @@ def release_next():
     local('hg merge next; hg ci -m automerge')
     local('hg update next')
     local('hg merge default; hg ci -m automerge')
-    prompt('Enter tag: ', 'tag')
-    with settings(warn_only=True):
-        local('hg tag "%(tag)s"' % env)
-        local('hg push ssh://hg@bitbucket.org/lcrees/shove')
-        local('hg push git+ssh://git@github.com:kwarterthieves/shove.git')
-    local('./setup.py register sdist --format=bztar,gztar,zip upload')
+    _promptup()
+    local(regup)
+    local(sphinxup)
+    local(nodist)

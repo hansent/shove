@@ -12,6 +12,7 @@ s3://<s3_key>:<s3_secret>@<bucket>
 <bucket> is the name of the bucket accessed through the S3 service
 '''
 
+from stuf.six import native
 try:
     from boto.s3.key import Key
     from boto.s3.connection import S3Connection
@@ -90,7 +91,7 @@ class S3Store(BaseStore):
         '''
         if self._updated or self._keys is None:
             self._keys = self._store.get_all_keys()
-        return list((str(k.key), k) for k in self._keys)
+        return list((native(k.key), k) for k in self._keys)
 
     def iteritems(self):
         '''
