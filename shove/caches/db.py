@@ -37,7 +37,7 @@ try:
 except ImportError:
     raise ImportError('requires SQLAlchemy >= 0.4')
 
-from shove.backends import Base
+from shove.base import Base
 
 __all__ = ['DBCache']
 

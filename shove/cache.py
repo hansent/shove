@@ -6,10 +6,11 @@ shove cache core
 import random
 from time import time
 from copy import deepcopy
+from collections import deque
 from threading import Condition
 
 from shove._compat import synchronized
-from shove.backends import SimpleBase, LRUBase, FileBase
+from shove.base import SimpleBase, FileBase
 
 __all__ = [
     'SimpleLRUCache', 'SimpleCache', 'MemoryCache', 'MemoryLRUCache',
@@ -100,7 +101,7 @@ class MemoryCache(SimpleCache):
     __delitem__ = synchronized(SimpleCache.__delitem__)
 
 
-class SimpleLRUCache(LRUBase):
+class SimpleLRUCache(SimpleCache):
 
     '''
     Single-process in-memory LRU cache that purges based on least recently
@@ -110,6 +111,53 @@ class SimpleLRUCache(LRUBase):
 
     simplelru://
     '''
+
+    def __init__(self, engine, **kw):
+        super(SimpleLRUCache, self).__init__(engine, **kw)
+        self._max_entries = kw.get('max_entries', 300)
+        self._hits = 0
+        self._misses = 0
+        self._queue = deque()
+        self._refcount = dict()
+
+    def __getitem__(self, key):
+        try:
+            value = super(SimpleLRUCache, self).__getitem__(key)
+            self._hits += 1
+        except KeyError:
+            self._misses += 1
+            raise
+        self._housekeep(key)
+        return value
+
+    def __setitem__(self, key, value):
+        super(SimpleLRUCache, self).__setitem__(key, value)
+        self._housekeep(key)
+        if len(self._store) > self._max_entries:
+            queue = self._queue
+            store = self._store
+            max_entries = self._max_entries
+            refcount = self._refcount
+            delitem = super(SimpleLRUCache, self).__delitem__
+            while len(store) > max_entries:
+                k = queue.popleft()
+                refcount[k] -= 1
+                if not refcount[k]:
+                    delitem(k)
+                    del refcount[k]
+
+    def _housekeep(self, key):
+        self._queue.append(key)
+        self._refcount[key] = self._refcount.get(key, 0) + 1
+        if len(self._queue) > self._max_entries * 4:
+            queue = self._queue
+            refcount = self._refcount
+            for _ in [None] * len(queue):
+                k = queue.popleft()
+                if refcount[k] == 1:
+                    queue.append(k)
+                else:
+                    refcount[k] -= 1
 
 
 class MemoryLRUCache(SimpleLRUCache):

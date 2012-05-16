@@ -8,18 +8,19 @@ cassandra://<host>:<port>/<keyspace>/<columnFamily>
 '''
 
 from stuf.six import native
+
 try:
     import pycassa
 except ImportError:
     raise ImportError('requires pycassa library')
 
-from shove.core import BaseStore
 from shove._compat import urlsplit
+from shove.store import SimpleStore
 
 __all__ = ['CassandraStore']
 
 
-class CassandraStore(BaseStore):
+class CassandraStore(SimpleStore):
 
     '''Cassandra based store'''
 

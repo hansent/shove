@@ -3,7 +3,7 @@
 from stuf.six import PY3, unittest
 
 
-class Cache(object):
+class NoTimeout(object):
 
     def setUp(self):
         self.cache = self._makeone(self.initstring)
@@ -26,6 +26,9 @@ class Cache(object):
 
     def test_get(self):
         self.assertEqual(self.cache.get('min'), None)
+
+
+class Cache(NoTimeout):
 
     def test_timeout(self):
         import time
@@ -53,8 +56,18 @@ class TestSimpleCache(CacheCull, unittest.TestCase):
 
     @property
     def _makeone(self):
-        from shove.cache.core import SimpleCache
+        from shove.cache import SimpleCache
         return SimpleCache
+
+
+class TestSimpleLRUCache(NoTimeout, unittest.TestCase):
+
+    initstring = 'simplelru://'
+
+    @property
+    def _makeone(self):
+        from shove.cache import SimpleLRUCache
+        return SimpleLRUCache
 
 
 class TestMemoryCache(CacheCull, unittest.TestCase):
@@ -63,8 +76,18 @@ class TestMemoryCache(CacheCull, unittest.TestCase):
 
     @property
     def _makeone(self):
-        from shove.cache.core import MemoryCache
+        from shove.cache import MemoryCache
         return MemoryCache
+
+
+class TestMemoryLRUCache(NoTimeout, unittest.TestCase):
+
+    initstring = 'memlru://'
+
+    @property
+    def _makeone(self):
+        from shove.cache import MemoryLRUCache
+        return MemoryLRUCache
 
 
 class TestFileCache(CacheCull, unittest.TestCase):
@@ -73,15 +96,23 @@ class TestFileCache(CacheCull, unittest.TestCase):
 
     @property
     def _makeone(self):
-        from shove.cache.core import FileCache
+        from shove.cache import FileCache
         return FileCache
 
     def tearDown(self):
-        import os
+        import shutil
         self.cache = None
-        for x in os.listdir('test'):
-            os.remove(os.path.join('test', x))
-        os.rmdir('test')
+        shutil.rmtree('test')
+
+
+class TestFileLRUCache(NoTimeout, unittest.TestCase):
+
+    initstring = 'filelru://test'
+
+    @property
+    def _makeone(self):
+        from shove.cache import FileLRUCache
+        return FileLRUCache
 
 
 class TestDbCache(CacheCull, unittest.TestCase):
@@ -90,7 +121,7 @@ class TestDbCache(CacheCull, unittest.TestCase):
 
     @property
     def _makeone(self):
-        from shove.cache.db import DBCache
+        from shove.caches.db import DBCache
         return DBCache
 
 
@@ -101,7 +132,7 @@ if not PY3:
 
         @property
         def _makeone(self):
-            from shove.cache.memcached import MemCached
+            from shove.caches.memcached import MemCached
             return MemCached
 
     class TestRedisCache(Cache, unittest.TestCase):
@@ -110,7 +141,7 @@ if not PY3:
 
         @property
         def _makeone(self):
-            from shove.cache.redisdb import RedisCache
+            from shove.caches.redisdb import RedisCache
             return RedisCache
 
 

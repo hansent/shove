@@ -21,8 +21,8 @@ except ImportError:
     except ImportError:
         raise ImportError('requires bsddb library')
 
+from shove.store import SyncStore
 from shove._compat import synchronized
-from shove.store.core import SyncStore
 
 __all__ = ['BSDBStore']
 

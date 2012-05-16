@@ -14,7 +14,7 @@ except ImportError:
     raise ImportError('requires pymongo library')
 
 from shove._compat import urlsplit
-from shove.store.core import SimpleStore
+from shove.store import SimpleStore
 
 __all__ = ['MongoDBStore']
 
@@ -37,7 +37,10 @@ class MongoDBStore(SimpleStore):
         self._store.ensure_index('key', unique=True)
 
     def __getitem__(self, key):
-        return self.loads(self._store.find_one(dict(key=key))['value'])
+        try:
+            return self.loads(self._store.find_one(dict(key=key))['value'])
+        except TypeError:
+            raise KeyError(key)
 
     def __setitem__(self, key, value):
         self._store.save(dict(key=key, value=Binary(self.dumps(value))))

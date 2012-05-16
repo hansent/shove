@@ -15,7 +15,7 @@ try:
 except ImportError:
     raise ImportError('requires py-leveldb library')
 
-from shove.store.core import ClientStore
+from shove.store import ClientStore
 
 __all__ = ['LevelDBStore']
 

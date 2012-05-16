@@ -7,7 +7,8 @@ from stuf.six import items
 from concurrent.futures import ThreadPoolExecutor
 
 from shove.base import BaseStore
-from shove.loadpoints import cache_backend, store_backend
+from shove._imports import cache_backend, store_backend
+
 
 __all__ = ('Shove', 'MultiShove')
 
@@ -24,7 +25,7 @@ class Shove(BaseStore):
         self._store = store_backend(store, **kw)
         # load cache backend
         self._cache = cache_backend(cache, **kw)
-        # buffer for lazy writing
+        # buffer for lazier writing
         self._buffer = dict()
         # setting for syncing frequency
         self._sync = kw.get('sync', 2)
@@ -54,12 +55,21 @@ class Shove(BaseStore):
         '''
         Deletes an item from shove.
         '''
+        self.sync()
         try:
             del self._cache[key]
         except KeyError:
             pass
-        self.sync()
         del self._store[key]
+
+    def __len__(self):
+        return len(self._store)
+
+    def clear(self):
+        '''
+        Removes all keys and values from a store.
+        '''
+        self._store.clear()
 
     def close(self):
         '''
@@ -72,7 +82,7 @@ class Shove(BaseStore):
             except AttributeError:
                 pass
             self._store.close()
-            self._store = self._cache = self._buffer = None
+        self._store = self._cache = self._buffer = None
 
     def keys(self):
         '''
@@ -110,6 +120,16 @@ class MultiShove(BaseStore):
         self._buffer = dict()
         # setting for syncing frequency
         self._sync = kw.get('sync', 2)
+
+    def __len__(self):
+        return len(self._stores[0])
+
+    def clear(self):
+        '''
+        Removes all keys and values from a store.
+        '''
+        for key in list(self.keys()):
+            del self[key]
 
     def __getitem__(self, key):
         '''
@@ -160,7 +180,7 @@ class MultiShove(BaseStore):
             for idx, store in enumerate(stores):
                 store.close()
                 stores[idx] = None
-            self._cache = self._buffer = self._stores = None
+        self._cache = self._buffer = self._stores = None
 
     def keys(self):
         '''
@@ -181,27 +201,16 @@ class MultiShove(BaseStore):
         self._buffer.clear()
 
 
-class ConcurrentShove(MultiShove):
-
-    '''
-    Common frontend that syncs multiple object stores concurrently.
-    '''
-
-    _executor = None
-
-    def __init__(self, *stores, **kw):
-        # init superclass with first store
-        super(ConcurrentShove, self).__init__(*stores, **kw)
-        self._maxworkers = kw.get('max_workers', 2)
-
-
-class ThreadShove(ConcurrentShove):
+class ThreadShove(MultiShove):
 
     '''
     Common frontend that syncs multiple object stores with multiple threads.
     '''
 
-    _executor = ThreadPoolExecutor
+    def __init__(self, *stores, **kw):
+        # init superclass with first store
+        super(ThreadShove, self).__init__(*stores, **kw)
+        self._maxworkers = kw.get('max_workers', 2)
 
     def __delitem__(self, key):
         '''
@@ -215,7 +224,7 @@ class ThreadShove(ConcurrentShove):
             self.sync()
         except AttributeError:
             pass
-        with self._executor(max_workers=self._maxworkers) as executor:
+        with ThreadPoolExecutor(max_workers=self._maxworkers) as executor:
             for store in self._stores:
                 executor.submit(delitem, store, key)
 
@@ -224,7 +233,7 @@ class ThreadShove(ConcurrentShove):
         Writes buffer to store.
         '''
         stores = self._stores
-        with self._executor(max_workers=self._maxworkers) as executor:
+        with ThreadPoolExecutor(max_workers=self._maxworkers) as executor:
             submit = executor.submit
             for k, v in items(self._buffer):
                 # sync all stores

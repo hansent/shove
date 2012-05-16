@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 '''shove core.'''
 
+import os
 import zlib
+from os.path import exists, join
 
-from stuf.utils import ld, optimize, items
-from stuf.six import HIGHEST_PROTOCOL, keys
+from stuf.utils import ld, optimize
+from stuf.six import HIGHEST_PROTOCOL
+
+from shove._compat import url2pathname, quote_plus, unquote_plus
 
 
 class Base(object):
@@ -63,120 +67,100 @@ class Base(object):
         return ld(value)
 
 
-class BaseStore(Base):
+class SimpleBase(Base):
 
-    '''Base Store (based on UserDict.DictMixin).'''
+    '''
+    Single-process in-memory store base.
+    '''
 
-    def __eq__(self, other):
-        if not isinstance(other, BaseStore):
-            return NotImplemented
-        return dict(self.items()) == dict(other.items())
+    def __init__(self, engine, **kw):
+        super(SimpleBase, self).__init__(engine, **kw)
+        self._store = dict()
 
-    def __ne__(self, other):
-        return not self == other
+    def __getitem__(self, key):
+        try:
+            return self._store[key]
+        except:
+            raise KeyError(key)
 
-    def __iter__(self):
-        for k in self.keys():
-            yield k
+    def __setitem__(self, key, value):
+        self._store[key] = value
+
+    def __delitem__(self, key):
+        try:
+            del self._store[key]
+        except:
+            raise KeyError(key)
 
     def __len__(self):
         return len(self._store)
 
-    def __repr__(self):
-        return repr(dict(self.items()))
+    def keys(self):
+        '''
+        Returns a list of keys in the store.
+        '''
+        return self._store.keys()
 
-    def close(self):
-        '''
-        Closes internal store and clears object references.
-        '''
+
+class FileBase(Base):
+
+    '''
+    Base for file based storage.
+    '''
+
+    def __init__(self, engine, **kw):
+        super(FileBase, self).__init__(engine, **kw)
+        if engine.startswith('file://'):
+            engine = url2pathname(engine.split('://')[1])
+        self._dir = engine
+        # Create directory
+        if not exists(self._dir):
+            self._createdir()
+
+    def __getitem__(self, key):
+        # (per Larry Meyn)
         try:
-            self._store.close()
-        except AttributeError:
-            pass
-        self._store = None
+            with open(self._key_to_file(key), 'rb') as item:
+                return self.loads(item.read())
+        except:
+            raise KeyError(key)
 
-    def clear(self):
-        '''
-        Removes all keys and values from a store.
-        '''
-        for key in list(self.keys()):
-            del self[key]
+    def __setitem__(self, key, value):
+        # (per Larry Meyn)
+        try:
+            with open(self._key_to_file(key), 'wb') as item:
+                item.write(self.dumps(value))
+        except (IOError, OSError):
+            raise KeyError(key)
 
-    def items(self):
-        '''
-        Lazily returns all key/value pairs in a store.
-        '''
-        for k in self:
-            yield (k, self[k])
+    def __delitem__(self, key):
+        try:
+            os.remove(self._key_to_file(key))
+        except (IOError, OSError):
+            raise KeyError(key)
 
-    def pop(self, key, *args):
-        '''
-        Removes and returns a value from a store.
+    def __contains__(self, key):
+        return exists(self._key_to_file(key))
 
-        :argument str key: keyword in shove
-        :param args: Default to return if key not present.
-        '''
-        if len(args) > 1:
-            raise TypeError(
-                'pop expected at most 2 arguments, got ' + repr(1 + len(args))
+    def __len__(self):
+        return len(os.listdir(self._dir))
+
+    def _createdir(self):
+        # creates the store directory
+        try:
+            os.makedirs(self._dir)
+        except OSError:
+            raise EnvironmentError(
+                'Cache directory "%s" does not exist and '
+                'could not be created' % self._dir
             )
-        try:
-            value = self[key]
-        # Return default if key not in store
-        except KeyError:
-            if args:
-                return args[0]
-        del self[key]
-        return value
 
-    def popitem(self):
-        '''
-        Removes and returns a key, value pair from a store.
-        '''
-        try:
-            k, v = next(self.items())
-        except StopIteration:
-            raise KeyError('store is empty')
-        del self[k]
-        return (k, v)
+    def _key_to_file(self, key):
+        # gives the filesystem path for a key
+        return join(self._dir, quote_plus(key))
 
-    def setdefault(self, key, default=None):
+    def keys(self):
         '''
-        Returns the value corresponding to an existing key or sets the to key
-        to the default and returns the default.
-
-        :argument str key: keyword in shove
-        :keyword default: default value
+        Returns a list of keys in the store.
         '''
-        try:
-            return self[key]
-        except KeyError:
-            self[key] = default
-        return default
-
-    def update(self, other=None, **kw):
-        '''
-        Adds to or overwrites the values in this store with values from
-        another store.
-
-        :keyword other: another store
-        :param kw: additional keys and values to store
-        '''
-        if hasattr(other, 'items'):
-            for k, v in items(other):
-                self[k] = v
-        elif hasattr(other, 'keys'):
-            for k in keys(other):
-                self[k] = other[k]
-        elif other is not None:
-            for k, v in other:
-                self[k] = v
-        if kw:
-            self.update(kw)
-
-    def values(self):
-        '''
-        Lazily returns all values in a store.
-        '''
-        for k in self:
-            yield self[k]
+        return list(unquote_plus(name) for name in os.listdir(self._dir))

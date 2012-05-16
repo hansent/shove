@@ -16,7 +16,7 @@ try:
 except ImportError:
     raise ImportError('requires h5py library')
 
-from shove.store.core import ClientStore
+from shove.store import ClientStore
 
 __all__ = ['HDF5Store']
 

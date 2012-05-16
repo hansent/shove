@@ -78,6 +78,9 @@ class DBStore(BaseStore):
     def __len__(self):
         return self._store.count().execute().fetchone()[0]
 
+    def clear(self):
+        self._store.delete().execute()
+
     def keys(self):
         '''
         Returns a list of keys in the store.

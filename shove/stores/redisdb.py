@@ -14,12 +14,12 @@ except ImportError:
 
 from shove._compat import urlsplit
 
-from shove.store.core import ClientStore
+from shove.store import SimplerStore
 
 __all__ = ['RedisStore']
 
 
-class RedisStore(ClientStore):
+class RedisStore(SimplerStore):
 
     '''
     Redis based store.
@@ -30,14 +30,16 @@ class RedisStore(ClientStore):
     def __init__(self, engine, **kw):
         super(RedisStore, self).__init__(engine, **kw)
         spliturl = urlsplit(engine)
-        db = spliturl.path.replace('/', '')
-        self._store = redis.Redis(spliturl.hostname, spliturl.port, db)
+        self._db = spliturl.path.replace('/', '')
+        self._hostname = spliturl.hostname
+        self._port = spliturl.port
+        self._store = redis.Redis(spliturl.hostname, spliturl.port, self._db)
 
     def __contains__(self, key):
         return self._store.exists(key)
 
     def clear(self):
-        self._store.flushdb()
+        self._store.flushall()
 
     def keys(self):
         return self._store.keys()

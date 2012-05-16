@@ -16,7 +16,7 @@ try:
 except ImportError:
     raise ImportError('requires ZODB3 library')
 
-from shove.store.core import SyncStore
+from shove.store import SyncStore
 
 __all__ = ['ZODBStore']
 

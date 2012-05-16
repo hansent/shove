@@ -14,37 +14,45 @@ class EventualStore(object):
 
     def test__getitem__(self):
         self.store['max'] = 3
+        self.store.sync()
         self.assertEqual(self.store['max'], 3)
 
     def test__setitem__(self):
         self.store['max'] = 3
+        self.store.sync()
         self.assertEqual(self.store['max'], 3)
 
     def test__delitem__(self):
         self.store['max'] = 3
+        self.store.sync()
         del self.store['max']
+        self.store.sync()
         self.assertEqual('max' in self.store, False)
 
     def test_get(self):
         self.store['max'] = 3
+        self.store.sync()
         self.assertEqual(self.store.get('min'), None)
 
     def test__cmp__(self):
         from shove import Shove
         tstore = Shove()
         self.store['max'] = 3
+        self.store.sync()
         tstore['max'] = 3
         self.assertEqual(self.store, tstore)
 
     def test__len__(self):
         self.store['max'] = 3
         self.store['min'] = 6
+        self.store.sync()
         self.assertEqual(len(self.store), 2)
 
     def test_items(self):
         self.store['max'] = 3
         self.store['min'] = 6
         self.store['pow'] = 7
+        self.store.sync()
         slist = list(self.store.items())
         self.assertEqual(('min', 6) in slist, True)
 
@@ -52,6 +60,7 @@ class EventualStore(object):
         self.store['max'] = 3
         self.store['min'] = 6
         self.store['pow'] = 7
+        self.store.sync()
         slist = list(self.store.keys())
         self.assertEqual('min' in slist, True)
 
@@ -59,19 +68,24 @@ class EventualStore(object):
         self.store['max'] = 3
         self.store['min'] = 6
         self.store['pow'] = 7
+        self.store.sync()
         slist = list(self.store.values())
         self.assertEqual(6 in slist, True)
 
     def test_pop(self):
         self.store['max'] = 3
         self.store['min'] = 6
+        self.store.sync()
         item = self.store.pop('min')
+        self.store.sync()
         self.assertEqual(item, 6)
 
     def test_setdefault(self):
         self.store['max'] = 3
         self.store['min'] = 6
+        self.store.sync()
         self.assertEqual(self.store.setdefault('pow', 8), 8)
+        self.store.sync()
         self.assertEqual(self.store['pow'], 8)
 
     def test_update(self):
@@ -84,6 +98,7 @@ class EventualStore(object):
         self.store['min'] = 3
         self.store['pow'] = 7
         self.store.update(tstore)
+        self.store.sync()
         self.assertEqual(self.store['min'], 6)
 
 
@@ -93,52 +108,25 @@ class Store(EventualStore):
         self.store['max'] = 3
         self.store['min'] = 6
         self.store['pow'] = 7
+        self.store.sync()
         self.store.clear()
+        self.store.sync()
         self.assertEqual(len(self.store), 0)
 
     def test_popitem(self):
         self.store['max'] = 3
         self.store['min'] = 6
         self.store['pow'] = 7
+        self.store.sync()
         item = self.store.popitem()
+        self.store.sync()
         self.assertEqual(len(item) + len(self.store), 4)
-
-
-class SyncStore(Store):
 
     def test_close(self):
         self.store.close()
-        self.assertEqual(self.store, None)
-
-    def test__getitem__(self):
-        self.store['max'] = 3
-        self.store.sync()
-        self.assertEqual(self.store['max'], 3)
-
-    def test__setitem__(self):
-        self.store['max'] = 3
-        self.store.sync()
-        self.assertEqual(self.store['max'], 3)
-
-    def test__delitem__(self):
-        self.store['max'] = 3
-        self.store.sync()
-        del self.store['max']
-        self.assertEqual('max' in self.store, False)
-
-    def test_get(self):
-        self.store['max'] = 3
-        self.store.sync()
-        self.assertEqual(self.store.get('min'), None)
-
-    def test__cmp__(self):
-        from shove import Shove
-        tstore = Shove()
-        self.store['max'] = 3
-        tstore['max'] = 3
-        self.store.sync()
-        tstore.sync()
-        self.assertEqual(self.store, tstore)
+        self.assertEqual(self.store._store, None)
+        self.assertEqual(self.store._buffer, None)
+        self.assertEqual(self.store._cache, None)
 
 
 class TestSimpleStore(Store, unittest.TestCase):
@@ -161,7 +149,7 @@ class TestFileStore(Store, unittest.TestCase):
         shutil.rmtree('test')
 
 
-class TestDBMStore(SyncStore, unittest.TestCase):
+class TestDBMStore(Store, unittest.TestCase):
 
     initstring = 'dbm://test.dbm'
 
@@ -176,7 +164,7 @@ class TestDBStore(Store, unittest.TestCase):
     initstring = 'sqlite://'
 
 
-class TestMongoDBStore(SyncStore, unittest.TestCase):
+class TestMongoDBStore(Store, unittest.TestCase):
 
     initstring = 'mongodb://127.0.0.1:27017/shove/shove'
 
@@ -188,7 +176,7 @@ class TestMongoDBStore(SyncStore, unittest.TestCase):
 
 
 @unittest.skip('reason')
-class TestFTPStore(SyncStore, unittest.TestCase):
+class TestFTPStore(Store, unittest.TestCase):
 
     initstring = 'put ftp string here'
 
@@ -202,7 +190,7 @@ class TestFTPStore(SyncStore, unittest.TestCase):
 
 
 @unittest.skip('reason')
-class TestS3Store(SyncStore, unittest.TestCase):
+class TestS3Store(Store, unittest.TestCase):
 
     initstring = 's3 test string here'
 

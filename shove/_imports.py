@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
 '''shove loadpoints.'''
 
-import pkg_resources
-from stuf.utils import lazyimport
 from stuf.six import strings
+from stuf.utils import lazyimport
+from pkg_resources import iter_entry_points
 
 stores = dict(
-    (_store.name, _store) for _store in
-    pkg_resources.iter_entry_points('shove.stores')
+    (_store.name, _store) for _store in iter_entry_points('shove.stores')
 )
 caches = dict(
-    (_cache.name, _cache) for _cache in
-    pkg_resources.iter_entry_points('shove.caches')
+    (_cache.name, _cache) for _cache in iter_entry_points('shove.caches')
 )
 
 
