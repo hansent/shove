@@ -3,7 +3,7 @@
 
 import zlib
 
-from stuf.utils import loads, dumps, items
+from stuf.utils import ld, optimize, items
 from stuf.six import HIGHEST_PROTOCOL, keys
 
 
@@ -31,10 +31,10 @@ class Base(object):
         Optionally serializes and compresses an object.
         '''
         # serialize anything but ASCII strings
-        value = dumps(value, protocol=self._protocol)
+        value = optimize(value)
         if self._compress:
             value = zlib.compress(
-                value, 9 if self._compress is True else self._compress
+                value, 9 if self._compress else self._compress
             )
         return value
 
@@ -60,7 +60,7 @@ class Base(object):
                 value = zlib.decompress(value)
             except zlib.error:
                 pass
-        return loads(value)
+        return ld(value)
 
 
 class BaseStore(Base):
@@ -75,18 +75,12 @@ class BaseStore(Base):
     def __ne__(self, other):
         return not self == other
 
-    def __del__(self):
-        # __init__ didn't succeed, so don't bother closing
-        if not hasattr(self, '_store'):
-            return
-        self.close()
-
     def __iter__(self):
         for k in self.keys():
             yield k
 
     def __len__(self):
-        return len(self.keys())
+        return len(self._store)
 
     def __repr__(self):
         return repr(dict(self.items()))
@@ -105,8 +99,7 @@ class BaseStore(Base):
         '''
         Removes all keys and values from a store.
         '''
-        keys = list(self.keys())
-        for key in keys:
+        for key in list(self.keys()):
             del self[key]
 
     def items(self):
@@ -169,15 +162,13 @@ class BaseStore(Base):
         :keyword other: another store
         :param kw: additional keys and values to store
         '''
-        if other is None:
-            pass
-        elif hasattr(other, 'iteritems'):
+        if hasattr(other, 'items'):
             for k, v in items(other):
                 self[k] = v
         elif hasattr(other, 'keys'):
             for k in keys(other):
                 self[k] = other[k]
-        else:
+        elif other is not None:
             for k, v in other:
                 self[k] = v
         if kw:
@@ -187,5 +178,5 @@ class BaseStore(Base):
         '''
         Lazily returns all values in a store.
         '''
-        for _, v in self.items():
-            yield v
+        for k in self:
+            yield self[k]

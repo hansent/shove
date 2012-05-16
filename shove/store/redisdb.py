@@ -30,9 +30,8 @@ class RedisStore(ClientStore):
     def __init__(self, engine, **kw):
         super(RedisStore, self).__init__(engine, **kw)
         spliturl = urlsplit(engine)
-        host, port = spliturl[1].split(':')
-        db = spliturl[2].replace('/', '')
-        self._store = redis.Redis(host, int(port), db)
+        db = spliturl.path.replace('/', '')
+        self._store = redis.Redis(spliturl.hostname, spliturl.port, db)
 
     def __contains__(self, key):
         return self._store.exists(key)

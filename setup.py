@@ -53,6 +53,7 @@ setup(
     hdf5=shove.store.hdf5:HDF5Store
     leveldb=shove.store.leveldbstore:LevelDBStore
     memory=shove.store.core:MemoryStore
+    mongodb=shove.store.mongodb:MongoDBStore
     mssql=shove.store.db:DBStore
     mysql=shove.store.db:DBStore
     oracle=shove.store.db:DBStore

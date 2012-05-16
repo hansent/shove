@@ -38,6 +38,9 @@ class ClientStore(SimpleStore):
     def __setitem__(self, key, value):
         super(ClientStore, self).__setitem__(key, self.dumps(value))
 
+    def __len__(self):
+        return len(self.keys())
+
 
 class MemoryStore(SimpleStore):
 

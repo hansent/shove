@@ -28,10 +28,10 @@ class CassandraStore(BaseStore):
     def __init__(self, engine, **kw):
         super(CassandraStore, self).__init__(engine, **kw)
         spliturl = urlsplit(engine)
-        _, keyspace, column_family = spliturl[2].split('/')
+        _, keyspace, column_family = spliturl.path.split('/')
         try:
             self._store = pycassa.ColumnFamily(
-                pycassa.ConnectionPool(keyspace, [spliturl[1]]),
+                pycassa.ConnectionPool(keyspace, [spliturl.hostname]),
                 column_family,
             )
         except pycassa.InvalidRequestException:
@@ -44,7 +44,7 @@ class CassandraStore(BaseStore):
             )
             system_manager.create_column_family(keyspace, column_family)
             self._store = pycassa.ColumnFamily(
-                pycassa.ConnectionPool(keyspace, [spliturl[1]]),
+                pycassa.ConnectionPool(keyspace, [spliturl.netloc]),
                 column_family,
             )
 
