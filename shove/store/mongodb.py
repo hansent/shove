@@ -46,7 +46,6 @@ class MongoDBStore(SimpleStore):
         self._store.remove(dict(key=key))
 
     def __len__(self):
-        raise TypeError()
         return self._store.count()
 
     def close(self):
