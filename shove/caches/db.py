@@ -109,6 +109,10 @@ class DBCache(Base):
     def __delitem__(self, key):
         self._store.delete(self._store.c.key == key).execute()
 
+    def __iter__(self):
+        for item in select([self._store.c.key]).execute().fetchall():
+            yield item[0]
+
     def __len__(self):
         return self._store.count().execute().fetchone()[0]
 

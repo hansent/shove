@@ -6,35 +6,15 @@ from copy import deepcopy
 from threading import Condition
 from collections import MutableMapping
 
-from stuf.six import items, keys
-
-from shove.base import SimpleBase, FileBase
+from shove.base import Mapping, FileBase
 from shove._compat import anydbm, synchronized, url2pathname
 
 __all__ = ('DBMStore', 'FileStore', 'MemoryStore', 'SimpleStore')
 
 
-class BaseStore(MutableMapping):
+class BaseStore(Mapping, MutableMapping):
 
     '''Base store.'''
-
-    def __getitem__(self, key):
-        try:
-            return self._store[key]
-        except:
-            raise KeyError(key)
-
-    def __setitem__(self, key, value):
-        self._store[key] = value
-
-    def __delitem__(self, key):
-        try:
-            del self._store[key]
-        except:
-            raise KeyError(key)
-
-    def __len__(self):
-        return len(self.keys())
 
     def close(self):
         '''
@@ -47,7 +27,7 @@ class BaseStore(MutableMapping):
         self._store = None
 
 
-class SimpleStore(SimpleBase, BaseStore):
+class SimpleStore(BaseStore):
 
     '''
     Single-process in-memory store.
@@ -57,23 +37,9 @@ class SimpleStore(SimpleBase, BaseStore):
     simple://
     '''
 
-
-class ClientStore(SimpleStore):
-
-    '''
-    Base store where updates must be committed to disk.
-    '''
-
     def __init__(self, engine, **kw):
-        super(ClientStore, self).__init__(engine, **kw)
-        if engine.startswith(self.init):
-            self._engine = url2pathname(engine.split('://')[1])
-
-    def __getitem__(self, key):
-        return self.loads(super(ClientStore, self).__getitem__(key))
-
-    def __setitem__(self, key, value):
-        super(ClientStore, self).__setitem__(key, self.dumps(value))
+        super(SimpleStore, self).__init__(engine, **kw)
+        self._store = dict()
 
 
 class MemoryStore(SimpleStore):
@@ -98,23 +64,22 @@ class MemoryStore(SimpleStore):
     __delitem__ = synchronized(SimpleStore.__delitem__)
 
 
-class FileStore(FileBase, BaseStore):
+class ClientStore(BaseStore):
 
     '''
-    Filesystem-based object store.
-
-    shove's URI for filesystem-based stores follows the form:
-
-    file://<path>
-
-    Where the path is a URI path to a directory on a local filesystem.
-    Alternatively, a native pathname to the directory can be passed as the
-    'engine' argument.
+    Base store where updates must be committed to disk.
     '''
 
-    def clear(self):
-        shutil.rmtree(self._dir)
-        self._createdir()
+    def __init__(self, engine, **kw):
+        super(ClientStore, self).__init__(engine, **kw)
+        if engine.startswith(self.init):
+            self._engine = url2pathname(engine.split('://')[1])
+
+    def __getitem__(self, key):
+        return self.loads(super(ClientStore, self).__getitem__(key))
+
+    def __setitem__(self, key, value):
+        super(ClientStore, self).__setitem__(key, self.dumps(value))
 
 
 class SyncStore(ClientStore):
@@ -160,3 +125,27 @@ class DBMStore(SyncStore):
             self.sync = self._store.sync
         except AttributeError:
             pass
+
+    def __iter__(self):
+        return iter(self._store.keys())
+
+
+class FileStore(FileBase, BaseStore):
+
+    '''
+    Filesystem-based object store.
+
+    shove's URI for filesystem-based stores follows the form:
+
+    file://<path>
+
+    Where the path is a URI path to a directory on a local filesystem.
+    Alternatively, a native pathname to the directory can be passed as the
+    'engine' argument.
+    '''
+
+    init = 'file://'
+
+    def clear(self):
+        shutil.rmtree(self._dir)
+        self._createdir()

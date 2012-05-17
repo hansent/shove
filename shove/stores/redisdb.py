@@ -38,14 +38,17 @@ class RedisStore(BaseStore):
     def __contains__(self, key):
         return self._store.exists(key)
 
+    def __len__(self):
+        return len(self._store.keys())
+
     def clear(self):
         self._store.flushall()
+
+    def __iter__(self):
+        return iter(self._store.keys())
 
     def keys(self):
         return self._store.keys()
 
     def setdefault(self, key, default=None):
         return self._store.getset(key, default)
-
-    def update(self, other=None, **kw):
-        self._store.mset(kw if other is not None else other)

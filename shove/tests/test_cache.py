@@ -24,9 +24,6 @@ class NoTimeout(object):
         del self.cache['test']
         self.assertEqual('test' in self.cache, False)
 
-    def test_get(self):
-        self.assertEqual(self.cache.get('min'), None)
-
 
 class Cache(NoTimeout):
 
@@ -107,15 +104,20 @@ class TestFileCache(CacheCull, unittest.TestCase):
 
 class TestFileLRUCache(NoTimeout, unittest.TestCase):
 
-    initstring = 'filelru://test'
+    initstring = 'filelru://test2'
 
     @property
     def _makeone(self):
         from shove.cache import FileLRUCache
         return FileLRUCache
 
+    def tearDown(self):
+        import shutil
+        self.cache = None
+        shutil.rmtree('test2')
 
-class TestDbCache(CacheCull, unittest.TestCase):
+
+class TestDBCache(CacheCull, unittest.TestCase):
 
     initstring = 'sqlite:///'
 
@@ -126,14 +128,14 @@ class TestDbCache(CacheCull, unittest.TestCase):
 
 
 if not PY3:
-    class TestMemcached(Cache, unittest.TestCase):
+    class TestMemcache(Cache, unittest.TestCase):
 
         initstring = 'memcache://localhost:11211'
 
         @property
         def _makeone(self):
-            from shove.caches.memcached import MemCached
-            return MemCached
+            from shove.caches.memcached import MemCache
+            return MemCache
 
     class TestRedisCache(Cache, unittest.TestCase):
 

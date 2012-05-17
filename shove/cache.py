@@ -10,7 +10,7 @@ from collections import deque
 from threading import Condition
 
 from shove._compat import synchronized
-from shove.base import Base, FileBase
+from shove.base import Mapping, FileBase
 
 __all__ = [
     'FileCache', 'FileLRUCache', 'MemoryCache', 'MemoryLRUCache',
@@ -18,7 +18,7 @@ __all__ = [
 ]
 
 
-class BaseCache(Base):
+class BaseCache(object):
 
     def __init__(self, engine, **kw):
         super(BaseCache, self).__init__(engine, **kw)
@@ -47,17 +47,11 @@ class BaseCache(Base):
         exp = time() + self.timeout
         super(BaseCache, self).__setitem__(key, (exp, value))
 
-    def __iter__(self):
-        '''
-        Returns a list of keys in the store.
-        '''
-        return iter(self._store)
-
     def _cull(self):
         # remove items in cache to make room
-        num, maxcull = 0, self._maxcull
+        maxcull = self._maxcull
         # cull number of items allowed (set by self._maxcull)
-        for key in self:
+        for num, key in enumerate(self):
             # remove only maximum # of items allowed by maxcull
             if num <= maxcull:
                 # remove items if expired
@@ -77,7 +71,7 @@ class BaseCache(Base):
             num += 1
 
 
-class SimpleCache(BaseCache):
+class SimpleCache(BaseCache, Mapping):
 
     '''
     Single-process in-memory cache.
@@ -128,6 +122,8 @@ class FileCache(BaseCache, FileBase):
     'engine' argument.
     '''
 
+    init = 'file://'
+
     def __init__(self, engine, **kw):
         super(FileCache, self).__init__(engine, **kw)
 
@@ -173,9 +169,9 @@ class BaseLRUCache(BaseCache):
     def __setitem__(self, key, value):
         super(BaseLRUCache, self).__setitem__(key, value)
         self._housekeep(key)
-        if len(self._store) > self._max_entries:
+        if len(self) > self._max_entries:
             queue = self._queue
-            store = self._store
+            store = self
             max_entries = self._max_entries
             refcount = self._refcount
             delitem = super(BaseLRUCache, self).__delitem__
@@ -200,7 +196,7 @@ class BaseLRUCache(BaseCache):
                     refcount[k] -= 1
 
 
-class SimpleLRUCache(BaseLRUCache):
+class SimpleLRUCache(BaseLRUCache, Mapping):
 
     '''
     Single-process in-memory LRU cache that purges based on least recently
@@ -210,6 +206,10 @@ class SimpleLRUCache(BaseLRUCache):
 
     simplelru://
     '''
+
+    def __init__(self, engine, **kw):
+        super(SimpleLRUCache, self).__init__(engine, **kw)
+        self._store = dict()
 
 
 class MemoryLRUCache(SimpleLRUCache):
@@ -247,3 +247,8 @@ class FileLRUCache(BaseLRUCache, FileBase):
     Alternatively, a native pathname to the directory can be passed as the
     'engine' argument.
     '''
+
+    init = 'filelru://'
+
+    def __init__(self, engine, **kw):
+        super(FileLRUCache, self).__init__(engine, **kw)

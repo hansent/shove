@@ -10,19 +10,19 @@ memcache://<memcache_server>
 try:
     import memcache
 except ImportError:
-    raise ImportError("requires 'python-memcache' library")
+    raise ImportError("requires 'python-memcached' library")
 
 from shove.base import Base
 
-__all__ = ['MemCached']
+__all__ = ['MemCache']
 
 
-class MemCached(Base):
+class MemCache(Base):
 
     '''Memcached cache backend'''
 
     def __init__(self, engine, **kw):
-        super(MemCached, self).__init__(engine, **kw)
+        super(MemCache, self).__init__(engine, **kw)
         if engine.startswith('memcache://'):
             engine = engine.split('://')[1]
         self._store = memcache.Client(engine.split(';'))

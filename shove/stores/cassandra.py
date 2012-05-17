@@ -68,6 +68,9 @@ class CassandraStore(SimpleStore):
         except pycassa.NotFoundException:
             raise KeyError(key)
 
+    def __len__(self):
+        return len(list(self._store.get_range()))
+
     def __iter__(self):
         for item in self._store.get_range():
             yield item[0]

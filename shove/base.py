@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 '''shove core.'''
 
-import os
 from os.path import exists, join
+from os import listdir, remove, makedirs
 from zlib import compress, decompress, error
 
 from stuf.utils import ld, optimize
@@ -14,7 +14,7 @@ from shove._compat import url2pathname, quote_plus, unquote_plus
 class Base(object):
 
     '''
-    Base mapping.
+    Base.
     '''
 
     def __init__(self, engine, **kw):
@@ -26,29 +26,57 @@ class Base(object):
     def __contains__(self, key):
         try:
             self[key]
-            return True
         except KeyError:
             return False
+        else:
+            return True
 
-    def get(self, key, default=None):
+    def dumps(self, value):
         '''
-        Fetch a given key from the mapping. If the key does not exist, return
-        the default.
+        Optionally serializes and compresses an object.
+        '''
+        # serialize anything but ASCII strings
+        value = optimize(value)
+        compression = self._compress
+        if compression:
+            value = compress(value, 9 if compression else compression)
+        return value
 
-        :argument str key: keyword of item in mapping
-        :keyword default: default value
+    def loads(self, value):
         '''
+        Deserializes and optionally decompresses an object.
+        '''
+        if self._compress:
+            try:
+                value = decompress(value)
+            except error:
+                pass
+        return ld(value)
+
+
+class Mapping(Base):
+
+    '''
+    Base mapping.
+    '''
+
+    def __getitem__(self, key):
         try:
-            return self[key]
-        except KeyError:
-            return default
+            return self._store[key]
+        except:
+            raise KeyError(key)
 
+    def __setitem__(self, key, value):
+        self._store[key] = value
 
-class SimpleBase(Base):
+    def __delitem__(self, key):
+        try:
+            del self._store[key]
+        except:
+            raise KeyError(key)
 
-    '''
-    Simple base.
-    '''
+    def __iter__(self):
+        return iter(self._store)
 
     def __len__(self):
         return len(self._store)
@@ -60,15 +88,9 @@ class SimpleBase(Base):
         # serialize anything but ASCII strings
         value = optimize(value)
         compression = self._compress
-        if compress:
+        if compression:
             value = compress(value, 9 if compression else compression)
         return value
-
-    def keys(self):
-        '''
-        Returns a list of keys in the store.
-        '''
-        return self._store.keys()
 
     def loads(self, value):
         '''
@@ -90,7 +112,7 @@ class FileBase(Base):
 
     def __init__(self, engine, **kw):
         super(FileBase, self).__init__(engine, **kw)
-        if engine.startswith('file://'):
+        if engine.startswith(self.init):
             engine = url2pathname(engine.split('://')[1])
         self._dir = engine
         # Create directory
@@ -115,24 +137,24 @@ class FileBase(Base):
 
     def __delitem__(self, key):
         try:
-            os.remove(self._key_to_file(key))
+            remove(self._key_to_file(key))
         except (IOError, OSError):
             raise KeyError(key)
+
+    def __iter__(self):
+        for name in listdir(self._dir):
+            yield unquote_plus(name)
 
     def __contains__(self, key):
         return exists(self._key_to_file(key))
 
     def __len__(self):
-        return len(os.listdir(self._dir))
-
-    def __iter__(self):
-        for name in os.listdir(self._dir):
-            yield unquote_plus(name)
+        return len(listdir(self._dir))
 
     def _createdir(self):
         # creates the store directory
         try:
-            os.makedirs(self._dir)
+            makedirs(self._dir)
         except OSError:
             raise EnvironmentError(
                 'Cache directory "{0}" does not exist and could not be '

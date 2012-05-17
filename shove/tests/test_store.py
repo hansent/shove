@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from stuf.six import PY3, unittest
+from stuf.six import PY3, unittest, keys, values, items
 
 
 class EventualStore(object):
@@ -53,7 +53,7 @@ class EventualStore(object):
         self.store['min'] = 6
         self.store['pow'] = 7
         self.store.sync()
-        slist = list(self.store.items())
+        slist = list(items(self.store))
         self.assertEqual(('min', 6) in slist, True)
 
     def test_keys(self):
@@ -61,7 +61,7 @@ class EventualStore(object):
         self.store['min'] = 6
         self.store['pow'] = 7
         self.store.sync()
-        slist = list(self.store.keys())
+        slist = list(keys(self.store))
         self.assertEqual('min' in slist, True)
 
     def test_values(self):
@@ -69,7 +69,7 @@ class EventualStore(object):
         self.store['min'] = 6
         self.store['pow'] = 7
         self.store.sync()
-        slist = list(self.store.values())
+        slist = list(values(self.store))
         self.assertEqual(6 in slist, True)
 
     def test_pop(self):
@@ -229,6 +229,7 @@ if not PY3:
             self.store.clear()
             self.store.close()
 
+    @unittest.skip('reason')
     class TestBSDBStore(Store, unittest.TestCase):
 
         initstring = 'bsddb://test.db'
@@ -245,17 +246,17 @@ if not PY3:
             from pycassa.system_manager import SystemManager  # @UnresolvedImport @IgnorePep8
             system_manager = SystemManager('localhost:9160')
             try:
-                system_manager.create_column_family('Foo', 'shove')
+                system_manager.create_column_family('Murk', 'shove')
             except:
                 pass
-            self.store = Shove('cassandra://localhost:9160/Foo/shove')
+            self.store = Shove('cassandra://localhost:9160/Murk/shove')
 
         def tearDown(self):
             self.store.clear()
             self.store.close()
             from pycassa.system_manager import SystemManager  # @UnresolvedImport @IgnorePep8
             system_manager = SystemManager('localhost:9160')
-            system_manager.drop_column_family('Foo', 'shove')
+            system_manager.drop_column_family('Murk', 'shove')
 
     @unittest.skip('reason')
     class TestHDF5Store(Store, unittest.TestCase):

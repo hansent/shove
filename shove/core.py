@@ -5,7 +5,6 @@ from functools import partial
 from operator import methodcaller
 from collections import MutableMapping
 
-from stuf.six import keys
 from stuf.iterable import exhaustcall
 from concurrent.futures import ThreadPoolExecutor
 
@@ -68,7 +67,7 @@ class Shove(MutableMapping):
 
     def __iter__(self):
         self.sync()
-        return keys(self._store)
+        return self._store.__iter__()
 
     def close(self):
         '''
@@ -152,7 +151,7 @@ class MultiShove(MutableMapping):
 
     def __iter__(self):
         self.sync()
-        return keys(self._stores[0])
+        return self._stores[0].__iter__()
 
     def close(self):
         '''
@@ -173,7 +172,7 @@ class MultiShove(MutableMapping):
         Writes buffer to stores.
         '''
         exhaustcall(methodcaller('update', self._buffer), self._stores)
-        buffer.clear()
+        self._buffer.clear()
 
 
 class ThreadShove(MultiShove):
@@ -211,4 +210,4 @@ class ThreadShove(MultiShove):
                 executor.submit, methodcaller('update', self._buffer),
             )
             exhaustcall(method, self._stores)
-        buffer.clear()
+        self._buffer.clear()
