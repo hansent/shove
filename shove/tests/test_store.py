@@ -159,6 +159,26 @@ class TestDBMStore(Store, unittest.TestCase):
         os.remove('test.dbm')
 
 
+class TestHgStore(Store, unittest.TestCase):
+
+    initstring = 'hg://test3'
+
+    def tearDown(self):
+        import shutil
+        self.store.close()
+        shutil.rmtree('test3')
+
+
+class TestGitStore(Store, unittest.TestCase):
+
+    initstring = 'git://test4'
+
+    def tearDown(self):
+        import shutil
+        self.store.close()
+        shutil.rmtree('test4')
+
+
 class TestDBStore(Store, unittest.TestCase):
 
     initstring = 'sqlite://'
@@ -173,16 +193,6 @@ class TestMongoDBStore(Store, unittest.TestCase):
 
     def test_close(self):
         pass
-
-
-class TestHgStore(Store, unittest.TestCase):
-
-    initstring = 'hg://test3'
-
-    def tearDown(self):
-        import shutil
-        self.store.close()
-        shutil.rmtree('test3')
 
 
 @unittest.skip('reason')
@@ -268,7 +278,6 @@ if not PY3:
             system_manager = SystemManager('localhost:9160')
             system_manager.drop_column_family('Murk', 'shove')
 
-    @unittest.skip('reason')
     class TestHDF5Store(Store, unittest.TestCase):
 
         initstring = 'hdf5://test.hdf5/test'

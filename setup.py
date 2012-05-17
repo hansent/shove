@@ -54,6 +54,7 @@ setup(
     sqlite=shove.stores.db:DBStore
     zodb=shove.stores.zodb:ZODBStore
     hg=shove.stores.hgstore:HgStore
+    git=shove.stores.gitstore:GitStore
     [shove.caches]
     file=shove.cache:FileCache
     filelru=shove.cache:FileLRUCache
