@@ -6,8 +6,8 @@ shove's URI for Mercurial-based stores follows the form:
 
 hg://<path>
 
-Where the path is a URI path to a Mercurial directory on a local filesystem.
-Alternatively, a native pathname to the directory can be passed as the
+Where the path is a URI path to a Mercurial repository on a local filesystem.
+Alternatively, a native pathname to the repository can be passed as the
 'engine' argument.
 '''
 
