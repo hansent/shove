@@ -175,6 +175,16 @@ class TestMongoDBStore(Store, unittest.TestCase):
         pass
 
 
+class TestHgStore(Store, unittest.TestCase):
+
+    initstring = 'hg://test3'
+
+    def tearDown(self):
+        import shutil
+        self.store.close()
+        shutil.rmtree('test3')
+
+
 @unittest.skip('reason')
 class TestFTPStore(Store, unittest.TestCase):
 

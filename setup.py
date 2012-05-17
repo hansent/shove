@@ -53,6 +53,7 @@ setup(
     simple=shove.store:SimpleStore
     sqlite=shove.stores.db:DBStore
     zodb=shove.stores.zodb:ZODBStore
+    hg=shove.stores.hgstore:HgStore
     [shove.caches]
     file=shove.cache:FileCache
     filelru=shove.cache:FileLRUCache
