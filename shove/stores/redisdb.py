@@ -14,12 +14,12 @@ except ImportError:
 
 from shove._compat import urlsplit
 
-from shove.store import SimplerStore
+from shove.store import BaseStore
 
 __all__ = ['RedisStore']
 
 
-class RedisStore(SimplerStore):
+class RedisStore(BaseStore):
 
     '''
     Redis based store.

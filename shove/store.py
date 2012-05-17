@@ -4,33 +4,37 @@
 import shutil
 from copy import deepcopy
 from threading import Condition
+from collections import MutableMapping
 
 from stuf.six import items, keys
 
-from shove.base import Base, SimpleBase, FileBase
+from shove.base import SimpleBase, FileBase
 from shove._compat import anydbm, synchronized, url2pathname
 
 __all__ = ('DBMStore', 'FileStore', 'MemoryStore', 'SimpleStore')
 
 
-class BaserStore(Base):
+class BaseStore(MutableMapping):
 
-    '''Base Store (based on UserDict.DictMixin).'''
+    '''Base store.'''
 
-    def __eq__(self, other):
-        if not isinstance(other, BaseStore):
-            return NotImplemented
-        return dict(self.items()) == dict(other.items())
+    def __getitem__(self, key):
+        try:
+            return self._store[key]
+        except:
+            raise KeyError(key)
 
-    def __ne__(self, other):
-        return not self == other
+    def __setitem__(self, key, value):
+        self._store[key] = value
 
-    def __iter__(self):
-        for k in self.keys():
-            yield k
+    def __delitem__(self, key):
+        try:
+            del self._store[key]
+        except:
+            raise KeyError(key)
 
-    def __repr__(self):
-        return repr(dict(self.items()))
+    def __len__(self):
+        return len(self.keys())
 
     def close(self):
         '''
@@ -42,95 +46,6 @@ class BaserStore(Base):
             pass
         self._store = None
 
-    def items(self):
-        '''
-        Lazily returns all key/value pairs in a store.
-        '''
-        for k in self:
-            yield (k, self[k])
-
-    def pop(self, key, *args):
-        '''
-        Removes and returns a value from a store.
-
-        :argument str key: keyword in shove
-        :param args: Default to return if key not present.
-        '''
-        if len(args) > 1:
-            raise TypeError(
-                'pop expected at most 2 arguments, got ' + repr(1 + len(args))
-            )
-        try:
-            value = self[key]
-        # Return default if key not in store
-        except KeyError:
-            if args:
-                return args[0]
-        del self[key]
-        return value
-
-    def popitem(self):
-        '''
-        Removes and returns a key, value pair from a store.
-        '''
-        try:
-            k, v = next(self.items())
-        except StopIteration:
-            raise KeyError('store is empty')
-        del self[k]
-        return (k, v)
-
-
-class BaseStore(BaserStore):
-
-    '''Base Store (based on UserDict.DictMixin).'''
-
-    def setdefault(self, key, default=None):
-        '''
-        Returns the value corresponding to an existing key or sets the to key
-        to the default and returns the default.
-
-        :argument str key: keyword in shove
-        :keyword default: default value
-        '''
-        try:
-            return self[key]
-        except KeyError:
-            self[key] = default
-        return default
-
-    def update(self, other=None, **kw):
-        '''
-        Adds to or overwrites the values in this store with values from
-        another store.
-
-        :keyword other: another store
-        :param kw: additional keys and values to store
-        '''
-        if hasattr(other, 'items'):
-            for k, v in items(other):
-                self[k] = v
-        elif hasattr(other, 'keys'):
-            for k in keys(other):
-                self[k] = other[k]
-        elif other is not None:
-            for k, v in other:
-                self[k] = v
-        if kw:
-            self.update(kw)
-
-    def values(self):
-        '''
-        Lazily returns all values in a store.
-        '''
-        for k in self:
-            yield self[k]
-
-
-class SimplerStore(SimpleBase, BaserStore):
-
-    '''simpler'''
-
 
 class SimpleStore(SimpleBase, BaseStore):
 
@@ -141,16 +56,6 @@ class SimpleStore(SimpleBase, BaseStore):
 
     simple://
     '''
-
-    def __len__(self):
-        return len(self.keys())
-
-    def clear(self):
-        '''
-        Removes all keys and values from a store.
-        '''
-        for key in list(self.keys()):
-            del self[key]
 
 
 class ClientStore(SimpleStore):

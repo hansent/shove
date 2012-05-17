@@ -10,15 +10,74 @@ from collections import deque
 from threading import Condition
 
 from shove._compat import synchronized
-from shove.base import SimpleBase, FileBase
+from shove.base import Base, FileBase
 
 __all__ = [
-    'SimpleLRUCache', 'SimpleCache', 'MemoryCache', 'MemoryLRUCache',
-    'FileCache', 'FileLRUCache',
+    'FileCache', 'FileLRUCache', 'MemoryCache', 'MemoryLRUCache',
+    'SimpleLRUCache', 'SimpleCache',
 ]
 
 
-class SimpleCache(SimpleBase):
+class BaseCache(Base):
+
+    def __init__(self, engine, **kw):
+        super(BaseCache, self).__init__(engine, **kw)
+        # get random seed
+        random.seed()
+        # set maximum number of items to cull if over max
+        self._maxcull = kw.get('maxcull', 10)
+        # set max entries
+        self._max_entries = kw.get('max_entries', 300)
+        # set timeout
+        self.timeout = kw.get('timeout', 300)
+
+    def __getitem__(self, key):
+        exp, value = super(BaseCache, self).__getitem__(key)
+        # delete if item timed out.
+        if exp < time():
+            super(BaseCache, self).__delitem__(key)
+            raise KeyError(key)
+        return value
+
+    def __setitem__(self, key, value):
+        # cull values if over max number of entries
+        if len(self) >= self._max_entries:
+            self._cull()
+        # set expiration time and value
+        exp = time() + self.timeout
+        super(BaseCache, self).__setitem__(key, (exp, value))
+
+    def __iter__(self):
+        '''
+        Returns a list of keys in the store.
+        '''
+        return iter(self._store)
+
+    def _cull(self):
+        # remove items in cache to make room
+        num, maxcull = 0, self._maxcull
+        # cull number of items allowed (set by self._maxcull)
+        for key in self:
+            # remove only maximum # of items allowed by maxcull
+            if num <= maxcull:
+                # remove items if expired
+                try:
+                    self[key]
+                except KeyError:
+                    num += 1
+            else:
+                break
+        choice = random.choice
+        keys = list(self)
+        max_entries = self._max_entries
+        # remove any additional items up to max # of items allowed by maxcull
+        while len(self) >= max_entries and num <= maxcull:
+            # cull remainder of allowed quota at random
+            del self[choice(keys)]
+            num += 1
+
+
+class SimpleCache(BaseCache):
 
     '''
     Single-process in-memory cache.
@@ -30,53 +89,7 @@ class SimpleCache(SimpleBase):
 
     def __init__(self, engine, **kw):
         super(SimpleCache, self).__init__(engine, **kw)
-        # get random seed
-        random.seed()
-        # set maximum number of items to cull if over max
-        self._maxcull = kw.get('maxcull', 10)
-        # set max entries
-        self._max_entries = kw.get('max_entries', 300)
-        # set timeout
-        self.timeout = kw.get('timeout', 300)
-
-    def __getitem__(self, key):
-        exp, value = super(SimpleCache, self).__getitem__(key)
-        # delete if item timed out.
-        if exp < time():
-            super(SimpleCache, self).__delitem__(key)
-            raise KeyError(key)
-        return value
-
-    def __setitem__(self, key, value):
-        # cull values if over max number of entries
-        if len(self) >= self._max_entries:
-            self._cull()
-        # set expiration time and value
-        exp = time() + self.timeout
-        super(SimpleCache, self).__setitem__(key, (exp, value))
-
-    def _cull(self):
-        # remove items in cache to make room
-        num, maxcull = 0, self._maxcull
-        # cull number of items allowed (set by self._maxcull)
-        for key in self.keys():
-            # remove only maximum # of items allowed by maxcull
-            if num <= maxcull:
-                # remove items if expired
-                try:
-                    self[key]
-                except KeyError:
-                    num += 1
-            else:
-                break
-        choice = random.choice
-        keys = list(self.keys())
-        max_entries = self._max_entries
-        # remove any additional items up to max # of items allowed by maxcull
-        while len(self) >= max_entries and num <= maxcull:
-            # cull remainder of allowed quota at random
-            del self[choice(keys)]
-            num += 1
+        self._store = dict()
 
 
 class MemoryCache(SimpleCache):
@@ -101,88 +114,7 @@ class MemoryCache(SimpleCache):
     __delitem__ = synchronized(SimpleCache.__delitem__)
 
 
-class SimpleLRUCache(SimpleCache):
-
-    '''
-    Single-process in-memory LRU cache that purges based on least recently
-    used item.
-
-    The shove URI for a simple cache is:
-
-    simplelru://
-    '''
-
-    def __init__(self, engine, **kw):
-        super(SimpleLRUCache, self).__init__(engine, **kw)
-        self._max_entries = kw.get('max_entries', 300)
-        self._hits = 0
-        self._misses = 0
-        self._queue = deque()
-        self._refcount = dict()
-
-    def __getitem__(self, key):
-        try:
-            value = super(SimpleLRUCache, self).__getitem__(key)
-            self._hits += 1
-        except KeyError:
-            self._misses += 1
-            raise
-        self._housekeep(key)
-        return value
-
-    def __setitem__(self, key, value):
-        super(SimpleLRUCache, self).__setitem__(key, value)
-        self._housekeep(key)
-        if len(self._store) > self._max_entries:
-            queue = self._queue
-            store = self._store
-            max_entries = self._max_entries
-            refcount = self._refcount
-            delitem = super(SimpleLRUCache, self).__delitem__
-            while len(store) > max_entries:
-                k = queue.popleft()
-                refcount[k] -= 1
-                if not refcount[k]:
-                    delitem(k)
-                    del refcount[k]
-
-    def _housekeep(self, key):
-        self._queue.append(key)
-        self._refcount[key] = self._refcount.get(key, 0) + 1
-        if len(self._queue) > self._max_entries * 4:
-            queue = self._queue
-            refcount = self._refcount
-            for _ in [None] * len(queue):
-                k = queue.popleft()
-                if refcount[k] == 1:
-                    queue.append(k)
-                else:
-                    refcount[k] -= 1
-
-
-class MemoryLRUCache(SimpleLRUCache):
-
-    '''
-    Thread-safe in-memory cache using LRU.
-
-    The shove URI for a memory cache is:
-
-    memlru://
-    '''
-
-    def __init__(self, engine, **kw):
-        super(MemoryLRUCache, self).__init__(engine, **kw)
-        self._lock = Condition()
-
-    @synchronized
-    def __getitem__(self, key):
-        return deepcopy(super(MemoryLRUCache, self).__getitem__(key))
-
-    __setitem__ = synchronized(SimpleLRUCache.__setitem__)
-    __delitem__ = synchronized(SimpleLRUCache.__delitem__)
-
-
-class FileCache(FileBase, SimpleCache):
+class FileCache(BaseCache, FileBase):
 
     '''
     File-based cache
@@ -218,7 +150,91 @@ class FileCache(FileBase, SimpleCache):
         )
 
 
-class FileLRUCache(FileBase, SimpleLRUCache):
+class BaseLRUCache(BaseCache):
+
+    def __init__(self, engine, **kw):
+        super(BaseLRUCache, self).__init__(engine, **kw)
+        self._max_entries = kw.get('max_entries', 300)
+        self._hits = 0
+        self._misses = 0
+        self._queue = deque()
+        self._refcount = dict()
+
+    def __getitem__(self, key):
+        try:
+            value = super(BaseLRUCache, self).__getitem__(key)
+            self._hits += 1
+        except KeyError:
+            self._misses += 1
+            raise
+        self._housekeep(key)
+        return value
+
+    def __setitem__(self, key, value):
+        super(BaseLRUCache, self).__setitem__(key, value)
+        self._housekeep(key)
+        if len(self._store) > self._max_entries:
+            queue = self._queue
+            store = self._store
+            max_entries = self._max_entries
+            refcount = self._refcount
+            delitem = super(BaseLRUCache, self).__delitem__
+            while len(store) > max_entries:
+                k = queue.popleft()
+                refcount[k] -= 1
+                if not refcount[k]:
+                    delitem(k)
+                    del refcount[k]
+
+    def _housekeep(self, key):
+        self._queue.append(key)
+        self._refcount[key] = self._refcount.get(key, 0) + 1
+        if len(self._queue) > self._max_entries * 4:
+            queue = self._queue
+            refcount = self._refcount
+            for _ in [None] * len(queue):
+                k = queue.popleft()
+                if refcount[k] == 1:
+                    queue.append(k)
+                else:
+                    refcount[k] -= 1
+
+
+class SimpleLRUCache(BaseLRUCache):
+
+    '''
+    Single-process in-memory LRU cache that purges based on least recently
+    used item.
+
+    The shove URI for a simple cache is:
+
+    simplelru://
+    '''
+
+
+class MemoryLRUCache(SimpleLRUCache):
+
+    '''
+    Thread-safe in-memory cache using LRU.
+
+    The shove URI for a memory cache is:
+
+    memlru://
+    '''
+
+    def __init__(self, engine, **kw):
+        super(MemoryLRUCache, self).__init__(engine, **kw)
+        self._lock = Condition()
+
+    @synchronized
+    def __getitem__(self, key):
+        return deepcopy(super(MemoryLRUCache, self).__getitem__(key))
+
+    __setitem__ = synchronized(SimpleLRUCache.__setitem__)
+    __delitem__ = synchronized(SimpleLRUCache.__delitem__)
+
+
+class FileLRUCache(BaseLRUCache, FileBase):
 
     '''
     File-based LRU cache

@@ -23,7 +23,7 @@ __all__ = ['ZODBStore']
 
 class ZODBStore(SyncStore):
 
-    '''ZODB store front end.'''
+    '''ZODB front end.'''
 
     init = 'zodb://'
 

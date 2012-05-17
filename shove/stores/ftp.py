@@ -10,7 +10,7 @@ ftp://<user>:<password>@<host>:<port>/<url-path>
 
 from ftplib import FTP, error_perm
 
-from shove.core import BaseStore
+from shove.store import BaseStore
 from shove._compat import StringIO, urlsplit
 
 __all__ = ['FTPStore']

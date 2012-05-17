@@ -30,7 +30,7 @@ try:
 except ImportError:
     raise ImportError('requires SQLAlchemy >= 0.4')
 
-from shove.core import BaseStore
+from shove.store import BaseStore
 
 __all__ = ['DBStore']
 
@@ -75,16 +75,12 @@ class DBStore(BaseStore):
     def __delitem__(self, key):
         self._store.delete(self._store.c.key == key).execute()
 
+    def __iter__(self):
+        for item in select([self._store.c.key]).execute().fetchall():
+            yield item[0]
+
     def __len__(self):
         return self._store.count().execute().fetchone()[0]
 
     def clear(self):
         self._store.delete().execute()
-
-    def keys(self):
-        '''
-        Returns a list of keys in the store.
-        '''
-        return list(i[0] for i in select(
-            [self._store.c.key]
-        ).execute().fetchall())

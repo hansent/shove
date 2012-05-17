@@ -19,7 +19,7 @@ try:
 except ImportError:
     raise ImportError('requires boto library')
 
-from shove.core import BaseStore
+from shove.store import BaseStore
 
 __all__ = ['S3Store']
 

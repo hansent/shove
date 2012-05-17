@@ -22,7 +22,9 @@ __all__ = ['LevelDBStore']
 
 class LevelDBStore(ClientStore):
 
-    '''LevelDB based store'''
+    '''
+    LevelDB based store.
+    '''
 
     init = 'leveldb://'
 
@@ -42,5 +44,5 @@ class LevelDBStore(ClientStore):
     def __delitem__(self, key):
         self._store.Delete(key)
 
-    def keys(self):
-        return list(k for k in self._store.RangeIter(include_value=False))
+    def __iter__(self):
+        return self._store.RangeIter(include_value=False)

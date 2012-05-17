@@ -51,18 +51,18 @@ class MongoDBStore(SimpleStore):
     def __len__(self):
         return self._store.count()
 
+    def __iter__(self):
+        for key in self._store.find(
+            dict(key={'$exists': True}), fields=['key'],
+        ):
+            yield key['key']
+
     def close(self):
         self._conn.close()
 
     def clear(self):
         self._store.drop()
         self._store = getattr(self._db, self._colpath)
-
-    def keys(self):
-        for key in self._store.find(
-            {'key': {'$exists': True}}, fields=['key']
-        ):
-            yield key['key']
 
     def items(self):
         for key in self._store.find({'key': {'$exists': True}}):
