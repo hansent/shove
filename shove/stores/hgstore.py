@@ -45,5 +45,6 @@ class HgStore(FileStore):
     def __delitem__(self, key):
         super(HgStore, self).__delitem__(key)
         fname = self._key_to_file(key)
+        print self._repo.hg_status()['R']
 #        if fname in self._repo.hg_status()['R']:
         self._repo.hg_commit('removed {0}'.format(fname))
