@@ -34,11 +34,12 @@ class HgStore(FileStore):
 
     def __setitem__(self, key, value):
         super(HgStore, self).__setitem__(key, value)
-        fname = quote_plus(key)
+        fname = self._key_to_file(key)
         status = self._repo.hg_status()
         print status
-        if fname in status['A']:
+        if fname in status['!']:
             self._repo.hg_add(fname)
+            self._repo.hg_commit('added {0}'.format(fname))
         if fname in status['M']:
             self._repo.hg_commit('added {0}'.format(fname))
 
@@ -46,5 +47,6 @@ class HgStore(FileStore):
         super(HgStore, self).__delitem__(key)
         fname = self._key_to_file(key)
         print self._repo.hg_status()
-#        if fname in self._repo.hg_status()['R']:
-        self._repo.hg_commit('removed {0}'.format(fname))
+        if fname in self._repo.hg_status()['R']:
+            self._repo.hg_remove(fname)
+            self._repo.hg_commit('removed {0}'.format(fname))
