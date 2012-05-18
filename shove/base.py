@@ -143,7 +143,7 @@ class FileBase(Base):
 
     def __iter__(self):
         for name in listdir(self._dir):
-            if not name.starts_with('.'):
+            if not name.startswith('.'):
                 yield unquote_plus(name)
 
     def __contains__(self, key):
