@@ -156,7 +156,7 @@ class TestDBMStore(Store, unittest.TestCase):
     def tearDown(self):
         import os
         self.store.close()
-        os.remove('test.dbm.db')
+        os.remove('test.dbm')
 
 
 class TestHgStore(Store, unittest.TestCase):
