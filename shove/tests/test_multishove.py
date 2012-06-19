@@ -128,7 +128,7 @@ class TestMultiShove(Multi, unittest.TestCase):
         import shutil
         self.store.close()
         shutil.rmtree('two')
-        os.remove('one.dbm')
+        os.remove('one.dbm.db')
 
 
 class TestThreadShove(unittest.TestCase):
