@@ -17,7 +17,6 @@ except ImportError:
     raise ImportError('requires hgapi library')
 
 from shove.store import FileStore
-from shove._compat import quote_plus
 
 
 class HgStore(FileStore):
