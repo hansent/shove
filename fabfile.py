@@ -103,3 +103,11 @@ def release_next():
     local(regup)
     local(sphinxup)
     local(nodist)
+
+
+def start_daemons():
+    pass
+
+
+def stop_daemons():
+    pass
