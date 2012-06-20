@@ -103,3 +103,11 @@ def release_next():
     local(regup)
     local(sphinxup)
     local(nodist)
+
+
+def memcached_up():
+    local('memcached -d')
+
+
+def memcached_down():
+    local('killall memcached')
