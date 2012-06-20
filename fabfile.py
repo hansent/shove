@@ -76,7 +76,7 @@ def releaser():
 #    docs()
     _promptup()
     local(regup)
-    local(sphinxup)
+#    local(sphinxup)
     local(nodist)
 
 
