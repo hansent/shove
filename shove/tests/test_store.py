@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from stuf.six import PY3, unittest, keys, values, items
-from testresources import ResourcedTestCase, TestResourceManager
 
 
 class EventualStore(object):
@@ -188,35 +187,12 @@ class TestDBStore(Store, unittest.TestCase):
     initstring = 'sqlite://'
 
 
-class MongoDBManager(TestResourceManager):
-
-    setUpCost = 10
-    tearDownCost = 5
-
-    def make(self, dependency_resources):
-        import os
-        from tempfile import mkdtemp
-        from fabric.api import local
-        self.tmp = mkdtemp()
-        os.chdir(self.tmp)
-        os.mkdir('mongo')
-        local('mongod --dbpath {0}'.format('./mongo/'))
-
-    def clean(self, resource):
-        import shutil
-        from fabric.api import local
-        local('killall mongod')
-        shutil.rmtree(self.tmp)
-
-
 class TestMongoDBStore(Store, unittest.TestCase):
 
     initstring = 'mongodb://127.0.0.1:27017/shove/shove'
-    resources = (('server', MongoDBManager()),)
 
     def tearDown(self):
         self.store.clear()
-        super(TestMongoDBStore, self).tearDown()
 
     def test_close(self):
         pass
@@ -268,35 +244,13 @@ if not PY3:
             self.store.close()
             os.remove('test.durus')
 
-    class RedisManager(TestResourceManager):
-        setUpCost = 10
-        tearDownCost = 5
-
-        def make(self, dependency_resources):
-            import os
-            from tempfile import mkdtemp
-            from fabric.api import local
-            self.tmp = mkdtemp()
-            os.chdir(self.tmp)
-            local('redis-server --daemonize=yes')
-
-        def clean(self, resource):
-            import os
-            import shutil
-            from fabric.api import local
-            local('killall redis-server')
-            os.chdir(self.tmp)
-            shutil.rmtree(self.tmp)
-
-    class TestRedisStore(Store, ResourcedTestCase):
+    class TestRedisStore(Store, unittest.TestCase):
 
         initstring = 'redis://localhost:6379/0'
-        resources = (('server', RedisManager()),)
 
         def tearDown(self):
             self.store.clear()
             self.store.close()
-            super(TestRedisStore, self).tearDown()
 
     @unittest.skip('reason')
     class TestBSDBStore(Store, unittest.TestCase):
@@ -311,7 +265,6 @@ if not PY3:
     class TestCassandraStore(EventualStore, unittest.TestCase):
 
         def setUp(self):
-            ResourcedTestCase.setUp()
             from shove import Shove
             from pycassa.system_manager import SystemManager  # @UnresolvedImport @IgnorePep8
             system_manager = SystemManager('localhost:9160')
@@ -327,7 +280,6 @@ if not PY3:
             from pycassa.system_manager import SystemManager  # @UnresolvedImport @IgnorePep8
             system_manager = SystemManager('localhost:9160')
             system_manager.drop_column_family('Murk', 'shove')
-            ResourcedTestCase.tearDown()
 
     class TestHDF5Store(Store, unittest.TestCase):
 

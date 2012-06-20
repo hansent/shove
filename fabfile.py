@@ -114,7 +114,7 @@ def memcached_down():
 
 
 def redis_up():
-    local('redis-server - daemonize=yes')
+    local('redis-server &')
 
 
 def redis_down(self, resource):
@@ -128,3 +128,15 @@ def cassandra_up():
 
 def cassandra_down():
     local('killall java')
+
+
+def mongo_up():
+    import os
+    os.mkdir('mongo')
+    local('mongod --dbpath {0} &'.format('./mongo/'))
+
+
+def mongodb_down():
+    import shutil
+    local('killall mongod')
+    shutil.rmtree('mongo')
