@@ -3,7 +3,6 @@
 setup for shove.
 '''
 
-import sys
 from setuptools import setup, find_packages
 
 setup(
@@ -17,7 +16,7 @@ setup(
     license='BSD',
     packages=find_packages(),
     test_suite='shove.tests',
-    install_requires=['futures'] if sys.version_info[0] < 3 else [],
+    install_requires=['futures', 'stuf'],
     zip_safe=False,
     keywords='object storage persistence database shelve',
     classifiers=[

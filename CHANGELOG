@@ -65,3 +65,14 @@ What's new with 0.4.3
 - Redis support for cache (per k4ml)
 - fix for InnoDB whining (per k4ml)
 - enhance Redis store
+
+What's new with 0.5
+
+- sync to multiple backends concurrently
+- MongoDB store
+- Mercurial store
+- git store
+- drop support for versions of Python < 2.6
+- optimized pickling
+- fix issue with double pickling
+- fix dictionary size resizing with concurrent issues
