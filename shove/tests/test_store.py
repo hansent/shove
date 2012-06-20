@@ -333,7 +333,7 @@ if not PY3:
         resources = (('server', CassandraManager()),)
 
         def setUp(self):
-            super(TestCassandraStore, self).setUp()
+            ResourcedTestCase.setUp()
             from shove import Shove
             from pycassa.system_manager import SystemManager  # @UnresolvedImport @IgnorePep8
             system_manager = SystemManager('localhost:9160')
@@ -349,7 +349,7 @@ if not PY3:
             from pycassa.system_manager import SystemManager  # @UnresolvedImport @IgnorePep8
             system_manager = SystemManager('localhost:9160')
             system_manager.drop_column_family('Murk', 'shove')
-            super(TestCassandraStore, self).setUp()
+            ResourcedTestCase.tearDown()
 
     class TestHDF5Store(Store, unittest.TestCase):
 
