@@ -132,11 +132,12 @@ def cassandra_down():
 
 def mongo_up():
     import os
+    import shutil
+    shutil.rmtree('mongo')
     os.mkdir('mongo')
-    local('mongod --dbpath {0} &'.format('./mongo/'))
+    local('touch mongo/mongo.log')
+    local('mongod --dbpath {0} --quiet --fork --logpath ./mongo/mongo.log'.format('./mongo/'))
 
 
 def mongodb_down():
-    import shutil
     local('killall mongod')
-    shutil.rmtree('mongo')
