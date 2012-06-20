@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+'''shove store tests'''
 
 from stuf.six import PY3, unittest, keys, values, items
 

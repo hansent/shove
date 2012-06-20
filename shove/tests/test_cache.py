@@ -1,6 +1,14 @@
 # -*- coding: utf-8 -*-
+'''shove cache tests'''
 
 from stuf.six import PY3, unittest
+
+
+def setUpModule():
+    import os
+    from tempfile import mkdtemp
+    TMP = mkdtemp()
+    os.chdir(TMP)
 
 
 class NoTimeout(object):
@@ -128,15 +136,6 @@ class TestDBCache(CacheCull, unittest.TestCase):
 
 
 if not PY3:
-
-    TMP = None
-
-    def setUpModule():
-        import os
-        from tempfile import mkdtemp
-        TMP = mkdtemp()
-        os.chdir(TMP)
-
     class TestMemcache(Cache, unittest.TestCase):
 
         initstring = 'memcache://localhost:11211'

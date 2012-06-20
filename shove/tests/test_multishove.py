@@ -1,5 +1,14 @@
+# -*- coding: utf-8 -*-
+'''shove multishove tests'''
 
 from stuf.six import unittest
+
+
+def setUpModule():
+    import os
+    from tempfile import mkdtemp
+    TMP = mkdtemp()
+    os.chdir(TMP)
 
 
 class Multi(object):
