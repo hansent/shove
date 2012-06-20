@@ -132,19 +132,45 @@ if not PY3:
 
         initstring = 'memcache://localhost:11211'
 
+        @classmethod
+        def setUpClass(cls):
+            from fabric.api import local
+            local('memcached -d')
+
         @property
         def _makeone(self):
             from shove.caches.memcached import MemCache
             return MemCache
 
+        @classmethod
+        def tearDownClass(cls):
+            from fabric.api import local
+            local('killall memcached')
+
     class TestRedisCache(Cache, unittest.TestCase):
 
         initstring = 'redis://localhost:6379/0'
+
+        @classmethod
+        def setUpClass(cls):
+#            import os
+            from fabric.api import local
+#            from tempfile import mkdtemp
+#            cls.tmp = mkdtemp()
+#            os.chdir(cls.tmp)
+            local('redis-server &')
 
         @property
         def _makeone(self):
             from shove.caches.redisdb import RedisCache
             return RedisCache
+
+        @classmethod
+        def tearDownClass(cls):
+#            import shutil
+            from fabric.api import local
+            local('killall redis-server')
+#            shutil.rmtree(cls.tmp)
 
 
 if __name__ == '__main__':

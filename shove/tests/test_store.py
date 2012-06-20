@@ -191,11 +191,30 @@ class TestMongoDBStore(Store, unittest.TestCase):
 
     initstring = 'mongodb://127.0.0.1:27017/shove/shove'
 
+    @classmethod
+    def setUpClass(cls):
+        import os
+        import shutil
+        from fabric.api import local
+        shutil.rmtree('mongo')
+        os.mkdir('mongo')
+        local('touch mongo/mongo.log')
+        local('mongod --dbpath {0} --quiet --fork --logpath {1}'.format(
+            './mongo/', './mongo/mongo.log'
+        ))
+
     def tearDown(self):
         self.store.clear()
 
     def test_close(self):
         pass
+
+    @classmethod
+    def tearDownClass(cls):
+        import shutil
+        from fabric.api import local
+        local('killall mongod')
+        shutil.rmtree('test')
 
 
 @unittest.skip('reason')
@@ -248,9 +267,25 @@ if not PY3:
 
         initstring = 'redis://localhost:6379/0'
 
+        @classmethod
+        def setUpClass(cls):
+#            import os
+            from fabric.api import local
+#            from tempfile import mkdtemp
+#            cls.tmp = mkdtemp()
+#            os.chdir(cls.tmp)
+            local('redis-server &')
+
         def tearDown(self):
             self.store.clear()
             self.store.close()
+
+        @classmethod
+        def tearDownClass(cls):
+#            import shutil
+            from fabric.api import local
+            local('killall redis-server')
+#            shutil.rmtree(cls.tmp)
 
     @unittest.skip('reason')
     class TestBSDBStore(Store, unittest.TestCase):
@@ -263,6 +298,16 @@ if not PY3:
             os.remove('test.db')
 
     class TestCassandraStore(EventualStore, unittest.TestCase):
+
+        @classmethod
+        def setUpClass(cls):
+#            import os
+            from fabric.api import local, settings
+#            from tempfile import mkdtemp
+#            cls.tmp = mkdtemp()
+#            os.chdir(cls.tmp)
+            with settings(warn_only=True):
+                local('cassandra')
 
         def setUp(self):
             from shove import Shove
@@ -280,6 +325,13 @@ if not PY3:
             from pycassa.system_manager import SystemManager  # @UnresolvedImport @IgnorePep8
             system_manager = SystemManager('localhost:9160')
             system_manager.drop_column_family('Murk', 'shove')
+
+        @classmethod
+        def tearDownClass(cls):
+#            import shutil
+            from fabric.api import local
+            local('killall java')
+#            shutil.rmtree(cls.tmp)
 
     class TestHDF5Store(Store, unittest.TestCase):
 
