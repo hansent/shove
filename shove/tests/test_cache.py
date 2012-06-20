@@ -128,6 +128,15 @@ class TestDBCache(CacheCull, unittest.TestCase):
 
 
 if not PY3:
+
+    TMP = None
+
+    def setUpModule():
+        import os
+        from tempfile import mkdtemp
+        TMP = mkdtemp()
+        os.chdir(TMP)
+
     class TestMemcache(Cache, unittest.TestCase):
 
         initstring = 'memcache://localhost:11211'
@@ -153,11 +162,7 @@ if not PY3:
 
         @classmethod
         def setUpClass(cls):
-#            import os
             from fabric.api import local
-#            from tempfile import mkdtemp
-#            cls.tmp = mkdtemp()
-#            os.chdir(cls.tmp)
             local('redis-server &')
 
         @property
@@ -167,10 +172,8 @@ if not PY3:
 
         @classmethod
         def tearDownClass(cls):
-#            import shutil
             from fabric.api import local
             local('killall redis-server')
-#            shutil.rmtree(cls.tmp)
 
 
 if __name__ == '__main__':

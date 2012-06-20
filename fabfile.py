@@ -103,3 +103,11 @@ def release_next():
     local(regup)
     local(sphinxup)
     local(nodist)
+
+
+def cassandra_up():
+    local('cassandra -f &')
+
+
+def cassandra_down():
+    local('killall java')

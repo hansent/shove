@@ -2,6 +2,15 @@
 
 from stuf.six import PY3, unittest, keys, values, items
 
+TMP = None
+
+
+def setUpModule():
+    import os
+    from tempfile import mkdtemp
+    TMP = mkdtemp()
+    os.chdir(TMP)
+
 
 class EventualStore(object):
 
@@ -149,19 +158,6 @@ class TestFileStore(Store, unittest.TestCase):
         shutil.rmtree('test')
 
 
-class TestDBMStore(Store, unittest.TestCase):
-
-    initstring = 'dbm://test.dbm'
-
-    def tearDown(self):
-        import os
-        self.store.close()
-        try:
-            os.remove('test.dbm')
-        except OSError:
-            os.remove('test.dbm.db')
-
-
 class TestHgStore(Store, unittest.TestCase):
 
     initstring = 'hg://test3'
@@ -182,6 +178,19 @@ class TestGitStore(Store, unittest.TestCase):
         shutil.rmtree('test4')
 
 
+class TestDBMStore(Store, unittest.TestCase):
+
+    initstring = 'dbm://test.dbm'
+
+    def tearDown(self):
+        import os
+        self.store.close()
+        try:
+            os.remove('test.dbm')
+        except OSError:
+            os.remove('test.dbm.db')
+
+
 class TestDBStore(Store, unittest.TestCase):
 
     initstring = 'sqlite://'
@@ -194,13 +203,11 @@ class TestMongoDBStore(Store, unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         import os
-        import shutil
         from fabric.api import local
-        shutil.rmtree('mongo')
         os.mkdir('mongo')
-        local('touch mongo/mongo.log')
-        local('mongod --dbpath {0} --quiet --fork --logpath {1}'.format(
-            './mongo/', './mongo/mongo.log'
+        local('touch ./mongo/mongo.log')
+        local('mongod --dbpath {0} --fork --logpath {1}'.format(
+            './mongo/', './mongo/mongolog',
         ))
 
     def tearDown(self):
@@ -211,10 +218,8 @@ class TestMongoDBStore(Store, unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        import shutil
         from fabric.api import local
         local('killall mongod')
-        shutil.rmtree('test')
 
 
 @unittest.skip('reason')
@@ -269,23 +274,18 @@ if not PY3:
 
         @classmethod
         def setUpClass(cls):
-#            import os
             from fabric.api import local
-#            from tempfile import mkdtemp
-#            cls.tmp = mkdtemp()
-#            os.chdir(cls.tmp)
             local('redis-server &')
 
         def tearDown(self):
-            self.store.clear()
-            self.store.close()
+            if self.store._store is not None:
+                self.store.clear()
+                self.store.close()
 
         @classmethod
         def tearDownClass(cls):
-#            import shutil
             from fabric.api import local
             local('killall redis-server')
-#            shutil.rmtree(cls.tmp)
 
     @unittest.skip('reason')
     class TestBSDBStore(Store, unittest.TestCase):
@@ -301,13 +301,8 @@ if not PY3:
 
         @classmethod
         def setUpClass(cls):
-#            import os
-            from fabric.api import local, settings
-#            from tempfile import mkdtemp
-#            cls.tmp = mkdtemp()
-#            os.chdir(cls.tmp)
-            with settings(warn_only=True):
-                local('cassandra')
+            from fabric.api import local
+            local('cassandra -f &')
 
         def setUp(self):
             from shove import Shove
@@ -328,10 +323,8 @@ if not PY3:
 
         @classmethod
         def tearDownClass(cls):
-#            import shutil
             from fabric.api import local
             local('killall java')
-#            shutil.rmtree(cls.tmp)
 
     class TestHDF5Store(Store, unittest.TestCase):
 
