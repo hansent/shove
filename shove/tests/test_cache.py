@@ -128,67 +128,24 @@ class TestDBCache(CacheCull, unittest.TestCase):
 
 
 if not PY3:
-    from testresources import ResourcedTestCase, TestResourceManager
-
-    class MemcachedManager(TestResourceManager):
-        setUpCost = 10
-        tearDownCost = 5
-
-        def make(self, dependency_resources):
-            from fabric.api import local
-            local('memcached -d')
-
-        def clean(self, resource):
-            from fabric.api import local
-            local('killall memcached')
-
-    class TestMemcache(Cache, ResourcedTestCase):
+    class TestMemcache(Cache, unittest.TestCase):
 
         initstring = 'memcache://localhost:11211'
-        resources = (('server', MemcachedManager()),)
 
         @property
         def _makeone(self):
             from shove.caches.memcached import MemCache
             return MemCache
 
-    class RedisManager(TestResourceManager):
-        setUpCost = 10
-        tearDownCost = 5
-
-        def make(self, dependency_resources):
-            import os
-            from tempfile import mkdtemp
-            from fabric.api import local
-            self.tmp = mkdtemp()
-            os.chdir(self.tmp)
-            local('redis-server --daemonize=yes')
-
-        def clean(self, resource):
-            import os
-            import shutil
-            from fabric.api import local
-            local('killall redis-server')
-            os.chdir(self.tmp)
-            shutil.rmtree(self.tmp)
-
-    class TestRedisCache(Cache, ResourcedTestCase):
+    class TestRedisCache(Cache, unittest.TestCase):
 
         initstring = 'redis://localhost:6379/0'
-        resources = (('server', RedisManager()),)
 
         @property
         def _makeone(self):
             from shove.caches.redisdb import RedisCache
             return RedisCache
 
-
-def load_tests(loader, tests, pattern):
-    from testresources import OptimisingTestSuite
-    suite = unittest.TestSuite()
-    suite.addTest(tests)
-    suite.addTest(OptimisingTestSuite(tests))
-    return suite
 
 if __name__ == '__main__':
     unittest.main()

@@ -111,3 +111,20 @@ def memcached_up():
 
 def memcached_down():
     local('killall memcached')
+
+
+def redis_up():
+    local('redis-server - daemonize=yes')
+
+
+def redis_down(self, resource):
+    local('killall redis-server')
+
+
+def cassandra_up():
+    with settings(warn_only=True):
+        local('cassandra')
+
+
+def cassandra_down():
+    local('killall java')

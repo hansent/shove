@@ -308,29 +308,7 @@ if not PY3:
             self.store.close()
             os.remove('test.db')
 
-    class CassandraManager(TestResourceManager):
-        setUpCost = 10
-        tearDownCost = 5
-
-        def make(self, dependency_resources):
-            import os
-            from tempfile import mkdtemp
-            from fabric.api import local
-            self.tmp = mkdtemp()
-            os.chdir(self.tmp)
-            local('cassandra')
-
-        def clean(self, resource):
-            import os
-            import shutil
-            from fabric.api import local
-            local('killall java')
-            os.chdir(self.tmp)
-            shutil.rmtree(self.tmp)
-
-    class TestCassandraStore(EventualStore, ResourcedTestCase):
-
-        resources = (('server', CassandraManager()),)
+    class TestCassandraStore(EventualStore, unittest.TestCase):
 
         def setUp(self):
             ResourcedTestCase.setUp()
@@ -375,14 +353,6 @@ if not PY3:
         def tearDown(self):
             import shutil
             shutil.rmtree('test')
-
-
-def load_tests(loader, tests, pattern):
-    from testresources import OptimisingTestSuite
-    suite = unittest.TestSuite()
-    suite.addTest(tests)
-    suite.addTest(OptimisingTestSuite(tests))
-    return suite
 
 
 if __name__ == '__main__':
