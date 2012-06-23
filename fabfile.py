@@ -86,7 +86,7 @@ def inplace():
     with settings(warn_only=True):
         local('hg push ssh://hg@bitbucket.org/lcrees/shove')
         local('hg push github')
-    local('./setup.py sdist --format=gztar,zip upload')
+    local('./setup.py sdist upload')
     local(sphinxup)
     local(nodist)
 
@@ -103,11 +103,3 @@ def release_next():
     local(regup)
     local(sphinxup)
     local(nodist)
-
-
-def cassandra_up():
-    local('cassandra -f &')
-
-
-def cassandra_down():
-    local('killall java')

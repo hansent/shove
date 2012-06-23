@@ -2,13 +2,10 @@
 '''shove cache tests'''
 
 from stuf.six import PY3, unittest
+from shove.tests.mixins import Spawn
 
-
-def setUpModule():
-    import os
-    from tempfile import mkdtemp
-    TMP = mkdtemp()
-    os.chdir(TMP)
+setUpModule = Spawn.setUpModule
+tearDownModule = Spawn.tearDownModule
 
 
 class NoTimeout(object):
@@ -136,43 +133,25 @@ class TestDBCache(CacheCull, unittest.TestCase):
 
 
 if not PY3:
-    class TestMemcache(Cache, unittest.TestCase):
+    class TestMemcache(Cache, Spawn, unittest.TestCase):
 
         initstring = 'memcache://localhost:11211'
-
-        @classmethod
-        def setUpClass(cls):
-            from fabric.api import local
-            local('memcached -d')
+        cmd = ['memcached']
 
         @property
         def _makeone(self):
             from shove.caches.memcached import MemCache
             return MemCache
 
-        @classmethod
-        def tearDownClass(cls):
-            from fabric.api import local
-            local('killall memcached')
-
-    class TestRedisCache(Cache, unittest.TestCase):
+    class TestRedisCache(Cache, Spawn, unittest.TestCase):
 
         initstring = 'redis://localhost:6379/0'
-
-        @classmethod
-        def setUpClass(cls):
-            from fabric.api import local
-            local('redis-server &')
+        cmd = ['redis-server']
 
         @property
         def _makeone(self):
             from shove.caches.redisdb import RedisCache
             return RedisCache
-
-        @classmethod
-        def tearDownClass(cls):
-            from fabric.api import local
-            local('killall redis-server')
 
 
 if __name__ == '__main__':

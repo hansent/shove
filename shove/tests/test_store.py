@@ -2,15 +2,10 @@
 '''shove store tests'''
 
 from stuf.six import PY3, unittest, keys, values, items
+from shove.tests.mixins import Spawn
 
-TMP = None
-
-
-def setUpModule():
-    import os
-    from tempfile import mkdtemp
-    TMP = mkdtemp()
-    os.chdir(TMP)
+setUpModule = Spawn.setUpModule
+tearDownModule = Spawn.tearDownModule
 
 
 class EventualStore(object):
@@ -197,9 +192,13 @@ class TestDBStore(Store, unittest.TestCase):
     initstring = 'sqlite://'
 
 
-class TestMongoDBStore(Store, unittest.TestCase):
+class TestMongoDBStore(Store, Spawn, unittest.TestCase):
 
     initstring = 'mongodb://127.0.0.1:27017/shove/shove'
+    cmd = [
+        'mongod', '--dbpath', './mongo/', '--nohttpinterface',
+        '--nounixsocket',
+    ]
 
     @classmethod
     def setUpClass(cls):
@@ -207,9 +206,9 @@ class TestMongoDBStore(Store, unittest.TestCase):
         from fabric.api import local
         os.mkdir('mongo')
         local('touch ./mongo/mongo.log')
-        local('mongod --dbpath {0} --fork --logpath {1}'.format(
-            './mongo/', './mongo/mongolog',
-        ))
+        super(TestMongoDBStore, cls).setUpClass()
+        import time
+        time.sleep(10.0)
 
     def tearDown(self):
         self.store.clear()
@@ -217,20 +216,15 @@ class TestMongoDBStore(Store, unittest.TestCase):
     def test_close(self):
         pass
 
-    @classmethod
-    def tearDownClass(cls):
-        from fabric.api import local
-        local('killall mongod')
-
 
 @unittest.skip('reason')
 class TestFTPStore(Store, unittest.TestCase):
 
-    initstring = 'put ftp string here'
+    initstring = 'ftp://127.0.0.1/'
 
     def setUp(self):
         from shove import Shove
-        self.store = Shove(self.ftpstring, compress=True)
+        self.store = Shove(self.initstring, compress=True)
 
     def tearDown(self):
         self.store.clear()
@@ -269,24 +263,15 @@ if not PY3:
             self.store.close()
             os.remove('test.durus')
 
-    class TestRedisStore(Store, unittest.TestCase):
+    class TestRedisStore(Store, Spawn, unittest.TestCase):
 
         initstring = 'redis://localhost:6379/0'
-
-        @classmethod
-        def setUpClass(cls):
-            from fabric.api import local
-            local('redis-server &')
+        cmd = ['redis-server']
 
         def tearDown(self):
             if self.store._store is not None:
                 self.store.clear()
                 self.store.close()
-
-        @classmethod
-        def tearDownClass(cls):
-            from fabric.api import local
-            local('killall redis-server')
 
     @unittest.skip('reason')
     class TestBSDBStore(Store, unittest.TestCase):
@@ -298,12 +283,15 @@ if not PY3:
             self.store.close()
             os.remove('test.db')
 
-    class TestCassandraStore(EventualStore, unittest.TestCase):
+    class TestCassandraStore(EventualStore, Spawn, unittest.TestCase):
+
+        cmd = ['cassandra', '-f']
 
         @classmethod
         def setUpClass(cls):
-            from fabric.api import local
-            local('cassandra -f &')
+            super(TestCassandraStore, cls).setUpClass()
+            import time
+            time.sleep(5.0)
 
         def setUp(self):
             from shove import Shove
