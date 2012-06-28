@@ -86,8 +86,8 @@ def inplace():
     with settings(warn_only=True):
         local('hg push ssh://hg@bitbucket.org/lcrees/shove')
         local('hg push github')
-    local('./setup.py sdist upload')
-    local(sphinxup)
+    local('./setup.py sdist --format=bztar,zip upload')
+#    local(sphinxup)
     local(nodist)
 
 

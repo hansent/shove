@@ -17,7 +17,7 @@ setup(
     license='BSD',
     packages=find_packages(),
     test_suite='shove.tests',
-    install_requires=['futures', 'stuf'],
+    install_requires=['futures', 'stuf>=0.8.19'],
     zip_safe=False,
     keywords='object storage persistence database shelve',
     classifiers=[
