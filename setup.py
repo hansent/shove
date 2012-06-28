@@ -8,7 +8,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='shove',
-    version='0.5.0',
+    version='0.5.1',
     description='''Common object storage frontend''',
     long_description=open('README.rst').read(),
     author='L. C. Rees',

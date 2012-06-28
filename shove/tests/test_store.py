@@ -24,6 +24,9 @@ class EventualStore(object):
 
     def test__setitem__(self):
         self.store['max'] = 3
+        self.store['d'] = {'A': 1}, {'A': 1}
+        self.store['d'] = {'AA': 1}, {'A': 1}
+        self.store['d'] = {'AA': 1}, {'AA': 1}
         self.store.sync()
         self.assertEqual(self.store['max'], 3)
 

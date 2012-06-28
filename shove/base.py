@@ -124,7 +124,7 @@ class FileBase(Base):
         try:
             with open(self._key_to_file(key), 'rb') as item:
                 return self.loads(item.read())
-        except:
+        except (IOError, OSError):
             raise KeyError(key)
 
     def __setitem__(self, key, value):

@@ -76,3 +76,8 @@ What's new with 0.5
 - optimized pickling
 - fix issue with double pickling
 - fix dictionary size resizing with concurrent issues
+
+What's new in 0.5.1
+===================
+
+- no memoizing of optimized pickling
