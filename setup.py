@@ -1,23 +1,23 @@
+#! /usr/bin/env python
 # -*- coding: utf-8 -*-
-'''setup - setuptools based setup for shove.'''
+'''
+setup for shove.
+'''
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
+from setuptools import setup, find_packages
 
 setup(
     name='shove',
-    version='0.4.3',
+    version='0.5.1',
     description='''Common object storage frontend''',
     long_description=open('README.rst').read(),
     author='L. C. Rees',
     author_email='lcrees@gmail.com',
     url='https://bitbucket.org/lcrees/shove/',
     license='BSD',
-    packages=['shove', 'shove.cache', 'shove.store', 'shove.tests'],
-    py_modules=['ez_setup'],
+    packages=find_packages(),
     test_suite='shove.tests',
+    install_requires=['futures', 'stuf'],
     zip_safe=False,
     keywords='object storage persistence database shelve',
     classifiers=[
@@ -28,47 +28,47 @@ setup(
         'Programming Language :: Python',
         'Topic :: Database :: Front-Ends',
         'Programming Language :: Python',
-        'Programming Language :: Python :: 2.5',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
     ],
     entry_points='''
     [shove.stores]
-    bsddb=shove.store.bsdb:BsdStore
-    cassandra=shove.store.cassandra:CassandraStore
-    dbm=shove.store.dbm:DbmStore
-    durus=shove.store.durusdb:DurusStore
-    file=shove.store.file:FileStore
-    firebird=shove.store.db:DbStore
-    ftp=shove.store.ftp:FtpStore
-    hdf5=shove.store.hdf5:HDF5Store
-    leveldb=shove.store.leveldbstore:LevelDBStore
-    memory=shove.store.memory:MemoryStore
-    mssql=shove.store.db:DbStore
-    mysql=shove.store.db:DbStore
-    oracle=shove.store.db:DbStore
-    postgres=shove.store.db:DbStore
-    redis=shove.store.redisdb:RedisStore
-    s3=shove.store.s3:S3Store
-    simple=shove.store.simple:SimpleStore
-    sqlite=shove.store.db:DbStore
-    svn=shove.store.svn:SvnStore
-    zodb=shove.store.zodb:ZodbStore
+    bsddb=shove.stores.bsdb:BSDBStore
+    cassandra=shove.stores.cassandra:CassandraStore
+    dbm=shove.store:DBMStore
+    durus=shove.stores.durusdb:DurusStore
+    file=shove.store:FileStore
+    firebird=shove.stores.db:DBStore
+    ftp=shove.stores.ftp:FTPStore
+    hdf5=shove.stores.hdf5:HDF5Store
+    leveldb=shove.stores.leveldbstore:LevelDBStore
+    memory=shove.store:MemoryStore
+    mongodb=shove.stores.mongodb:MongoDBStore
+    mssql=shove.store.db:DBStore
+    mysql=shove.stores.db:DBStore
+    oracle=shove.stores.db:DBStore
+    postgres=shove.store.db:DBStore
+    redis=shove.stores.redisdb:RedisStore
+    s3=shove.stores.s3:S3Store
+    simple=shove.store:SimpleStore
+    sqlite=shove.stores.db:DBStore
+    zodb=shove.stores.zodb:ZODBStore
+    hg=shove.stores.hgstore:HgStore
+    git=shove.stores.gitstore:GitStore
     [shove.caches]
-    bsddb=shove.cache.bsdb:BsdCache
-    file=shove.cache.file:FileCache
-    filelru=shove.cache.filelru:FileLRUCache
-    firebird=shove.cache.db:DbCache
-    memcache=shove.cache.memcached:MemCached
-    memlru=shove.cache.memlru:MemoryLRUCache
-    memory=shove.cache.memory:MemoryCache
-    mssql=shove.cache.db:DbCache
-    mysql=shove.cache.db:DbCache
-    oracle=shove.cache.db:DbCache
-    postgres=shove.cache.db:DbCache
-    redis='shove.cache.redisdb:RedisCache',
-    simple=shove.cache.simple:SimpleCache
-    simplelru=shove.cache.simplelru:SimpleLRUCache
-    sqlite=shove.cache.db:DbCache
-    '''
+    file=shove.cache:FileCache
+    filelru=shove.cache:FileLRUCache
+    firebird=shove.caches.db:DBCache
+    memcache=shove.caches.memcached:MemCache
+    memlru=shove.cache:MemoryLRUCache
+    memory=shove.caches:MemoryCache
+    mssql=shove.caches.db:DBCache
+    mysql=shove.caches.db:DBCache
+    oracle=shove.caches.db:DBCache
+    postgres=shove.caches.db:DBCache
+    redis=shove.caches.redisdb:RedisCache
+    simple=shove.cache:SimpleCache
+    simplelru=shove.cache:SimpleLRUCache
+    sqlite=shove.caches.db:DBCache
+    ''',
 )
