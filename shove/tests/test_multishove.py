@@ -130,7 +130,7 @@ class TestMultiShove(Multi, unittest.TestCase):
 
     def setUp(self):
         from shove.core import MultiShove
-        self.store = MultiShove(*self.stores)
+        self.store = MultiShove(*self.stores, sync=0)
 
     def tearDown(self):
         import os
@@ -151,7 +151,7 @@ class TestThreadShove(unittest.TestCase):
 
     def setUp(self):
         from shove.core import ThreadShove
-        self.store = ThreadShove(*self.stores, max_workers=2)
+        self.store = ThreadShove(*self.stores, max_workers=2, sync=0)
 
     def tearDown(self):
         import shutil

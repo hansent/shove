@@ -12,7 +12,7 @@ class EventualStore(object):
 
     def setUp(self):
         from shove import Shove
-        self.store = Shove(self.initstring, compress=True)
+        self.store = Shove(self.initstring, compress=True, sync=0)
 
     def tearDown(self):
         self.store.close()
