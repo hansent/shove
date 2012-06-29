@@ -1,14 +1,19 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
-'''
-setup for shove.
-'''
+'''setup for shove'''
 
 from setuptools import setup, find_packages
 
+
+def getversion(fname):
+    '''Get the __version__ without importing.'''
+    for line in open(fname):
+        if line.startswith('__version__'):
+            return '%s.%s.%s' % eval(line[13:])
+
 setup(
     name='shove',
-    version='0.5.1',
+    version=getversion('shove/__init__.py'),
     description='''Common object storage frontend''',
     long_description=open('README.rst').read(),
     author='L. C. Rees',

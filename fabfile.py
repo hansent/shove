@@ -7,10 +7,19 @@ nodist = 'rm -rf ./dist'
 sphinxup = './setup.py upload_sphinx'
 
 
+def getversion(fname):
+    '''
+    Get the __version__ without importing.
+    '''
+    for line in open(fname):
+        if line.startswith('__version__'):
+            return '%s.%s.%s' % eval(line[13:])
+
+
 def _promptup():
     prompt('Enter tag: ', 'tag')
     with settings(warn_only=True):
-        local('hg tag "%(tag)s"' % env)
+        local('hg tag "%(tag)s"' % getversion('shove/__init__.py'))
         local('hg push ssh://hg@bitbucket.org/lcrees/shove')
         local('hg push github')
 
