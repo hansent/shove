@@ -8,7 +8,7 @@ setUpModule = Spawn.setUpModule
 tearDownModule = Spawn.tearDownModule
 
 
-class EventualStore(object):
+class Store(object):
 
     def setUp(self):
         from shove import Shove
@@ -108,9 +108,6 @@ class EventualStore(object):
         self.store.update(tstore)
         self.store.sync()
         self.assertEqual(self.store['min'], 6)
-
-
-class Store(EventualStore):
 
     def test_clear(self):
         self.store['max'] = 3
@@ -286,7 +283,7 @@ if not PY3:
             self.store.close()
             os.remove('test.db')
 
-    class TestCassandraStore(EventualStore, Spawn, unittest.TestCase):
+    class TestCassandraStore(Store, Spawn, unittest.TestCase):
 
         cmd = ['cassandra', '-f']
 
@@ -307,8 +304,9 @@ if not PY3:
             self.store = Shove('cassandra://localhost:9160/Murk/shove')
 
         def tearDown(self):
-            self.store.clear()
-            self.store.close()
+            if self.store._store is not None:
+                self.store.clear()
+                self.store.close()
             from pycassa.system_manager import SystemManager  # @UnresolvedImport @IgnorePep8
             system_manager = SystemManager('localhost:9160')
             system_manager.drop_column_family('Murk', 'shove')

@@ -13,13 +13,12 @@ def getversion(fname):
     '''
     for line in open(fname):
         if line.startswith('__version__'):
-            return '%s.%s.%s' % eval(line[13:])
+            return '%s.%s.%s' % eval(line[13:].rstrip())
 
 
 def _promptup():
-    prompt('Enter tag: ', 'tag')
     with settings(warn_only=True):
-        local('hg tag "%(tag)s"' % getversion('shove/__init__.py'))
+        local('hg tag "%s"' % getversion('shove/__init__.py'))
         local('hg push ssh://hg@bitbucket.org/lcrees/shove')
         local('hg push github')
 

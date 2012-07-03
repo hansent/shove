@@ -51,7 +51,7 @@ class CassandraStore(SimpleStore):
 
     def __getitem__(self, key):
         try:
-            item = self._store.get(key).get(key)
+            item = self._store.get(key).get('key')
             if item is not None:
                 return self.loads(item)
             raise KeyError(key)

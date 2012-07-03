@@ -7,9 +7,10 @@ from setuptools import setup, find_packages
 
 def getversion(fname):
     '''Get the __version__ without importing.'''
-    for line in open(fname):
-        if line.startswith('__version__'):
-            return '%s.%s.%s' % eval(line[13:])
+    with open(fname) as f:
+        for line in f:
+            if line.startswith('__version__'):
+                return '%s.%s.%s' % eval(line[13:].rstrip())
 
 setup(
     name='shove',
