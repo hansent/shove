@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-MongoDB Database Store.
+MongoDB database store.
 
 shove's URI for MongoDB stores follows the form:
 
@@ -21,9 +21,7 @@ __all__ = ['MongoDBStore']
 
 class MongoDBStore(SimpleStore):
 
-    '''
-    MongoDB based store.
-    '''
+    '''MongoDB-based object storage frontend.'''
 
     init = 'mongodb://'
 

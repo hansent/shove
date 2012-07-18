@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-Mercurial-based object store.
+Mercurial versioned object store.
 
 shove's URI for Mercurial-based stores follows the form:
 
@@ -20,6 +20,8 @@ from shove.store import FileStore
 
 
 class HgStore(FileStore):
+
+    '''Mercurial versioned filesystem based object storage frontend.'''
 
     init = 'hg://'
 

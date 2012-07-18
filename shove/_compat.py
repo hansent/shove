@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-'''shove compatibility for different python versions'''
+'''shove compatibility shim for different python versions.'''
 
 try:
     from urlparse import urlsplit
@@ -23,7 +23,7 @@ def synchronized(func):
     '''
     Decorator to lock and unlock a method (Phillip J. Eby).
 
-    @param func Method to decorate
+    :argument func: method to decorate
     '''
     def wrapper(self, *__args, **__kw):
         self._lock.acquire()

@@ -29,9 +29,7 @@ __all__ = ['BSDBStore']
 
 class BSDBStore(SyncStore):
 
-    '''
-    Berkeley Source Database store.
-    '''
+    '''Berkeley Source Database-based object storage frontend.'''
 
     init = 'bsddb://'
 

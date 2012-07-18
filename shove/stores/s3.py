@@ -26,9 +26,7 @@ __all__ = ['S3Store']
 
 class S3Store(BaseStore):
 
-    '''
-    S3 store.
-    '''
+    '''S3-based object storage frontend.'''
 
     def __init__(self, engine=None, **kw):
         super(S3Store, self).__init__(engine, **kw)
@@ -80,22 +78,16 @@ class S3Store(BaseStore):
             raise KeyError(key)
 
     def keys(self):
-        '''
-        Returns a list of keys in the store.
-        '''
+        '''List of keys in the store.'''
         return list(i[0] for i in self.items())
 
     def items(self):
-        '''
-        Returns a list of items from the store.
-        '''
+        '''List of items in the store.'''
         if self._updated or self._keys is None:
             self._keys = self._store.get_all_keys()
         return list((native(k.key), k) for k in self._keys)
 
     def iteritems(self):
-        '''
-        Lazily returns items from the store.
-        '''
+        '''Lazily returns items from the store.'''
         for k in self.items():
             yield (k.key, k)

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 '''
-Database object store.
+Relational database object store.
 
-The shove URI used for database object stores is the format used by
+The shove URI used for relational database object stores is the format used by
 SQLAlchemy:
 
 <driver>://<username>:<password>@<host>:<port>/<database>
@@ -37,9 +37,7 @@ __all__ = ['DBStore']
 
 class DBStore(BaseStore):
 
-    '''
-    Database cache backend.
-    '''
+    '''Relational database-based object storage frontend.'''
 
     def __init__(self, engine, **kw):
         super(DBStore, self).__init__(engine, **kw)

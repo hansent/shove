@@ -48,6 +48,7 @@ class BaseCache(object):
         super(BaseCache, self).__setitem__(key, (exp, value))
 
     def _cull(self):
+        num = 0
         # remove items in cache to make room
         maxcull = self._maxcull
         # cull number of items allowed (set by self._maxcull)

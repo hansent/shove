@@ -44,9 +44,7 @@ __all__ = ['DBCache']
 
 class DBCache(Base):
 
-    '''
-    Database cache backend.
-    '''
+    '''Relational database-based cache frontend.'''
 
     def __init__(self, engine, **kw):
         super(DBCache, self).__init__(engine, **kw)

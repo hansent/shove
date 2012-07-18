@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-LevelDB Database Store.
+LevelDB database store.
 
 shove's URI for LevelDB stores follows the form:
 
@@ -23,7 +23,7 @@ __all__ = ['LevelDBStore']
 class LevelDBStore(ClientStore):
 
     '''
-    LevelDB based store.
+    LevelDB-based object storage frontend.
     '''
 
     init = 'leveldb://'

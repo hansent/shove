@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-HDF5 Database Store.
+HDF5 database store.
 
 shove's URI for HDF5 stores follows the form:
 
@@ -23,7 +23,7 @@ __all__ = ['HDF5Store']
 
 class HDF5Store(ClientStore):
 
-    '''LevelDB based store'''
+    '''HDF5-based object storage frontend.'''
 
     init = 'hdf5://'
 

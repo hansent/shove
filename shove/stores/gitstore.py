@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-git-based object store.
+git versioned object store.
 
 shove's URI for git-based stores follows the form:
 
@@ -22,6 +22,8 @@ from shove._compat import quote_plus
 
 
 class GitStore(FileStore):
+
+    '''Git versioned filesystem based object storage frontend.'''
 
     init = 'git://'
 

@@ -17,9 +17,7 @@ class BaseStore(Mapping, MutableMapping):
     '''Base store.'''
 
     def close(self):
-        '''
-        Closes internal store and clears object references.
-        '''
+        '''Closes internal store and clears object references.'''
         try:
             self._store.close()
         except AttributeError:
@@ -66,9 +64,7 @@ class MemoryStore(SimpleStore):
 
 class ClientStore(BaseStore):
 
-    '''
-    Base store where updates must be committed to disk.
-    '''
+    '''Base store where updates must be committed to disk.'''
 
     def __init__(self, engine, **kw):
         super(ClientStore, self).__init__(engine, **kw)
@@ -84,9 +80,7 @@ class ClientStore(BaseStore):
 
 class SyncStore(ClientStore):
 
-    '''
-    Base store where updates have to be synced to disk.
-    '''
+    '''Base store where updates have to be synced to disk.'''
 
     def __setitem__(self, key, value):
         super(SyncStore, self).__setitem__(key, value)
@@ -147,5 +141,6 @@ class FileStore(FileBase, BaseStore):
     init = 'file://'
 
     def clear(self):
+        '''Clear all objects from store.'''
         shutil.rmtree(self._dir)
         self._createdir()

@@ -22,7 +22,7 @@ __all__ = ['CassandraStore']
 
 class CassandraStore(SimpleStore):
 
-    '''Cassandra based store'''
+    '''Cassandra based storage frontend.'''
 
     init = 'cassandra://'
 

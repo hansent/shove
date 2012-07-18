@@ -20,7 +20,7 @@ __all__ = ['RedisCache']
 
 class RedisCache(Base):
 
-    '''Redis cache backend'''
+    '''Redis-based cache backend'''
 
     init = 'redis://'
 

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 '''
-FTP-accessed stores
+FTP-accessed stores.
 
 shove's URI for FTP accessed stores follows the standard form for FTP URLs
 defined in RFC-1738:
@@ -17,6 +17,8 @@ __all__ = ['FTPStore']
 
 
 class FTPStore(BaseStore):
+
+    '''FTP-based object storage frontend.'''
 
     def __init__(self, engine, **kw):
         super(FTPStore, self).__init__(engine, **kw)

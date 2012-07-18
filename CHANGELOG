@@ -81,3 +81,8 @@ What's new in 0.5.1
 ===================
 
 - no memoizing of optimized pickling
+
+What's new in 0.5.3
+===================
+
+- optimize pickling, compression pipeline (per Ling Li)

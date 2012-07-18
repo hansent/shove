@@ -1,27 +1,30 @@
 # -*- coding: utf-8 -*-
 '''shove core.'''
 
+from functools import partial
 from os.path import exists, join
 from os import listdir, remove, makedirs
 from zlib import compress, decompress, error
 
 from stuf.utils import ld, optimize
-from stuf.six import HIGHEST_PROTOCOL
+from stuf.six import HIGHEST_PROTOCOL, dumps
 
 from shove._compat import url2pathname, quote_plus, unquote_plus
 
 
 class Base(object):
 
-    '''
-    Base.
-    '''
+    '''Base for shove.'''
 
     def __init__(self, engine, **kw):
         # keyword compress True, False, or an integer compression level (1-9)
         self._compress = kw.get('compress', False)
         # pickle protocol
-        self._protocol = kw.get('protocol', HIGHEST_PROTOCOL)
+        protocol = kw.get('protocol', HIGHEST_PROTOCOL)
+        if kw.get('optimize', True):
+            self._optimizer = partial(optimize, p=protocol)
+        else:
+            self._optimizer = partial(dumps, protocol=protocol)
 
     def __contains__(self, key):
         try:
@@ -32,20 +35,16 @@ class Base(object):
             return True
 
     def dumps(self, value):
-        '''
-        Optionally serializes and compresses an object.
-        '''
+        '''Optionally serializes and compresses object `value`.'''
         # serialize anything but ASCII strings
-        value = optimize(value)
+        value = self._optimizer(value)
         compression = self._compress
         if compression:
-            value = compress(value, 9 if compression else compression)
+            value = compress(value, 9 if compression is True else compression)
         return value
 
     def loads(self, value):
-        '''
-        Deserializes and optionally decompresses an object.
-        '''
+        '''Deserializes and optionally decompresses object `value`.'''
         if self._compress:
             try:
                 value = decompress(value)
@@ -56,14 +55,12 @@ class Base(object):
 
 class Mapping(Base):
 
-    '''
-    Base mapping.
-    '''
+    '''Base mapping for shove.'''
 
     def __getitem__(self, key):
         try:
             return self._store[key]
-        except:
+        except KeyError:
             raise KeyError(key)
 
     def __setitem__(self, key, value):
@@ -72,7 +69,7 @@ class Mapping(Base):
     def __delitem__(self, key):
         try:
             del self._store[key]
-        except:
+        except KeyError:
             raise KeyError(key)
 
     def __iter__(self):
@@ -81,34 +78,10 @@ class Mapping(Base):
     def __len__(self):
         return len(self._store)
 
-    def dumps(self, value):
-        '''
-        Optionally serializes and compresses an object.
-        '''
-        # serialize anything but ASCII strings
-        value = optimize(value)
-        compression = self._compress
-        if compression:
-            value = compress(value, 9 if compression else compression)
-        return value
-
-    def loads(self, value):
-        '''
-        Deserializes and optionally decompresses an object.
-        '''
-        if self._compress:
-            try:
-                value = decompress(value)
-            except error:
-                pass
-        return ld(value)
-
 
 class FileBase(Base):
 
-    '''
-    Base for file based storage.
-    '''
+    '''Base for file based storage.'''
 
     def __init__(self, engine, **kw):
         super(FileBase, self).__init__(engine, **kw)
@@ -158,7 +131,7 @@ class FileBase(Base):
             makedirs(self._dir)
         except OSError:
             raise EnvironmentError(
-                'Cache directory "{0}" does not exist and could not be '
+                'cache directory "{0}" does not exist and could not be '
                 'created'.format(self._dir)
             )
 

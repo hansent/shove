@@ -19,7 +19,7 @@ __all__ = ['MemCache']
 
 class MemCache(Base):
 
-    '''Memcached cache backend'''
+    '''Memcached-based cache frontend.'''
 
     def __init__(self, engine, **kw):
         super(MemCache, self).__init__(engine, **kw)

@@ -23,7 +23,7 @@ __all__ = ['ZODBStore']
 
 class ZODBStore(SyncStore):
 
-    '''ZODB front end.'''
+    '''ZODB-based object storage frontend.'''
 
     init = 'zodb://'
 
@@ -37,9 +37,7 @@ class ZODBStore(SyncStore):
         self.sync = transaction.commit
 
     def close(self):
-        '''
-        Closes all open storage and connections.
-        '''
+        '''Closes all open storage and connections.'''
         self.sync()
         super(ZODBStore, self).close()
         self._connection.close()

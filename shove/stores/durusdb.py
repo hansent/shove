@@ -23,9 +23,7 @@ __all__ = ['DurusStore']
 
 class DurusStore(SyncStore):
 
-    '''
-    Durus object database frontend.
-    '''
+    '''Durus-based object storage frontend.'''
 
     init = 'durus://'
 
