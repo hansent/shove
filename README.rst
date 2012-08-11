@@ -13,8 +13,13 @@ Currently supported storage backends are:
 - FTP
 - Filesystem
 - Firebird
+- git
+- HDF5
+- LevelDB
 - Memory
+- Mercurial
 - Microsoft SQL Server
+- MongoDB
 - MySQL
 - Oracle
 - PostgreSQL
@@ -32,6 +37,7 @@ Currently supported caching backends are:
 - MySQL
 - Oracle
 - PostgreSQL
+- Redis
 - SQLite
 - memcache
 
